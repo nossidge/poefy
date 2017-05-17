@@ -1,0 +1,205 @@
+#!/usr/bin/env ruby
+# Encoding: UTF-8
+
+################################################################################
+# Use Poefy::PoefyGen to make a poem from the command line.
+################################################################################
+
+require 'optparse'
+
+require_relative '../lib/poefy.rb'
+
+################################################################################
+
+def parse_options
+  options = { console: true }
+
+  # Set up variables used later.
+  forms = Poefy::PoeticForms::POETIC_FORMS.keys.reject { |i| i == :default }
+  forms_by_4 = forms.each_slice(4).to_a.map { |i| i.join ', ' }
+  rhyme_docs = "    This is the most important argument.
+      All other form strings are based on this.
+    Each token represents a line.
+      (Token examples: 'a', 'b', 'A1', ' ')
+    Letters indicate rhymes, so all 'a' or 'A' lines have the same rhyme.
+      (Example, limerick: 'aabba')
+    Uppercase letter lines will be duplicated exactly.
+      This is used to create refrain lines.
+      (Example, rondeau: 'aabba aabR aabbaR')
+    Numbers after a capital letter indicate which specific line to repeat.
+      (Example, villanelle: 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'"
+
+  # Get all of the command-line options.
+  optparse = OptionParser.new do |opts|
+
+    # Set a banner, displayed at the top of the help screen.
+    program_info = %[      Poefy, Line-Based Poem Generator
+      Version #{Poefy.version_number} - #{Poefy.version_date}
+      https://github.com/nossidge/poefy
+      Paul Thompson - nossidge@gmail.com
+    ].gsub('      ','  ')
+
+    usage = %[Usage: poefy shakespeare < shakespeare_sonnets.txt
+      poefy shakespeare sonnet
+      poefy spoke haiku
+      poefy therese -r 'abab cdcd efef gg' -i '0101 0101 0011 01'
+      poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
+    ].gsub('      ','       ')
+
+    databases = Poefy.all_databases.join("\n" + ' ' * 21)
+    databases = "Databases available: " + databases
+
+    opts.banner = program_info + "\n" + usage + "\n" + databases + "\n\n"
+
+    # These will be further validated within the class.
+    opts.on('-f', '--form STRING',
+            "A named poetic form for the output\n" +
+            ' ' * 37 + "Specifies rhyme, indent and syllable\n" +
+            ' ' * 37 + "One of:\n" +
+            ' ' * 39 + forms_by_4.join("\n" + ' ' * 39)) do |s|
+      options[:form] = s.to_sym
+    end
+    opts.on('-r', '--rhyme STRING', "See big block of text below") do |s|
+      options[:rhyme] = s
+    end
+    opts.on('-i', '--indent STRING', "Indentation of each line") do |s|
+      options[:indent] = s
+    end
+    opts.on('-s', '--syllable STRING',
+                  "Apply syllable constraints to certain lines") do |s|
+      options[:syllable] = s
+    end
+    opts.on('-x', '--regex STRING',
+                  "Apply regex constraints to certain lines") do |s|
+      options[:regex] = s
+    end
+
+    opts.on('-a', '--acrostic STRING',
+            "Overwrite 'regex' option to generate an acrostic") do |s|
+      obj = nil
+      obj.extend(Poefy::PoeticForms)
+      options[:regex] = obj.acrostic s
+    end
+
+    # Handle proper sentence structure.
+    opts.separator nil
+    opts.on('-p', '--proper',
+            "Ensure first word is not 'and but or nor yet'\n" +
+            ' ' * 39 + "and final line ends with closing punctuation'\n" +
+            ' ' * 39 + "Defaults to ON -- Use this option to DISABLE") do
+      options[:proper] = false
+    end
+
+    # Database options.
+    opts.separator nil
+    opts.on('-o', '--overwrite',
+            "Overwrite existing database with new input") do
+      options[:overwrite] = true
+    end
+    opts.on('-l', '--local',
+            "Default is to use database files from /data/\n" + ' ' * 39 +
+            "With this option, use files from elsewhere") do
+      options[:local] = true
+    end
+
+    # Help output.
+    opts.separator nil
+    opts.on('-h', '--help', 'Display this help screen' ) do
+      puts opts
+      exit 0
+    end
+    opts.on('-v', '--version', 'Display the version number' ) do
+      puts "poefy #{Poefy.version_number} (#{Poefy.version_date})"
+      exit 0
+    end
+
+    opts.separator nil
+    opts.separator "Description of rhyme string:"
+    opts.separator rhyme_docs
+    opts.separator nil
+    opts.separator "All of this is much better documented in README.md"
+  end
+
+  # Parse the options and show errors on failure.
+  begin
+    optparse.parse! ARGV
+  rescue OptionParser::ParseError => e
+    puts e
+    exit 1
+  end
+
+  options
+end
+
+################################################################################
+
+# Parse the options to shift the ARGV list.
+options = parse_options
+
+# Read data lines from STDIN.
+data = (not STDIN.tty? and not STDIN.closed?) ? STDIN.read : nil
+
+# Database is the first argument.
+first_arg = ARGV.first
+if first_arg.nil?
+  puts "ERROR: Please specify a database to read from."
+  exit 0
+end
+
+# If the first argument is 'makedbs', then make
+#   databases from the included text files.
+if first_arg == 'make_dbs'
+  input = `sed '/[a-z]/!d' data/shakespeare_sonnets.txt`
+  poefy = Poefy::PoefyGen.new 'shakespeare'
+  poefy.make_database input, false
+
+  input = `sed '/[a-z]/!d' data/st_therese_of_lisieux.txt`
+  poefy = Poefy::PoefyGen.new 'therese'
+  poefy.make_database input, false
+
+  input = `sed '/[a-z]/!d' data/whitman_leaves.txt`
+  poefy = Poefy::PoefyGen.new 'whitman'
+  poefy.make_database input, false
+
+  input = `sed '/[a-z]/!d' data/emily_dickinson.txt`
+  poefy = Poefy::PoefyGen.new 'dickinson'
+  poefy.make_database input, false
+
+  input = `sed '/[a-z]/!d' data/english_as_she_is_spoke.txt`
+  poefy = Poefy::PoefyGen.new 'spoke'
+  poefy.make_database input, false
+
+  exit 0
+end
+
+# Poetic form name is the second argument, if it exists.
+second_arg = (ARGV.length > 1) ? ARGV[1] : ''
+options[:form] = second_arg.to_sym
+
+# Create poefy object.
+poefy = Poefy::PoefyGen.new first_arg, options
+
+# If the second argument is 'rhyme', then output all
+#   lines that rhyme with the word.
+if second_arg == 'rhyme'
+  third_arg  = (ARGV.length > 2) ? ARGV[2] : nil
+  fourth_arg = (ARGV.length > 3) ? ARGV[3] : nil
+  puts poefy.rhymes(third_arg, fourth_arg)
+  exit 0
+end
+
+# Create a database using input.
+if data
+  if options[:overwrite]
+    poefy.make_database! data
+  else
+    poefy.make_database data
+  end
+
+# Make a new poem, and output it.
+else
+  poem = poefy.poem
+  puts poem if poem
+end
+
+################################################################################
