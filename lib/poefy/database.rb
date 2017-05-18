@@ -171,25 +171,46 @@ module Poefy
 
       ##########################################################################
 
-      # Find rhymes and counts greater than a certain length.
-      def sproc_rhymes_by_count rhyme_count
-        if not @sproc[:rbc]
-          sql = %Q[
-            SELECT rhyme, COUNT(rhyme) AS rc
-            FROM (
-              SELECT rhyme, final_word, COUNT(final_word) AS wc
-              FROM lines
-              GROUP BY rhyme, final_word
-            )
-            GROUP BY rhyme
-            HAVING rc >= ?
-          ]
+      # Define all stored procedures.
+      def create_sprocs
+        sql = {}
+        sql[:rbc] = %Q[
+          SELECT rhyme, COUNT(rhyme) AS rc
+          FROM (
+            SELECT rhyme, final_word, COUNT(final_word) AS wc
+            FROM lines
+            GROUP BY rhyme, final_word
+          )
+          GROUP BY rhyme
+          HAVING rc >= ?
+        ]
+        sql[:rbcs] = %Q[
+          SELECT rhyme, COUNT(rhyme) AS rc
+          FROM (
+            SELECT rhyme, final_word, COUNT(final_word) AS wc
+            FROM lines
+            WHERE syllables BETWEEN ? AND ?
+            GROUP BY rhyme, final_word
+          )
+          GROUP BY rhyme
+          HAVING rc >= ?
+        ]
+        sql[:la] = %Q[
+          SELECT line, syllables, final_word, rhyme
+          FROM lines WHERE rhyme = ?
+        ]
+        sql.each do |key, value|
           begin
-            @sproc[:rbc] = db.prepare sql
+            @sproc[key] = db.prepare value
           rescue
+            raise 'ERROR: Database table structure is invalid'
             return handle_error 'ERROR: Database table structure is invalid'
           end
         end
+      end
+
+      # Find rhymes and counts greater than a certain length.
+      def sproc_rhymes_by_count rhyme_count
         @sproc[:rbc].reset!
         @sproc[:rbc].bind_param(1, rhyme_count)
         @sproc[:rbc].execute.to_a
@@ -197,24 +218,6 @@ module Poefy
 
       # Also adds syllable selection.
       def sproc_rhymes_by_count_syllables rhyme_count, syllable_min_max
-        if not @sproc[:rbcs]
-          sql = %Q[
-            SELECT rhyme, COUNT(rhyme) AS rc
-            FROM (
-              SELECT rhyme, final_word, COUNT(final_word) AS wc
-              FROM lines
-              WHERE syllables BETWEEN ? AND ?
-              GROUP BY rhyme, final_word
-            )
-            GROUP BY rhyme
-            HAVING rc >= ?
-          ]
-          begin
-            @sproc[:rbcs] = db.prepare sql
-          rescue
-            return handle_error 'ERROR: Database table structure is invalid'
-          end
-        end
         @sproc[:rbcs].reset!
         @sproc[:rbcs].bind_param(1, syllable_min_max[:min])
         @sproc[:rbcs].bind_param(2, syllable_min_max[:max])
@@ -222,25 +225,14 @@ module Poefy
         @sproc[:rbcs].execute.to_a
       end
 
-      ##########################################################################
-
       # Find all lines for a certain rhyme.
       def sproc_lines_all rhyme
-        if not @sproc[:la]
-          sql = %Q[
-            SELECT line, syllables, final_word, rhyme
-            FROM lines WHERE rhyme = ?
-          ]
-          begin
-            @sproc[:la] = db.prepare sql
-          rescue
-            return handle_error 'ERROR: Database table structure is invalid'
-          end
-        end
         @sproc[:la].reset!
         @sproc[:la].bind_param(1, rhyme)
         @sproc[:la].execute.to_a
       end
+
+      ##########################################################################
 
   end
 
