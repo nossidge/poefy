@@ -22,6 +22,7 @@ module Poefy
 
     # Make a database using the given lines.
     def make_database input, overwrite = @overwrite
+      @db.close if @db
       if overwrite
         make_database! input
       else

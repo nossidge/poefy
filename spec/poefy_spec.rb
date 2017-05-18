@@ -7,6 +7,8 @@ describe Poefy::PoefyGen do
 
   before(:all) do
     @root = File.expand_path('../../', __FILE__)
+    db_file = "#{@root}/data/spec_test_tiny.db"
+    File.delete(db_file) if File.exists?(db_file)
   end
   after(:all) do
     db_file = "#{@root}/data/spec_test_tiny.db"
@@ -31,7 +33,6 @@ describe Poefy::PoefyGen do
     describe "#make_database( '#{@root}/data/#{file_txt}', true )" do
       it "should make the database '#{@root}/data/#{file_db}" do
         db_file = "#{@root}/data/#{file_db}"
-        File.delete(db_file) if File.exists?(db_file)
         @poefy.make_database "#{@root}/data/#{file_txt}", true
         expect(@poefy.db.exists?).to be true
         expect(File.exists?(db_file)).to be true

@@ -23,8 +23,8 @@ module Poefy
     attr_reader :console, :db_file
 
     # Finalizer must be a class variable.
-    @@final = proc { |dbase| proc {
-      @sproc.each { |k, v| v.close }
+    @@final = proc { |dbase, sproc| proc {
+      sproc.each { |k, v| v.close }
       dbase.close if dbase
     } }
 
@@ -32,7 +32,8 @@ module Poefy
       @db_file = db_file
       @console = console
       @sproc = {}
-      ObjectSpace.define_finalizer(self, @@final.call(@db))
+      db
+      ObjectSpace.define_finalizer(self, @@final.call(@db, @sproc))
     end
 
     # Open global database session, if not already existing.
@@ -40,11 +41,16 @@ module Poefy
     #   execute it before any calling code.
     def db
       if not @db
-        begin
-          open
-        rescue
+        if !exists?
           @db = nil
           return handle_error 'ERROR: Database does not yet exist'
+        end
+        begin
+          open
+          create_sprocs
+        rescue
+          @db = nil
+          return handle_error 'ERROR: Database contains invalid structure'
         end
       end
       @db
@@ -66,7 +72,7 @@ module Poefy
     # Close the database file.
     def close
       @sproc.each { |k, v| v.close }
-      db.close
+      @db.close if @db
     end
 
     # See if the database file exists or not.
