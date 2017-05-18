@@ -6,6 +6,22 @@
 #   array of conditions for each element.
 # Both methods return an output array consisting of samples from an
 #   input array, for which output[0] satisfies condition[0], etc.
+# Both methods may take a whole lot of time, depending on how lenient the
+#   conditions are. It is better for the stricter conditions to be at the
+#   start of the array, due to the way the code is written.
+# If none of the conditions match, then it will run in factorial time,
+#   which will get exponentially longer the more elements there are in the
+#   input array.
+# I would recommend wrapping inside a Timeout block to assuage this. If it
+#   fails to resolve in, say, two seconds, then it's probably not possible
+#   to fit the conditions to the lines:
+#       begin
+#         Timeout::timeout(2) do
+#           output = conditional_selection(lines.shuffle, conditions)
+#         end
+#       rescue
+#         output = []
+#       end
 ################################################################################
 # '#conditional_permutation' returns a complete permutation of an array.
 # i.e. output length == array length
@@ -18,11 +34,6 @@
 #     proc { |arr, elem| elem > 1}
 #   ]
 #   possible output = [1,3,4,5,2]
-#
-#
-#   ToDo: This is now not used! Need to add 'current_array' argument.
-#
-#
 ################################################################################
 # '#conditional_selection' returns an array that satisfies only the conditions.
 # i.e. output length == conditions length
@@ -113,10 +124,9 @@ module Poefy
     # Return a permutation of 'array' where each element validates to the
     #   same index in a 'conditions' array of procs that return Boolean.
     # Will not work on arrays that contain nil values.
-    # This may take a whole lot of time, depending on how lenient the
-    #   conditions are. It is better for the stricter conditions to be
-    #   at the start of the array, due to the way the code is written.
-    def conditional_permutation array, conditions, current_iter = 0
+    def conditional_permutation array, conditions,
+                                current_iter = 0,
+                                current_array = []
       output = []
 
       # Get the current conditional.
@@ -128,7 +138,7 @@ module Poefy
 
         # Test the condition. If we've run out of elements
         #   in the condition array, then allow any value.
-        valid = cond ? cond.call(elem) : true
+        valid = cond ? cond.call(current_array, elem) : true
         if valid
 
           # Remove this element from the array, and recurse.
@@ -138,8 +148,9 @@ module Poefy
           # If the remaining array is empty, no need to recurse.
           new_val = nil
           if !remain.empty?
-            new_val = conditional_permutation(remain,
-                      conditions, current_iter + 1)
+            new_val = conditional_permutation(remain, conditions,
+                                              current_iter + 1,
+                                              current_array + [elem])
           end
 
           # If we cannot use this value, because it breaks future conditions.
@@ -184,8 +195,9 @@ module Poefy
           delete_first(remain, elem)
 
           # If the remaining array is empty, no need to recurse.
-          new_val = conditional_selection(remain,
-                    conditions, current_iter + 1, current_array + [elem])
+          new_val = conditional_selection(remain, conditions,
+                                          current_iter + 1,
+                                          current_array + [elem])
 
           # If we cannot use this value, because it breaks future conditions.
           if new_val and new_val.empty?
