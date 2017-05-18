@@ -146,26 +146,28 @@ if first_arg.nil?
   exit 0
 end
 
-# If the first argument is 'makedbs', then make
+# If the first argument is 'make_dbs', then make
 #   databases from the included text files.
 if first_arg == 'make_dbs'
-  input = `sed '/[a-z]/!d' data/shakespeare_sonnets.txt`
+  path = File.expand_path('../../data', __FILE__)
+
+  input = `sed '/[a-z]/!d' #{path}/shakespeare_sonnets.txt`
   poefy = Poefy::PoefyGen.new 'shakespeare'
   poefy.make_database input, false
 
-  input = `sed '/[a-z]/!d' data/st_therese_of_lisieux.txt`
+  input = `sed '/[a-z]/!d' #{path}/st_therese_of_lisieux.txt`
   poefy = Poefy::PoefyGen.new 'therese'
   poefy.make_database input, false
 
-  input = `sed '/[a-z]/!d' data/whitman_leaves.txt`
+  input = `sed '/[a-z]/!d' #{path}/whitman_leaves.txt`
   poefy = Poefy::PoefyGen.new 'whitman'
   poefy.make_database input, false
 
-  input = `sed '/[a-z]/!d' data/emily_dickinson.txt`
+  input = `sed '/[a-z]/!d' #{path}/emily_dickinson.txt`
   poefy = Poefy::PoefyGen.new 'dickinson'
   poefy.make_database input, false
 
-  input = `sed '/[a-z]/!d' data/english_as_she_is_spoke.txt`
+  input = `sed '/[a-z]/!d' #{path}/english_as_she_is_spoke.txt`
   poefy = Poefy::PoefyGen.new 'spoke'
   poefy.make_database input, false
 
