@@ -179,19 +179,8 @@ module Poefy
 
           # If all the lines include a 'syllable' condition,
           #   then we can specify to only query for matching lines.
-          if line_conds.all?{ |i| i[:syllable] }
-            min = line_conds.min do |a, b|
-              [*a[:syllable]].min <=> [*b[:syllable]].min
-            end[:syllable]
-            max = line_conds.max do |a, b|
-              [*a[:syllable]].max <=> [*b[:syllable]].max
-            end[:syllable]
-            min_max = { min: [*min].min, max: [*max].max }
-            min_max = nil if min_max[:max] == 0
-            rhymes = @db.sproc_rhymes_all!(line_conds.count, min_max)
-          else
-            rhymes = @db.sproc_rhymes_all!(line_conds.count)
-          end
+          min_max = syllable_min_max line_conds
+          rhymes = @db.sproc_rhymes_all!(line_conds.count, min_max)
 
           # Get just the rhyme part of the hash.
           rhymes = rhymes.map{ |i| i['rhyme'] }
@@ -200,7 +189,7 @@ module Poefy
           # For each rhyme, get all lines and try to sastify all conditions.
           out = []
           rhymes.shuffle.each do |rhyme|
-            out = try_rhyme(conditions, rhyme)
+            out = try_rhyme(conditions, rhyme, min_max)
             break if !out.empty?
           end
           if out.empty?
@@ -247,18 +236,33 @@ module Poefy
 
       # Loop through the rhymes until we find one that works.
       # (In a reasonable time-frame)
-      def try_rhyme conditions, rhyme
+      def try_rhyme conditions, rhyme, syllable_min_max = nil
         output = []
-        lines = @db.sproc_lines_all!(rhyme)
+        lines = @db.sproc_lines_all!(rhyme, syllable_min_max)
         begin
           Timeout::timeout(2) do
             output = conditional_selection(lines.shuffle, conditions)
-            break
           end
         rescue
           output = []
         end
         output
+      end
+
+      # Find min and max syllable count from the conditions.
+      def syllable_min_max line_conds
+        min_max = nil
+        if line_conds.all?{ |i| i[:syllable] }
+          min = line_conds.min do |a, b|
+            [*a[:syllable]].min <=> [*b[:syllable]].min
+          end[:syllable]
+          max = line_conds.max do |a, b|
+            [*a[:syllable]].max <=> [*b[:syllable]].max
+          end[:syllable]
+          min_max = { min: [*min].min, max: [*max].max }
+          min_max = nil if min_max[:max] == 0
+        end
+        min_max
       end
 
   end

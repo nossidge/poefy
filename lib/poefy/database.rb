@@ -142,8 +142,12 @@ module Poefy
         sproc_rhymes_by_count rhyme_count
       end
     end
-    def sproc_lines_all! rhyme
-      sproc_lines_all rhyme
+    def sproc_lines_all! rhyme, syllable_min_max = nil
+      if syllable_min_max
+        sproc_lines_all_syllables rhyme, syllable_min_max
+      else
+        sproc_lines_all rhyme
+      end
     end
 
     private
@@ -205,6 +209,11 @@ module Poefy
           SELECT line, syllables, final_word, rhyme
           FROM lines WHERE rhyme = ?
         ]
+        sql[:las] = %Q[
+          SELECT line, syllables, final_word, rhyme
+          FROM lines WHERE rhyme = ?
+          AND syllables BETWEEN ? AND ?
+        ]
         sql.each do |key, value|
           begin
             @sproc[key] = db.prepare value
@@ -236,6 +245,15 @@ module Poefy
         @sproc[:la].reset!
         @sproc[:la].bind_param(1, rhyme)
         @sproc[:la].execute.to_a
+      end
+
+      # Also adds syllable selection.
+      def sproc_lines_all_syllables rhyme, syllable_min_max
+        @sproc[:las].reset!
+        @sproc[:las].bind_param(1, rhyme)
+        @sproc[:las].bind_param(2, syllable_min_max[:min])
+        @sproc[:las].bind_param(3, syllable_min_max[:max])
+        @sproc[:las].execute.to_a
       end
 
       ##########################################################################
