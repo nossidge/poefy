@@ -29,11 +29,12 @@ module Poefy
       if !(poetic_form[:form] or poetic_form[:rhyme])
         return handle_error \
           "ERROR: No valid rhyme or form option specified.\n" +
-          "       Try again using the -f or -r option.\n", nil
+          "       Try again using the -f or -r option.\n" +
+          "       Use -h or --help to view valid forms."
       end
 
       # Loop until we find a valid poem.
-      output = poem_proper_sentence poetic_form
+      output = gen_poem_using_conditions poetic_form
 
       # Return nil if poem could not be created.
       return nil if (output.nil? or output == [] or output == [''])
@@ -41,7 +42,7 @@ module Poefy
       # Indent the output using the :indent string.
       output = do_indent(output, get_poetic_form_indent(poetic_form))
 
-      # Append nil lines to the end if the :rhyme demands it.
+      # Append blank lines to the end if the :rhyme demands it.
       rhyme = tokenise_rhyme get_poetic_form_rhyme poetic_form
       (output.length...rhyme.length).each do |i|
         output[i] = ''
@@ -74,39 +75,6 @@ module Poefy
 
     private
 
-      # Generate a poem using the database and a poem format.
-      # If ':proper' then loop to find a valid poem.
-      def poem_proper_sentence poetic_form = @poetic_form
-        poetic_form = validate_poetic_form poetic_form
-        output, count_down = [], 500
-
-        # Final line must close with sentence-end punctuation.
-        # Don't start poems with these words.
-        banned_first_words = poetic_form[:proper] ? %w{and but or nor yet} : []
-
-        loop do
-          output = gen_poem_using_conditions poetic_form
-          break if output.nil? or output.empty?
-          if !banned_first_words.include?(first_word(output[0]).downcase) and
-              ( !poetic_form[:proper] or has_stop_punctuation?(output[-1]) )
-            break
-          end
-
-          # Fail after some number of failures.
-          if (count_down -= 1) == 0 and poetic_form[:proper]
-            return handle_error \
-              "ERROR: Proper sentence structure not able to be honoured.\n" +
-              "       Ensure the input has closing punctuation or\n" +
-              "       try again using the -p option."
-          end
-        end
-
-        # (previous way of dealing with closing full stops)
-        # (leaving the code commented out for now)
-        # output[-1] = end_the_sentence(output[-1])
-        output
-      end
-
       # Use the constraints in 'poetic_form' to generate a poem.
       def gen_poem_using_conditions poetic_form = @poetic_form
         poetic_form = poetic_form_full poetic_form
@@ -118,8 +86,53 @@ module Poefy
           return handle_error 'ERROR: Rhyme string is not valid', []
         end
 
-        # Add lines number as ':line' in each element's hash.
+        # Add line number as ':line' in each element's hash.
         by_line = conditions_by_line(tokenised_rhyme, poetic_form)
+
+        # If the poetic_form[:proper] option is true, we're going to
+        #   need to add additional regex conditions to the first and
+        #   last lines.
+        # This is pretty easy for non-repeating lines, but for refrains
+        #   we need to apply the regex for all occurrences.
+        if poetic_form[:proper]
+
+          # Turn the regex into an array, if it isn't already.
+          # Then add the banned starting words.
+          line_conds = [*by_line[0][:regex]]
+          line_conds += [/^((?!and).)/i]
+          line_conds += [/^((?!but).)/i]
+          line_conds += [/^((?!or).)/i]
+          line_conds += [/^((?!nor).)/i]
+          line_conds += [/^((?!yet).)/i]
+          by_line[0][:regex] = line_conds
+
+          # Same for the last line.
+          line_conds = [*by_line[tokenised_rhyme.count-1][:regex]]
+          line_conds += [/[\.?!]$/]
+          by_line[tokenised_rhyme.count-1][:regex] = line_conds
+
+          # Get all refrains by uppercase rhyme token.
+          refrains = by_line.reject do |i|
+            i[:rhyme] == i[:rhyme].downcase
+          end.group_by do |i|
+            i[:rhyme]
+          end
+
+          # Now make each refrain :regex be an array of all.
+          refrain_regex = Hash.new { |h,k| h[k] = [] }
+          refrains.each do |key, value|
+            refrain_regex[key] = value.map do |i|
+              i[:regex]
+            end.flatten.compact
+          end
+
+          # Go through [by_line] and update each :regex.
+          by_line.each do |i|
+            if not refrain_regex[i[:rhyme]].empty?
+              i[:regex] = refrain_regex[i[:rhyme]]
+            end
+          end
+        end
 
         # Now we have ':line', so we can break the array order.
         # Let's get rid of empty lines, and group by the rhyme letter.
@@ -193,7 +206,11 @@ module Poefy
             break if !out.empty?
           end
           if out.empty?
-            return handle_error 'ERROR: Not enough rhyming lines in the input'
+            msg = 'ERROR: Not enough rhyming lines in the input.'
+            if poetic_form[:proper]
+              msg += "\n       Perhaps try again using the -p option."
+            end
+            return handle_error msg
           end
           rhymes_already_used << out.first['rhyme']
 
