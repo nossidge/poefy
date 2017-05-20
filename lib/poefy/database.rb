@@ -73,6 +73,7 @@ module Poefy
     def close
       @sproc.each { |k, v| v.close rescue nil }
       @db.close if @db
+      @db = nil
     end
 
     # See if the database file exists or not.
@@ -136,6 +137,7 @@ module Poefy
 
     # Public interfaces for private stored procedure methods.
     def sproc_rhymes_all! rhyme_count, syllable_min_max = nil
+      db
       if syllable_min_max
         sproc_rhymes_by_count_syllables rhyme_count, syllable_min_max
       else
@@ -143,6 +145,7 @@ module Poefy
       end
     end
     def sproc_lines_all! rhyme, syllable_min_max = nil
+      db
       if syllable_min_max
         sproc_lines_all_syllables rhyme, syllable_min_max
       else
