@@ -43,14 +43,14 @@ module Poefy
       if not @db
         if !exists?
           @db = nil
-          return handle_error 'ERROR: Database does not yet exist'
-        end
-        begin
-          open
-          create_sprocs
-        rescue
-          @db = nil
-          return handle_error 'ERROR: Database contains invalid structure'
+        else
+          begin
+            open
+            create_sprocs
+          rescue
+            @db = nil
+            return handle_error 'ERROR: Database contains invalid structure'
+          end
         end
       end
       @db
@@ -71,7 +71,7 @@ module Poefy
 
     # Close the database file.
     def close
-      @sproc.each { |k, v| v.close }
+      @sproc.each { |k, v| v.close rescue nil }
       @db.close if @db
     end
 
@@ -96,7 +96,7 @@ module Poefy
       sql_import_file = save_sql_import_file lines
 
       # Delete any existing database.
-      File.delete(@db_file) rescue nil
+      File.delete(@db_file) if File.exists?(@db_file)
 
       # Write SQL and SQLite instructions to temp file,
       #   import to database, delete temp file.

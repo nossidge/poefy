@@ -192,16 +192,15 @@ end
 
 # Create a database using input.
 if data
-  if options[:overwrite]
-    poefy.make_database! data
-  else
-    poefy.make_database data
-  end
+  poefy.make_database data, options[:overwrite]
 
 # Make a new poem, and output it.
 else
   poem = poefy.poem
   puts poem if poem
 end
+
+# Close the database connection.
+poefy.close
 
 ################################################################################

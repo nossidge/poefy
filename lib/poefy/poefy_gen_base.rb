@@ -24,13 +24,13 @@ module Poefy
     def make_database input, overwrite = @overwrite
       @db.close if @db
       if overwrite
-        make_database! input
+        @db.make_new! validate_lines input
       else
         @db.make_new validate_lines input
       end
     end
     def make_database! input
-      @db.make_new! validate_lines input
+      make_database input, true
     end
 
     # Close the database.
