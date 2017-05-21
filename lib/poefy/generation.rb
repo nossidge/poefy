@@ -86,6 +86,12 @@ module Poefy
           return handle_error 'ERROR: Rhyme string is not valid', []
         end
 
+        # Add acrostic to the regex, if necessary.
+        if poetic_form[:acrostic]
+          poetic_form[:regex] =
+            merge_hashes poetic_form[:regex], acrostic(poetic_form[:acrostic])
+        end
+
         # Add line number as ':line' in each element's hash.
         by_line = conditions_by_line(tokenised_rhyme, poetic_form)
 

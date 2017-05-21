@@ -76,9 +76,7 @@ def parse_options
 
     opts.on('-a', '--acrostic STRING',
             "Overwrite 'regex' option to generate an acrostic") do |s|
-      obj = nil
-      obj.extend(Poefy::PoeticForms)
-      options[:regex] = obj.acrostic s
+      options[:acrostic] = s
     end
 
     # Handle proper sentence structure.

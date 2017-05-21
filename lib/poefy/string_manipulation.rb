@@ -74,6 +74,21 @@ module Poefy
         output_array
       end
 
+      # Combine two hashes together, transforming all values to array.
+      # These arrays are then flattened.
+      def merge_hashes one, two
+        one ||= {}
+        two ||= {}
+        new_hash = Hash.new { |h,k| h[k] = [] }
+        keys = (one.keys + two.keys).sort.uniq
+        keys.each do |key|
+          new_hash[key] << one[key] if one[key]
+          new_hash[key] << two[key] if two[key]
+          new_hash[key].flatten!
+        end
+        new_hash
+      end
+
   end
 
 end
