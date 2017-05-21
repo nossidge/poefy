@@ -106,6 +106,12 @@ module Poefy
         rhyme:    'abab',
         indent:   '0101',
         syllable: '[8,6,8,6]'
+      },
+      double_dactyl: {
+        rhyme:    'abcd efgd',
+        indent:   '',
+        syllable: '[6,6,6,4,0,6,6,6,4]',
+        regex:    '{7=>/^\S+$/}'
       }
     }
 

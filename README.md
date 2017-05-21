@@ -100,6 +100,12 @@ To view and amend these definitions, the code is in `lib/poefy/poetic_forms.rb`.
     rhyme:    'aabba',
     indent:   '',
     syllable: '{1:[8],2:[8],3:[4,5],4:[4,5],5:[8]}'
+  },
+  double_dactyl: {
+    rhyme:    'abcd efgd',
+    indent:   '',
+    syllable: '[6,6,6,4,0,6,6,6,4]',
+    regex:    '{7=>/^\S+$/}'
   }
 }
 ```
