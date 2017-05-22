@@ -12,13 +12,13 @@ module Poefy
   end
 
   def self.version_date
-    '2017-05-17'
+    '2017-05-22'
   end
 
   module VERSION
     MAJOR = 0
     MINOR = 5
-    TINY  = 1
+    TINY  = 2
     PRE   = nil
 
     STRING = [MAJOR, MINOR, TINY, PRE].compact.join('.')
