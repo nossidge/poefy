@@ -216,6 +216,23 @@ describe Poefy::PoefyGen do
       end
     end
 
+    describe "using acrostic option" do
+      describe "should return correct number of lines" do
+        it "({ form: :sonnet, acrostic: 'pauldpthompson' })" do
+          poem = @poefy.poem ({ form: :sonnet,
+                                acrostic: 'pauldpthompson' })
+          expect(poem.count).to be 14
+        end
+      end
+      describe "should fail to be created" do
+        it "({ form: :sonnet, acrostic: 'qqqqqqqqqqqqqq' })" do
+          poem = @poefy.poem ({ form: :sonnet,
+                                acrostic: 'qqqqqqqqqqqqqq' })
+          expect(poem).to be_nil
+        end
+      end
+    end
+
     describe "using form string" do
       describe "should return correct number of lines" do
 
@@ -242,6 +259,29 @@ describe Poefy::PoefyGen do
               poem = @poefy.poem ({ form: form })
               expect(poem).to be_nil
             end
+          end
+        end
+      end
+    end
+
+    describe "make sonnets" do
+      sonnet_options = [
+        { rhyme: 'ababcdcdefefgg' },
+        { rhyme: 'abab cdcd efef gg', indent: '0101 0101 0011 01' },
+        { form: 'sonnet' },
+        { form: :sonnet, syllable: 0 },
+        { form: :sonnet, syllable: 10 },
+        { form: :sonnet, regex: /^[A-Z].*$/ },
+        { form: :sonnet, regex: '^[A-Z].*$' },
+        { form: :sonnet, acrostic: 'pauldpthompson' },
+        { form: 'sonnet', indent: '01010101001101' },
+        { form: 'sonnet', proper: false }
+      ]
+      sonnet_options.each do |option|
+        it "#{option}" do
+          4.times do
+            poem = @poefy.poem(option)
+            expect(poem).to_not be_nil
           end
         end
       end
@@ -293,6 +333,29 @@ describe Poefy::PoefyGen do
                 end.include?(c)
               end
             end
+          end
+        end
+      end
+    end
+
+    describe "make sonnets" do
+      sonnet_options = [
+        { rhyme: 'ababcdcdefefgg' },
+        { rhyme: 'abab cdcd efef gg', indent: '0101 0101 0011 01' },
+        { form: 'sonnet' },
+        { form: :sonnet, syllable: 0 },
+        { form: :sonnet, syllable: 10 },
+        { form: :sonnet, regex: /^[A-Z].*$/ },
+        { form: :sonnet, regex: '^[A-Z].*$' },
+        { form: :sonnet, acrostic: 'pauldpthompson' },
+        { form: 'sonnet', indent: '01010101001101' },
+        { form: 'sonnet', proper: false }
+      ]
+      sonnet_options.each do |option|
+        it "#{option}" do
+          4.times do
+            poem = @poefy.poem(option)
+            expect(poem).to_not be_nil
           end
         end
       end
