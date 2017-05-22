@@ -42,8 +42,12 @@ describe Poefy::PoefyGen do
     describe ":rhyme option" do
 
       describe "should return nil" do
-        it "({  })" do
+        it "blank, no argument" do
           poem = @poefy.poem
+          expect(poem).to be_nil
+        end
+        it "({  })" do
+          poem = @poefy.poem ({  })
           expect(poem).to be_nil
         end
         it "({ rhyme: nil })" do
@@ -194,11 +198,14 @@ describe Poefy::PoefyGen do
 
     # All the Shakespeare lines are pentameter, so some forms should fail.
     forms      = Poefy::PoeticForms::POETIC_FORMS
-    forms_fail = [:limerick, :haiku, :common, :ballad]
+    forms_fail = [:limerick, :haiku, :common, :ballad, :double_dactyl]
     forms_pass = forms.keys - forms_fail
 
     before(:each) do
       @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
+    end
+    after(:each) do
+      @poefy.close
     end
 
     it "initialised object not nil" do
@@ -208,7 +215,6 @@ describe Poefy::PoefyGen do
     describe "#make_database( '#{@root}/data/#{file_txt}', true )" do
       it "should make the database '#{@root}/data/#{file_db}" do
         db_file = "#{@root}/data/#{file_db}"
-#        File.delete(db_file) if File.exists?(db_file)
         input = `sed '/[a-z]/!d' #{@root}/data/#{file_txt}`
         @poefy.make_database input
         expect(@poefy.db.exists?).to be true
@@ -302,6 +308,9 @@ describe Poefy::PoefyGen do
     before(:each) do
       @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
     end
+    after(:each) do
+      @poefy.close
+    end
 
     it "initialised object not nil" do
       expect(@poefy).to_not be_nil
@@ -310,7 +319,6 @@ describe Poefy::PoefyGen do
     describe "#make_database( '#{@root}/data/#{file_txt}', true )" do
       it "should make the database '#{@root}/data/#{file_db}" do
         db_file = "#{@root}/data/#{file_db}"
-#        File.delete(db_file) if File.exists?(db_file)
         input = `sed '/[a-z]/!d' #{@root}/data/#{file_txt}`
         @poefy.make_database input
         expect(@poefy.db.exists?).to be true

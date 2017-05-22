@@ -237,7 +237,7 @@ module Poefy
         result
       end
 
-      # Sort by keys, to make JSON more human-readable.
+      # Sort by keys, to make it more human-readable.
       def sort_hash input
         output = {}
         input.keys.sort.each do |k|

@@ -15,7 +15,6 @@ require 'wordfilter'
 require 'tempfile'
 require 'sqlite3'
 require 'timeout'
-require 'json'
 
 require_relative 'poefy/version.rb'
 require_relative 'poefy/self.rb'

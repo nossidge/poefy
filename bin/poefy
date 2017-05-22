@@ -57,7 +57,7 @@ def parse_options
             ' ' * 37 + "Specifies rhyme, indent and syllable\n" +
             ' ' * 37 + "One of:\n" +
             ' ' * 39 + forms_by_4.join("\n" + ' ' * 39)) do |s|
-      options[:form] = s.to_sym
+      options[:form] = s
     end
     opts.on('-r', '--rhyme STRING', "See big block of text below") do |s|
       options[:rhyme] = s
@@ -174,7 +174,7 @@ end
 
 # Poetic form name is the second argument, if it exists.
 second_arg = (ARGV.length > 1) ? ARGV[1] : ''
-options[:form] = second_arg.to_sym
+options[:form] = second_arg
 
 # Create poefy object.
 poefy = Poefy::PoefyGen.new first_arg, options

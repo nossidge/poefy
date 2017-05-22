@@ -25,7 +25,7 @@ Or install it yourself as:
 
     $ gem install poefy
 
-The repo comes with some text files included. To generate databases for these files, execute special `make_dbs` command:
+The repo comes with some text files included. To generate databases for these files, execute the special `make_dbs` command:
 
     $ poefy make_dbs
 
@@ -273,7 +273,9 @@ puts poefy.poem ({ rhyme: 'abab cdcd efef gg', indent: '0101 0101 0011 01' })
 puts poefy.poem ({ form: 'sonnet' })
 puts poefy.poem ({ form: :sonnet, syllable: 0 })
 puts poefy.poem ({ form: :sonnet, syllable: 10 })
-puts poefy.poem ({ form: :sonnet, regex: poefy.acrostic('pauldpthompson') })
+puts poefy.poem ({ form: :sonnet, regex: /^[A-Z].*$/ })
+puts poefy.poem ({ form: :sonnet, regex: '^[A-Z].*$' })
+puts poefy.poem ({ form: :sonnet, acrostic: 'pauldpthompson' })
 puts poefy.poem ({ form: 'sonnet', indent: '01010101001101' })
 puts poefy.poem ({ form: 'sonnet', proper: false })
 ```
@@ -315,7 +317,7 @@ Use sed to filter out lines that are too short:
 
 ### Make a database, ignoring uppercase lines
 
-Use sed to filter out lines that only contain uppercase lines:
+Use sed to filter out lines that do not contain lowercase letters. For example, the sonnets file contains lines with the number of the sonnet, e.g. "CXLVII."
 
     $ sed -r 'sed '/[a-z]/!d' shakespeare_sonnets.txt | poefy -o shakespeare
 
