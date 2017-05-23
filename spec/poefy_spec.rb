@@ -531,6 +531,28 @@ describe Poefy::PoefyGen do
     end
   end
 
+  ##############################################################################
+
+  describe "reusing the same PoefyGen instance" do
+    it "should correctly merge the option hashes" do
+
+      # Default to use rondeau poetic form, and proper sentence validation
+      poefy = Poefy::PoefyGen.new('shakespeare', { form: 'rondeau', proper: true })
+
+      # Generate a properly sentenced rondeau
+      poem = poefy.poem
+      expect(poem.count).to be 17
+
+      # Generate a rondeau without proper validation
+      poem = poefy.poem ({ proper: false })
+      expect(poem.count).to be 17
+
+      # Generate a proper rondeau with a certain indentation
+      poem = poefy.poem ({ indent: '01012 0012 010112' })
+      expect(poem.count).to be 17
+    end
+  end
+
 end
 
 ################################################################################

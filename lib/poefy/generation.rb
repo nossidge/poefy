@@ -24,6 +24,7 @@ module Poefy
       raise ArgumentError, 'Argument must be a hash' unless
             poetic_form.is_a?(Hash)
       poetic_form = validate_poetic_form poetic_form
+      poetic_form = @poetic_form.merge poetic_form
 
       # Make sure the hash contains ':form' or ':rhyme' keys.
       if !(poetic_form[:form] or poetic_form[:rhyme])
