@@ -144,14 +144,16 @@ module Poefy
       # Get full form, from either the user-specified options,
       #   or the default poetic form.
       def poetic_form_full poetic_form = @poetic_form
-        rhyme =    get_poetic_form_token :rhyme, poetic_form
-        indent =   get_poetic_form_token :indent, poetic_form
-        syllable = get_poetic_form_token :syllable, poetic_form
-        regex =    get_poetic_form_token :regex, poetic_form
-        poetic_form[:rhyme]    = rhyme
-        poetic_form[:indent]   = indent   if indent != ''
-        poetic_form[:syllable] = syllable if syllable != ''
-        poetic_form[:regex]    = regex    if regex
+        rhyme     = get_poetic_form_token :rhyme,     poetic_form
+        indent    = get_poetic_form_token :indent,    poetic_form
+        syllable  = get_poetic_form_token :syllable,  poetic_form
+        regex     = get_poetic_form_token :regex,     poetic_form
+        transform = get_poetic_form_token :transform, poetic_form
+        poetic_form[:rhyme]     = rhyme
+        poetic_form[:indent]    = indent    if indent    != ''
+        poetic_form[:syllable]  = syllable  if syllable  != ''
+        poetic_form[:regex]     = regex     if regex
+        poetic_form[:transform] = transform if transform != ' '
         poetic_form
       end
 

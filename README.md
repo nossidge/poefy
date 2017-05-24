@@ -297,6 +297,36 @@ puts poefy.poem ({ indent: '01012 0012 010112' })
 ```
 
 
+#### Option `transform:`
+
+An option that is not included in the CLI interface is the `transform` poem option. This is a hash of procs that transform a line somehow.
+
+For example, to all-caps the 4th and 12th lines:
+
+```ruby
+transform_hash = {
+   4 => proc { |line, num, poem| line.upcase },
+  12 => proc { |line, num, poem| line.upcase }
+}
+poefy = Poefy::PoefyGen.new 'shakespeare'
+puts poefy.poem({ form: :sonnet, transform: transform_hash })
+```
+
+The key for the hash corresponds to the line of the poem, starting from 1 (not 0). You can use negative keys to specify from the end of the poem. Any key that is not an integer or is out of the array bounds will be ignored.
+
+If you don't include a hash, then the proc will be applied to each line. So to add line numbers to the whole poem:
+
+```ruby
+transform_proc = proc { |line, num, poem| "#{num.to_s.rjust(2)} #{line}" }
+poefy = Poefy::PoefyGen.new 'shakespeare'
+puts poefy.poem({ form: :sonnet, transform: transform_proc })
+```
+
+The proc arguments `|line, num, poem|` are: the text of the line that is being replaced, the number of the line, and the full poem array as it was before any transformations had occurred.
+
+The transformations are implemented after the poem has been generated, but before the `indent` has occurred.
+
+
 ## Some tips
 
 ### Make a database from a delimited file

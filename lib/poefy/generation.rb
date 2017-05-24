@@ -87,6 +87,12 @@ module Poefy
           return handle_error 'ERROR: Rhyme string is not valid', []
         end
 
+        # Expand poetic_form[:transform], if there's just one element.
+        if poetic_form[:transform] and !poetic_form[:transform].respond_to?(:each)
+          poetic_form[:transform] = fill_hash poetic_form[:transform],
+                                              1..tokenised_rhyme.count
+        end
+
         # Add acrostic to the regex, if necessary.
         if poetic_form[:acrostic]
           poetic_form[:regex] =
@@ -255,7 +261,25 @@ module Poefy
           end
         end
 
-        poem_lines
+        # Carry out transformations, if necessary.
+        the_poem = poem_lines.dup
+        if poetic_form[:transform]
+
+          # Due to the 'merge_hashes' above, each 'poetic_form[:transform]'
+          #   value may contain an array of procs.
+          poetic_form[:transform].each do |key, procs|
+            begin
+              # This is to ensure that e.g. '-2' will access from the end.
+              i = (key > 0) ? key - 1 : key
+              [*procs].each do |proc|
+                the_poem[i] = proc.call(the_poem[i], i + 1, poem_lines).to_s
+              end
+            rescue
+            end
+          end
+        end
+
+        the_poem
       end
 
       # Loop through the rhymes until we find one that works.

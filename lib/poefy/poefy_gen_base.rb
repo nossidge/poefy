@@ -78,12 +78,13 @@ module Poefy
         form_string   = get_valid_form input[:form]
 
         # Handle obvious inputs.
-        output[:form]     = form_string      if form_string
-        output[:rhyme]    = input[:rhyme]    if input[:rhyme]
-        output[:indent]   = input[:indent]   if input[:indent]
-        output[:syllable] = input[:syllable] if input[:syllable]
-        output[:regex]    = input[:regex]    if input[:regex]
-        output[:acrostic] = input[:acrostic] if input[:acrostic]
+        output[:form]       = form_string        if form_string
+        output[:rhyme]      = input[:rhyme]      if input[:rhyme]
+        output[:indent]     = input[:indent]     if input[:indent]
+        output[:syllable]   = input[:syllable]   if input[:syllable]
+        output[:regex]      = input[:regex]      if input[:regex]
+        output[:acrostic]   = input[:acrostic]   if input[:acrostic]
+        output[:transform]  = input[:transform]  if input[:transform]
 
         # Tokenise string to arrays and hashes.
         rhyme = get_poetic_form_rhyme(output)

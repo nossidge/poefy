@@ -89,6 +89,16 @@ module Poefy
         new_hash
       end
 
+      # Fill a hash with a single value.
+      # Keys are integers in a range.
+      def fill_hash value, key_range
+        output = {}
+        key_range.each do |i|
+          output[i] = value
+        end
+        output
+      end
+
   end
 
 end

@@ -550,6 +550,57 @@ describe Poefy::PoefyGen do
       # Generate a proper rondeau with a certain indentation
       poem = poefy.poem ({ indent: '01012 0012 010112' })
       expect(poem.count).to be 17
+
+  ##############################################################################
+
+  describe "using the transform option" do
+
+    it "should correctly transform the output 1" do
+      poefy = Poefy::PoefyGen.new :shakespeare
+      transform_hash = {
+         4 => proc { |line, num, poem| line.upcase },
+        12 => proc { |line, num, poem| line.upcase }
+      }
+      poem = poefy.poem({ form: :sonnet, transform: transform_hash })
+      expect(poem.count).to be 14
+      expect(poem[3]).to  eq poem[3].upcase
+      expect(poem[11]).to eq poem[11].upcase
+    end
+
+    it "should correctly transform the output 2" do
+      poefy = Poefy::PoefyGen.new :shakespeare
+      transform_hash = {
+         4 => proc { |line, num, poem| poem.count },
+        -3 => proc { |line, num, poem| poem.count },
+         7 => proc { |line, num, poem| 'test string' }
+      }
+      poem = poefy.poem({ form: :sonnet, transform: transform_hash })
+      expect(poem.count).to be 14
+      expect(poem[3]).to  eq '14'
+      expect(poem[11]).to eq '14'
+      expect(poem[6]).to  eq 'test string'
+    end
+
+    it "should correctly transform the output 3" do
+      poefy = Poefy::PoefyGen.new :shakespeare
+      transform_proc = proc { |line, num, poem| line.downcase }
+      poem = poefy.poem({ form: :sonnet, transform: transform_proc })
+      expect(poem.count).to be 14
+      poem.each do |i|
+        expect(i).to eq i.downcase
+      end
+    end
+
+    it "should correctly transform the output 4" do
+      poefy = Poefy::PoefyGen.new :shakespeare
+      transform_proc = proc { |line, num, poem| "#{num} #{line.downcase}" }
+      poem = poefy.poem({ form: :sonnet, transform: transform_proc })
+      expect(poem.count).to be 14
+      poem.each.with_index do |line, index|
+        expect(line).to eq line.downcase
+        first_word = line.split(' ').first
+        expect(first_word).to eq (index + 1).to_s
+      end
     end
   end
 
