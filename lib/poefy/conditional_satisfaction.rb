@@ -74,12 +74,8 @@ module Poefy
         valid = valid && [*poetic_form[:syllable]].include?(line['syllables'])
       end
       if poetic_form[:regex]
-        if poetic_form[:regex].respond_to?(:each)
-          poetic_form[:regex].each do |i|
-            valid = valid && !!(line['line'].match(i))
-          end
-        else
-          valid = valid && !!(line['line'].match(poetic_form[:regex]))
+        [*poetic_form[:regex]].each do |i|
+          valid = valid && !!(line['line'].match(i))
         end
       end
       valid

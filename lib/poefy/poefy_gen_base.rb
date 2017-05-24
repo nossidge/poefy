@@ -13,7 +13,7 @@ module Poefy
 
     def initialize db_name, options = {}
       handle_options options
-      @db = Poefy::Database.new get_database_file(db_name), @console
+      @db = Poefy::Database.new get_database_file(db_name.to_s), @console
     end
 
     # Make a database using the given lines.
@@ -39,7 +39,7 @@ module Poefy
     def validate_lines input
 
       # If the input is a file, then read it.
-      lines = File.exists?(input) ? File.read(input) : input
+      lines = File.exists?(input.to_s) ? File.read(input) : input
 
       # If lines is not an array, assume string and split on newlines.
       lines = lines.respond_to?(:each) ? lines : lines.split("\n")
@@ -88,11 +88,11 @@ module Poefy
         output[:transform]  = input[:transform]  if input[:transform]
 
         # Tokenise string to arrays and hashes.
-        rhyme = get_poetic_form_rhyme(output)
         if output[:rhyme]
           output[:rhyme] = tokenise_rhyme output[:rhyme]
         end
-        if output[:syllable]
+        rhyme = get_poetic_form_rhyme(output)
+        if output[:syllable] and rhyme != ' '
           output[:syllable] = transform_string_syllable output[:syllable], rhyme
         end
         if output[:regex]

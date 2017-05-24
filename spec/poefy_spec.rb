@@ -551,6 +551,20 @@ describe Poefy::PoefyGen do
       poem = poefy.poem ({ indent: '01012 0012 010112' })
       expect(poem.count).to be 17
 
+      # Generate other forms
+      poem = poefy.poem ({ rhyme: 'abbaabbacdecde' })
+      expect(poem.count).to be 14
+      poem = poefy.poem ({ form: 'sonnet' })
+      expect(poem.count).to be 14
+      poem = poefy.poem ({ form: 'ballade' })
+      expect(poem.count).to be 31
+
+      # Generate a default rondeau again
+      poem = poefy.poem
+      expect(poem.count).to be 17
+    end
+  end
+
   ##############################################################################
 
   describe "using the transform option" do

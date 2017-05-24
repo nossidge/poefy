@@ -82,7 +82,7 @@ module Poefy
         syllable: ''
       },
       petrarchan: {
-        rhyme:    ['abbaabbacdecde','abbaabbacdccdc',
+        rhyme:    ['abbaabbacdecde','abbaabbacdccdc','abbaabbacdcddc',
                    'abbaabbacddcdd','abbaabbacddece','abbaabbacdcdcd'],
         indent:   ['01100110010010','10001000100100'],
         syllable: ''
@@ -120,10 +120,8 @@ module Poefy
     #   acrostic('unin tell igib le')
     def acrostic word
       output = {}
-      counter = 1
-      word.split('').each do |i|
-        output[counter] = /^[#{i.upcase}#{i.downcase}]/ if i != ' '
-        counter += 1
+      word.split('').each.with_index do |char, i|
+        output[i + 1] = /^[#{char.downcase}]/i if char != ' '
       end
       output
     end
