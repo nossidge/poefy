@@ -84,6 +84,7 @@ module Poefy
         output[:syllable]   = input[:syllable]   if input[:syllable]
         output[:regex]      = input[:regex]      if input[:regex]
         output[:acrostic]   = input[:acrostic]   if input[:acrostic]
+        output[:acrostic_x] = input[:acrostic_x] if input[:acrostic_x]
         output[:transform]  = input[:transform]  if input[:transform]
 
         # Tokenise string to arrays and hashes.

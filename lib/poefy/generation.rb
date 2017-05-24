@@ -94,7 +94,13 @@ module Poefy
         end
 
         # Add acrostic to the regex, if necessary.
-        if poetic_form[:acrostic]
+        if poetic_form[:acrostic_x]
+          acrostic_opts = acrostic_x(poetic_form[:acrostic_x])
+          poetic_form[:regex] =
+            merge_hashes poetic_form[:regex], acrostic_opts[:regex]
+          poetic_form[:transform] =
+            merge_hashes acrostic_opts[:transform], poetic_form[:transform]
+        elsif poetic_form[:acrostic]
           poetic_form[:regex] =
             merge_hashes poetic_form[:regex], acrostic(poetic_form[:acrostic])
         end

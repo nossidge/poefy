@@ -211,6 +211,22 @@ You must also beware of repeated lines (uppercase letters in the rhyme string). 
     $ poefy therese rondeau -a'grown ever softer'
 
 
+#### Option `-A` or `--acrostic_x`
+
+This does the same as `-a`, but with special workarounds for 'x'. In the case that a line needs to match '^x', it will instead match '^ex' and replace with 'eX'. It will also use indentation to line-up the letters vertically:
+
+    $ poefy whitman -s8 -r abcbdd -A taxman
+
+````
+  To reason's early paradise,
+  And that death and dismay are great.
+ eXult O shores, and ring O bells!
+  May-be kill'd, unknown to her mate,
+  Around the idea of thee.
+  now, for all you cannot see me?
+````
+
+
 #### Option `-p` or `--proper`
 
 This is used to ensure that the first word in the first line is not 'and but or nor yet', and the final line ends with closing punctuation (full stop, exclamation, or question mark). The default for this is `true`, but you can set it to `false` if necessary, for example if your input lines do not use punctuation.

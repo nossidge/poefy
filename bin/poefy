@@ -74,9 +74,14 @@ def parse_options
       options[:regex] = s
     end
 
+    # Options for acrostic poems.
     opts.on('-a', '--acrostic STRING',
-            "Overwrite 'regex' option to generate an acrostic") do |s|
+            "Generate an acrostic on a certain word") do |s|
       options[:acrostic] = s
+    end
+    opts.on('-A', '--acrostic_x STRING',
+            "Generate an acrostic with better handling of 'x'") do |s|
+      options[:acrostic_x] = s
     end
 
     # Handle proper sentence structure.

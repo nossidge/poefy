@@ -128,6 +128,29 @@ module Poefy
       output
     end
 
+    # Create a regex specification for acrostics.
+    # Uses special logic for 'X'.
+    # Match words starting 'ex' and then change case to 'eX'.
+    def acrostic_x word
+      regex = {}
+      transform = {}
+      word.split('').each.with_index do |char, i|
+        if char.downcase == 'x'
+          regex[i + 1] = /^ex/i
+          transform[i + 1] = proc do |line|
+            line[0..1] = 'eX'
+            ' ' + line
+          end
+        elsif char != ' '
+          regex[i + 1] = /^[#{char.downcase}]/i
+          transform[i + 1] = proc do |line|
+            '  ' + line
+          end
+        end
+      end
+      { regex: regex, transform: transform }
+    end
+
     private
 
       # Can the string be converted to integer?
