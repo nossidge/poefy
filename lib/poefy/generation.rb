@@ -209,6 +209,10 @@ module Poefy
           #   words as there are lines to be matched.
           rhymes = nil
 
+          # If all the lines include a 'regex' condition,
+          #   then we can specify to only query for matching lines.
+          regex_all = regex_for_all line_conds
+
           # If all the lines include a 'syllable' condition,
           #   then we can specify to only query for matching lines.
           min_max = syllable_min_max line_conds
@@ -221,7 +225,7 @@ module Poefy
           # For each rhyme, get all lines and try to sastify all conditions.
           out = []
           rhymes.shuffle.each do |rhyme|
-            out = try_rhyme(conditions, rhyme, min_max)
+            out = try_rhyme(conditions, rhyme, min_max, regex_all)
             break if !out.empty?
           end
           if out.empty?
@@ -290,9 +294,14 @@ module Poefy
 
       # Loop through the rhymes until we find one that works.
       # (In a reasonable time-frame)
-      def try_rhyme conditions, rhyme, syllable_min_max = nil
+      def try_rhyme conditions, rhyme, syllable_min_max = nil, regex_all = nil
         output = []
         lines = @db.sproc_lines_all!(rhyme, syllable_min_max)
+
+        # To reduce the number of permutations, reject lines
+        #   that do not match any of the lines regex.
+        lines.reject! { |i| !(i['line'].match(regex_all)) } if regex_all
+
         begin
           Timeout::timeout(2) do
             output = conditional_selection(lines.shuffle, conditions)
@@ -317,6 +326,16 @@ module Poefy
           min_max = nil if min_max[:max] == 0
         end
         min_max
+      end
+
+      # If every line has a regex, then return a regex union.
+      def regex_for_all line_conds
+        output = nil
+        if line_conds.all?{ |i| i[:regex] }
+          all_regex = line_conds.map{ |i| i[:regex] }
+          output = Regexp.union all_regex.flatten
+        end
+        output
       end
 
   end
