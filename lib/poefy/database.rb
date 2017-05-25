@@ -45,28 +45,16 @@ module Poefy
           @db = nil
         else
           begin
-            open
-            create_sprocs
+            @db = SQLite3::Database.open(@db_file)
+            @db.results_as_hash = true
           rescue
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
           end
+          create_sprocs
         end
       end
       @db
-    end
-
-    # Open the database file.
-    def open
-      @db = SQLite3::Database.open(@db_file)
-      @db.results_as_hash = true
-
-      # Create a REGEX function in SQLite.
-      # http://stackoverflow.com/questions/7302311
-      @db.create_function('regexp', 2) do |func, pattern, expression|
-        regexp = Regexp.new(pattern.to_s, Regexp::IGNORECASE)
-        func.result = expression.to_s.match(regexp) ? 1 : 0
-      end
     end
 
     # Close the database file.
