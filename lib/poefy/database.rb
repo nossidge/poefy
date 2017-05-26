@@ -124,21 +124,30 @@ module Poefy
     end
 
     # Public interfaces for private stored procedure methods.
+    # Use instance variables to keep a cache of the results.
     def sproc_rhymes_all! rhyme_count, syllable_min_max = nil
       db
-      if syllable_min_max
-        sproc_rhymes_by_count_syllables rhyme_count, syllable_min_max
-      else
-        sproc_rhymes_by_count rhyme_count
+      @rbc = Hash.new { |h,k| h[k] = {} } if @rbc.nil?
+      if @rbc[rhyme_count][syllable_min_max].nil?
+        @rbc[rhyme_count][syllable_min_max] = if syllable_min_max
+          sproc_rhymes_by_count_syllables(rhyme_count, syllable_min_max)
+        else
+          sproc_rhymes_by_count(rhyme_count)
+        end
       end
+      @rbc[rhyme_count][syllable_min_max].dup
     end
     def sproc_lines_all! rhyme, syllable_min_max = nil
       db
-      if syllable_min_max
-        sproc_lines_all_syllables rhyme, syllable_min_max
-      else
-        sproc_lines_all rhyme
+      @la = Hash.new { |h,k| h[k] = {} } if @la.nil?
+      if @la[rhyme][syllable_min_max].nil?
+        @la[rhyme][syllable_min_max] = if syllable_min_max
+          sproc_lines_all_syllables(rhyme, syllable_min_max)
+        else
+          sproc_lines_all(rhyme)
+        end
       end
+      @la[rhyme][syllable_min_max].dup
     end
 
     private

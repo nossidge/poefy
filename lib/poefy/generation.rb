@@ -35,7 +35,14 @@ module Poefy
       end
 
       # Loop until we find a valid poem.
-      output = gen_poem_using_conditions poetic_form
+      # There are cases where valid permutations are not able to be
+      #   genned on the first try, so keep trying a few more times.
+      output, count_down = nil, 10
+      loop do
+        output = gen_poem_using_conditions poetic_form
+        break if !output.nil? || count_down == 0
+        count_down -= 1
+      end
 
       # Return nil if poem could not be created.
       return nil if (output.nil? or output == [] or output == [''])
@@ -250,7 +257,7 @@ module Poefy
         # Transpose lines to their actual location.
         poem_lines = []
         all_lines.each do |line|
-          poem_lines[line['line_number'] - 1] = line['line']
+          poem_lines[line['line_number'] - 1] = line['line'].dup
         end
 
         # Go back to the [by_line] array and find all the refrain line nos.
@@ -272,7 +279,7 @@ module Poefy
         end
 
         # Carry out transformations, if necessary.
-        the_poem = poem_lines.dup
+        the_poem = poem_lines
         if poetic_form[:transform]
 
           # Due to the 'merge_hashes' above, each 'poetic_form[:transform]'
