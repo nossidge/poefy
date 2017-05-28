@@ -230,7 +230,16 @@ module Poefy
           return handle_error 'ERROR: Rhyme string is not valid', []
         end
         tokens = [' '] if tokens == ['']
-        tokens
+
+        # Output as a hash.
+        tokens.map do |i|
+          hash = {
+            token: i,
+            rhyme_letter: i[0].downcase
+          }
+          hash[:refrain] = i if i[0] == i[0].upcase
+          hash
+        end
       end
 
       # Indent an array of lines using a string of numbers.

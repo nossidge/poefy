@@ -89,8 +89,8 @@ module Poefy
       tokenised_rhyme.each.with_index do |rhyme, index|
         line_hash = {
           line: index + 1,
-          rhyme: rhyme,
-          rhyme_letter: rhyme[0].downcase
+          rhyme: rhyme[:token],
+          rhyme_letter: rhyme[:rhyme_letter]
         }
         poetic_form.keys.each do |k|
           if poetic_form[k].is_a? Hash
