@@ -168,23 +168,21 @@ module Poefy
           i[:rhyme_letter]
         end
 
-        # Okay, this is great. But if we're making villanelles we'll need
-        #   duplicated refrain lines. So we won't need unique rhymes for those.
+        # Okay, this is great. But if we're making villanelles we'll need to
+        #   duplicate refrain lines. So we won't need unique rhymes for those.
         # So make a distinct set of lines conditions, still grouped by rhyme.
-        # This will be the same as [conditions_by_rhyme], except duplicate lines
-        #   are removed. (These are lines with capitals and numbers: i.e. A1, B2)
+        # This will be the same as [conditions_by_rhyme], except duplicate
+        #   lines are removed. (In string input, these are lines with
+        #   capitals and numbers: i.e. A1, B2)
         # It will keep the condition hash of only the first refrain line.
         distinct_line_conds = Hash.new { |h,k| h[k] = [] }
         conditions_by_rhyme.each do |key, values|
-          uppers = []
+          refrains = []
           values.each do |v|
-            char_1 = v[:rhyme][0]
-            if char_1 == char_1.upcase
-              if !uppers.include?(v[:rhyme])
-                uppers << v[:rhyme]
-                distinct_line_conds[key] << v
-              end
-            else
+            if !v[:refrain]
+              distinct_line_conds[key] << v
+            elsif !refrains.include?(v[:refrain])
+              refrains << v[:refrain]
               distinct_line_conds[key] << v
             end
           end
@@ -263,8 +261,8 @@ module Poefy
         # Go back to the [by_line] array and find all the refrain line nos.
         refrains = Hash.new { |h,k| h[k] = [] }
         by_line.reject{ |i| i[:rhyme] == ' ' }.each do |line|
-          if line[:rhyme][0] == line[:rhyme][0].upcase
-            refrains[line[:rhyme]] << line[:line]
+          if line[:refrain]
+            refrains[line[:refrain]] << line[:line]
           end
         end
         refrains.keys.each do |k|
