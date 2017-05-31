@@ -92,7 +92,9 @@ module Poefy
           rhyme: rhyme[:token],
           rhyme_letter: rhyme[:rhyme_letter]
         }
-        line_hash[:refrain] = rhyme[:refrain] if rhyme[:refrain]
+        if rhyme[:refrain] and rhyme[:refrain] != ' '
+          line_hash[:refrain] = rhyme[:refrain]
+        end
         poetic_form.keys.each do |k|
           if poetic_form[k].is_a? Hash
             line_hash[k] = poetic_form[k][index + 1]

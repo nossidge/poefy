@@ -137,11 +137,11 @@ module Poefy
           line_conds += [/[\.?!]$/]
           by_line[tokenised_rhyme.count-1][:regex] = line_conds
 
-          # Get all refrains by uppercase rhyme token.
-          refrains = by_line.reject do |i|
-            i[:rhyme] == i[:rhyme].downcase
+          # Get all refrains and group them.
+          refrains = by_line.select do |i|
+            i[:refrain]
           end.group_by do |i|
-            i[:rhyme]
+            i[:refrain]
           end
 
           # Now make each refrain :regex be an array of all.
