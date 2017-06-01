@@ -21,6 +21,7 @@ require_relative 'poefy/self.rb'
 require_relative 'poefy/poefy_gen_base.rb'
 require_relative 'poefy/generation.rb'
 require_relative 'poefy/poetic_forms.rb'
+require_relative 'poefy/poetic_form_from_text.rb'
 require_relative 'poefy/string_manipulation.rb'
 require_relative 'poefy/handle_error.rb'
 require_relative 'poefy/database.rb'
@@ -37,6 +38,7 @@ module Poefy
     include Poefy::PoefyGenBase
     include Poefy::Generation
     include Poefy::PoeticForms
+    include Poefy::PoeticFormFromText
     include Poefy::StringManipulation
     include Poefy::ConditionalSatisfaction
     include Poefy::HandleError

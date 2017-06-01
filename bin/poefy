@@ -193,13 +193,19 @@ if second_arg == 'rhyme'
   exit 0
 end
 
+# If the second argument is a file, then use that as the poetic_form.
+updated_poetic_form = {}
+if File.exists?(second_arg)
+  updated_poetic_form = poefy.poetic_form_from_text(second_arg)
+end
+
 # Create a database using input.
 if data
   poefy.make_database data, options[:overwrite]
 
 # Make a new poem, and output it.
 else
-  poem = poefy.poem
+  poem = poefy.poem(updated_poetic_form)
   puts poem if poem
 end
 
