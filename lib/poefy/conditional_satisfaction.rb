@@ -95,6 +95,7 @@ module Poefy
         if rhyme[:refrain] and rhyme[:refrain] != ' '
           line_hash[:refrain] = rhyme[:refrain]
         end
+        line_hash[:exact] = rhyme[:exact] if rhyme[:exact]
         poetic_form.keys.each do |k|
           if poetic_form[k].is_a? Hash
             line_hash[k] = poetic_form[k][index + 1]

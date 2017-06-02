@@ -276,6 +276,11 @@ module Poefy
           end
         end
 
+        # Do the same for [:exact] lines.
+        poetic_form[:rhyme].each.with_index do |line, index|
+          poem_lines[index] = line[:exact] if line[:exact]
+        end
+
         # Carry out transformations, if necessary.
         the_poem = poem_lines
         if poetic_form[:transform]

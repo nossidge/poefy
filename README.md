@@ -267,6 +267,78 @@ $ poefy dickinson rhyme confuse line
 You can do the same thing for the other keys: `rhyme`, `final_word`, and `syllables`.
 
 
+#### Special case: poetic form from text file
+
+If the second argument is a reference to a text file, then the output will be a poem with the same structure as the file.
+
+The program will scan by line, looking for rhyme, syllables and repeated lines. It will then build up a constraint hash and use that as the poetic form.
+
+Any line that is bracketed in `[square]` or `{curly}` braces will be duplicated exactly in the output. This is for lines such as "chorus" or "1st verse" descriptions. This seems to work nicely with lyrics from genius.com.
+
+Here's an example of a song that can be sung to the same tune as "[I Want to Hold Your Hand][1]", but using lyrics from all Beatles songs:
+
+````
+$ poefy beatles data/beatles/i_want_to_hold_your_hand.txt
+[Chorus 1]
+Now the sun turns out his light
+And, though we may be blind
+It's been a hard day's night
+What goes on in your mind?
+What goes on in your mind?
+What goes on in your mind?
+
+[Verse 1]
+Feeling two-foot small
+As I write this letter
+The walrus was Paul
+I left you far behind
+You're not the hurting kind
+What goes on in your mind?
+
+[Bridge]
+I'll remember all the little things we've done
+Sleep pretty darling, do not cry
+In the sun
+In the sun
+In the sun
+
+[Chorus 2]
+You know I feel alright
+And, though we may be blind
+It's been a hard day's night
+What goes on in your mind?
+What goes on in your mind?
+What goes on in your mind?
+
+[Bridge]
+I'll remember all the little things we've done
+Sleep pretty darling, do not cry
+In the sun
+In the sun
+In the sun
+
+[Chorus 3]
+You know I feel alright
+And, though we may be blind
+I want a love that's right
+What goes on in your mind?
+What goes on in your mind?
+What goes on in your mind?
+What goes on in your mind?
+````
+
+You can tell that it's only based on whole line changes. Very similar lines are replaced with rhyming, but dissimilar ones. Something for me to think about.
+
+````
+[Original]                       [Generated]
+You'll let me hold your hand     I left you far behind
+I'll let me hold your hand       You're not the hurting kind
+I want to hold your hand         What goes on in your mind?
+````
+
+[1]: https://genius.com/The-beatles-i-want-to-hold-your-hand-lyrics
+
+
 ### As a Ruby Gem
 
 To make a poefy database and generate poems from it:

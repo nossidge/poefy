@@ -99,6 +99,13 @@ module Poefy
         output
       end
 
+      # Is the string enclosed in brackets?
+      def bracketed? string
+        square = (string[0] == '[' and string[-1] == ']')
+        curly  = (string[0] == '{' and string[-1] == '}')
+        square or curly
+      end
+
   end
 
 end
