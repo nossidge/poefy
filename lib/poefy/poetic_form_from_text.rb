@@ -10,8 +10,12 @@ module Poefy
   module PoeticFormFromText
 
     # Read a song lyric file, output a poetic_form that matches its form.
-    def poetic_form_from_text text_file
+    def poetic_form_from_text_file text_file
       lines = File.readlines(text_file).map(&:strip)
+      poetic_form_from_text lines
+    end
+
+    def poetic_form_from_text lines
 
       # For refrains, we don't care about the lines exactly, just
       #   the structure. So we can delete punctuation and downcase.

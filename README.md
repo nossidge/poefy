@@ -38,7 +38,7 @@ The code rather hackily uses system to call `sqlite3`, so make sure you have tha
 
 Make a poefy database from a text file:
 
-    $ poefy shakespeare < shakespeare_sonnets.txt
+    $ poefy shakespeare -o < shakespeare_sonnets.txt
 
 Now, whenever you want to make poems using Shakespeare's lines, you can just use `poefy shakespeare` and it will read from the already created database:
 
@@ -147,11 +147,11 @@ Specify syllable count allowed for each line. There's a few valid forms it can t
 
 If the string is just one number, all lines will be that number of syllables long.
 
-    $ poefy whitman -s'10'
+    $ poefy whitman sonnet -s'10'
 
 If the string is comma delimited, all lines will be any of those numbers of syllables long.
 
-    $ poefy whitman -s'9,10,11'
+    $ poefy whitman sonnet -s'9,10,11'
 
 If the string is an array, each element corresponds to a line in the output. This will skip blank lines.
 
@@ -164,7 +164,8 @@ If the string is a hash, the key will be used to match the line number.
 
     $ poefy whitman -r'aabba' -s'{1:8,2:8,3:5,4:5,5:8}'
     $ poefy whitman -r'aabba' -s'{1:[8,9],2:[8,9],3:[4,5,6],4:[4,5,6],5:[8,9]}'
-    $ poefy whitman -r'aabba' -s'{0:[8,9],3:[4,5,6],4:[4,5,6]}'
+    $ poefy whitman -r'aabba' -s'{0: [8,9],3: [4,5,6],4: [4,5,6]}'
+    $ poefy whitman -r'aabba' -s'{0=>[8,9],3=>[4,5,6],4=>[4,5,6]}'
 
 In the hash form, any lines not explicitly specified will use the value of the '0' key. If there is no '0' key, the lines will be ignored.
 
@@ -188,7 +189,7 @@ If the string is just one regex, all lines will be forced to match that regex.
     $ poefy whitman sonnet -x'^[A-Z].*$'
     $ poefy whitman sonnet -x'^[^e]*$' -s0
 
-If the string is a hash, the key will be used to match the line number. Unlike in the `syllable` string, you must use ruby's `=>` key identifier. Also, you must put the regex inside `/slashes/`.
+If the string is a hash, the key will be used to match the line number. Unlike in the `syllable` string, you must use ruby's `=>` key identifier, and not `:` as in JSON. Also, you must put the regex inside `/slashes/`.
 
 Example, to ensure the first line always starts with capitalisation:
 
@@ -213,7 +214,7 @@ You must also beware of repeated lines (uppercase letters in the rhyme string). 
 
 #### Option `-A` or `--acrostic_x`
 
-This does the same as `-a`, but with special workarounds for 'x'. In the case that a line needs to match '^x', it will instead match '^ex' and replace with 'eX'. It will also use indentation to line-up the letters vertically:
+This does the same as `-a`, but with special workarounds for 'x'. In the case that a line needs to match /^x/, it will instead match /^ex/ and replace with 'eX'. It will also use indentation to line-up the letters vertically:
 
     $ poefy whitman -s8 -r abcbdd -A taxman
 
@@ -269,7 +270,11 @@ You can do the same thing for the other keys: `rhyme`, `final_word`, and `syllab
 
 #### Special case: poetic form from text file
 
-If the second argument is a reference to a text file, then the output will be a poem with the same structure as the file.
+If you pipe in text and don't use the `-o` option to create a database, then the output will be a poem with the same structure as the file. This can also be accomplished if the second argument is a reference to a text file. So, assuming you have a `lyrics` script that will return song lines for you:
+
+    $ lyrics 'carly rae jepsen' 'call me maybe' | tee jep.txt | poefy whitman
+    $ poefy whitman < jep.txt
+    $ poefy whitman jep.txt
 
 The program will scan by line, looking for rhyme, syllables and repeated lines. It will then build up a constraint hash and use that as the poetic form.
 

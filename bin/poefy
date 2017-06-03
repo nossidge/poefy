@@ -145,8 +145,8 @@ data = (not STDIN.tty? and not STDIN.closed?) ? STDIN.read : nil
 # Database is the first argument.
 first_arg = ARGV.first
 if first_arg.nil?
-  puts "ERROR: Please specify a database to read from."
-  exit 0
+  STDERR.puts "ERROR: Please specify a database to read from / to"
+  exit 1
 end
 
 # If the first argument is 'make_dbs', then make
@@ -179,10 +179,24 @@ end
 
 # Poetic form name is the second argument, if it exists.
 second_arg = (ARGV.length > 1) ? ARGV[1] : ''
-options[:form] = second_arg
+options[:form] = second_arg if second_arg != ''
 
 # Create poefy object.
 poefy = Poefy::PoefyGen.new first_arg, options
+
+# If we need to make a database.
+# Exit the program after database is generated.
+if options[:overwrite]
+  if data
+    poefy.make_database data, true
+    poefy.close
+    exit 0
+  else
+    STDERR.puts 'ERROR: Need text input to generate a database'
+    STDERR.puts '       Please pipe some data into the program'
+    exit 1
+  end
+end
 
 # If the second argument is 'rhyme', then output all
 #   lines that rhyme with the word.
@@ -193,21 +207,20 @@ if second_arg == 'rhyme'
   exit 0
 end
 
-# If the second argument is a file, then use that as the poetic_form.
+# If there is piped data, or the second argument is a file,
+#   then use that as the poetic_form.
 updated_poetic_form = {}
-if File.exists?(second_arg)
-  updated_poetic_form = poefy.poetic_form_from_text(second_arg)
-end
-
-# Create a database using input.
 if data
-  poefy.make_database data, options[:overwrite]
+  lines = data.split("\n").map(&:strip)
+  updated_poetic_form = poefy.poetic_form_from_text(lines)
+elsif File.exists?(second_arg)
+  updated_poetic_form = poefy.poetic_form_from_text_file(second_arg)
+end
+updated_poetic_form = updated_poetic_form.merge(options)
 
 # Make a new poem, and output it.
-else
-  poem = poefy.poem(updated_poetic_form)
-  puts poem if poem
-end
+poem = poefy.poem(updated_poetic_form)
+puts poem if poem
 
 # Close the database connection.
 poefy.close
