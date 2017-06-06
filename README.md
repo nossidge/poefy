@@ -371,6 +371,8 @@ puts poefy.poem ({ form: :sonnet, regex: '^[A-Z].*$' })
 puts poefy.poem ({ form: :sonnet, acrostic: 'pauldpthompson' })
 puts poefy.poem ({ form: 'sonnet', indent: '01010101001101' })
 puts poefy.poem ({ form: 'sonnet', proper: false })
+puts poefy.poem ({ form_from_text: 'how_do_i_love_thee.txt' })
+puts poefy.poem ({ form_from_text: 'how_do_i_love_thee.txt', syllable: 0 })
 ```
 
 All options can be specified at object initialisation, and subsequent poems will use those options as default:

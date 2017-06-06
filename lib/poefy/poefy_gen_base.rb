@@ -77,6 +77,13 @@ module Poefy
         input, output = poetic_form, {}
         form_string   = get_valid_form input[:form]
 
+        # Apply ':form_from_text' before any others.
+        if input[:form_from_text]
+          lines = validate_lines input[:form_from_text]
+          form = poetic_form_from_text lines
+          input = form.merge input
+        end
+
         # Handle obvious inputs.
         output[:form]       = form_string        if form_string
         output[:rhyme]      = input[:rhyme]      if input[:rhyme]

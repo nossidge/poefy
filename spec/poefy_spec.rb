@@ -618,6 +618,68 @@ describe Poefy::PoefyGen do
     end
   end
 
+  ##############################################################################
+
+  describe "using the form_from_text option" do
+    before(:all) do
+      @file = "#{@root}/data/i_want_to_hold_your_hand.txt"
+    end
+
+    it "should use the exact poetic form 1" do
+      poefy = Poefy::PoefyGen.new(:beatles, {
+        form_from_text: @file
+      })
+      poem = poefy.poem
+      expect(poem.count).to be 46
+    end
+
+    it "should use the exact poetic form 2" do
+      poefy = Poefy::PoefyGen.new :beatles
+      poem = poefy.poem({
+        form_from_text: @file
+      })
+      expect(poem.count).to be 46
+    end
+
+    it "should correctly modify the poetic form 1" do
+      poefy = Poefy::PoefyGen.new(:beatles, {
+        form_from_text: @file,
+        syllable: 6
+      })
+      poem = poefy.poem
+      expect(poem.count).to be 46
+    end
+
+    it "should correctly modify the poetic form 2" do
+      poefy = Poefy::PoefyGen.new :beatles
+      poem = poefy.poem({
+        form_from_text: @file,
+        syllable: 6
+      })
+      expect(poem.count).to be 46
+    end
+
+    it "should correctly modify the poetic form 3" do
+      poefy = Poefy::PoefyGen.new(:beatles, {
+        form_from_text: @file
+      })
+      poem = poefy.poem({
+        syllable: 6
+      })
+      expect(poem.count).to be 46
+    end
+
+    it "should correctly replace the poetic form" do
+      poefy = Poefy::PoefyGen.new(:beatles, {
+        syllable: 6
+      })
+      poem = poefy.poem({
+        form_from_text: @file
+      })
+      expect(poem.count).to be 46
+    end
+  end
+
 end
 
 ################################################################################

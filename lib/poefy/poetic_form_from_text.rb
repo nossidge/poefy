@@ -17,6 +17,9 @@ module Poefy
 
     def poetic_form_from_text lines
 
+      # If lines is not an array, assume string and split on newlines.
+      lines = lines.respond_to?(:each) ? lines : lines.split("\n")
+
       # For refrains, we don't care about the lines exactly, just
       #   the structure. So we can delete punctuation and downcase.
       lines = lines.map do |line|
