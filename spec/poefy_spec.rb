@@ -678,6 +678,43 @@ describe Poefy::PoefyGen do
       })
       expect(poem.count).to be 46
     end
+
+    ############################################################################
+
+    describe "private method #poetic_form_from_text" do
+
+      # Singleton which includes the method.
+      # Make the private methods public.
+      let(:obj) do
+        class Sing
+          include Poefy::PoeticFormFromText
+          include Poefy::StringManipulation
+          public *private_instance_methods
+        end.new
+      end
+
+      it "80 should rhyme with weighty" do
+        lines = ["Lorem ipsum dolor weighty", "Lorem ipsum dolor 80"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to be 1
+      end
+      it "80 should not rhyme with shoe" do
+        lines = ["Lorem ipsum dolor shoe", "Lorem ipsum dolor 80"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to_not be 1
+      end
+      it "2 should rhyme with shoe" do
+        lines = ["Lorem ipsum dolor shoe", "Lorem ipsum dolor 2"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to be 1
+      end
+      it "2 should not rhyme with weighty" do
+        lines = ["Lorem ipsum dolor weighty", "Lorem ipsum dolor 2"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to_not be 1
+      end
+    end
+
   end
 
 end
