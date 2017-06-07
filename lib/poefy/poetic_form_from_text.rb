@@ -10,11 +10,6 @@ module Poefy
   module PoeticFormFromText
 
     # Read a song lyric file, output a poetic_form that matches its form.
-    def poetic_form_from_text_file text_file
-      lines = File.readlines(text_file).map(&:strip)
-      poetic_form_from_text lines
-    end
-
     def poetic_form_from_text lines
 
       # If lines is not an array, assume string and split on newlines.

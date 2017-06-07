@@ -181,12 +181,10 @@ end
 second_arg = (ARGV.length > 1) ? ARGV[1] : ''
 options[:form] = second_arg if second_arg != ''
 
-# Create poefy object.
-poefy = Poefy::PoefyGen.new first_arg, options
-
 # If we need to make a database.
 # Exit the program after database is generated.
 if options[:overwrite]
+  poefy = Poefy::PoefyGen.new first_arg
   if data
     poefy.make_database data, true
     poefy.close
@@ -201,6 +199,7 @@ end
 # If the second argument is 'rhyme', then output all
 #   lines that rhyme with the word.
 if second_arg == 'rhyme'
+  poefy = Poefy::PoefyGen.new first_arg
   third_arg  = (ARGV.length > 2) ? ARGV[2] : nil
   fourth_arg = (ARGV.length > 3) ? ARGV[3] : nil
   puts poefy.rhymes(third_arg, fourth_arg)
@@ -209,17 +208,15 @@ end
 
 # If there is piped data, or the second argument is a file,
 #   then use that as the poetic_form.
-updated_poetic_form = {}
-if data
-  lines = data.split("\n").map(&:strip)
-  updated_poetic_form = poefy.poetic_form_from_text(lines)
-elsif File.exists?(second_arg)
-  updated_poetic_form = poefy.poetic_form_from_text_file(second_arg)
+if data or File.exists?(second_arg)
+  options[:form_from_text] = (data || second_arg)
 end
-updated_poetic_form = updated_poetic_form.merge(options)
+
+# Create poefy object using the options.
+poefy = Poefy::PoefyGen.new first_arg, options
 
 # Make a new poem, and output it.
-poem = poefy.poem(updated_poetic_form)
+poem = poefy.poem
 puts poem if poem
 
 # Close the database connection.
