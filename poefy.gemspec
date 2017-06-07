@@ -30,4 +30,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('sqlite3',     '~> 1.3', '>= 1.3.13')
   s.add_runtime_dependency('ruby_rhymes', '~> 0.1', '>= 0.1.2')
   s.add_runtime_dependency('wordfilter',  '~> 0.2', '>= 0.2.6')
+  s.add_runtime_dependency('humanize',    '~> 1.4', '>= 1.4.0')
 end

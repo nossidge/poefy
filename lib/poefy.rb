@@ -12,6 +12,7 @@
 
 require 'ruby_rhymes'
 require 'wordfilter'
+require 'humanize'
 require 'tempfile'
 require 'sqlite3'
 require 'timeout'

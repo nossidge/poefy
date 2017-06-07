@@ -7,6 +7,7 @@
 
 require 'ruby_rhymes'
 require 'wordfilter'
+require 'humanize'
 
 ################################################################################
 
@@ -104,6 +105,19 @@ module Poefy
         square = (string[0] == '[' and string[-1] == ']')
         curly  = (string[0] == '{' and string[-1] == '}')
         square or curly
+      end
+
+      # Humanize every number in the text.
+      # This will not work for floats.
+      # It will also break emoticons, but GIGO.
+      def humanize_instr text
+        output = text
+        loop do
+          num = output[/\d+/]
+          break if not num
+          output.sub!(num, num.to_i.humanize)
+        end
+        output
       end
 
   end
