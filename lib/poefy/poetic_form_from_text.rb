@@ -23,10 +23,12 @@ module Poefy
       # For refrains, we don't care about the lines exactly, just
       #   the structure. So we can delete punctuation and downcase.
       lines = lines.map do |line|
-        {
-          orig: line,
-          downcase: line.gsub(/[[:punct:]]/, '').downcase
-        }
+        hash = {}
+        hash[:orig] = line
+        hash[:downcase] = humanize_instr(line).
+                          gsub(/[[:punct:]]/, '').
+                          downcase
+        hash
       end
 
       # Find all the lines that are duplicated.
@@ -51,7 +53,7 @@ module Poefy
         # Misc details.
         hash[:num] = index + 1
         hash[:syllable] = syllables(hash[:downcase])
-        hash[:last_word] = (text.to_phrase.last_word rescue '')
+        hash[:last_word] = (hash[:downcase].to_phrase.last_word rescue '')
 
         # The rhyme for the line.
         # ToDo: For now, just get the first rhyme of the tag array.
