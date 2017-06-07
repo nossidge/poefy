@@ -30,7 +30,23 @@ module Poefy
 
       # Uses 'ruby_rhymes' to find the rhyme key for a text.
       def get_rhymes text
-        (numeric?(text[-1]) ? [] : text.to_phrase.rhymes.keys) rescue []
+        out = (numeric?(text[-1]) ? [] : text.to_phrase.rhymes.keys) rescue []
+        out = rhyme_initialism(text) if out.empty?
+        out
+      end
+
+      # We will only call this method if there are no dictionary rhymes.
+      # If the last word is uppercase, then assume it's an initialism.
+      # Get the last letter and rhyme that.
+      # Else, return an empty array, as normal.
+      def rhyme_initialism text
+        output = []
+        last_word = text.split.last
+        if last_word and last_word == last_word.upcase
+          letter = last_word.scan(/[A-Z]/).last
+          output = get_rhymes letter
+        end
+        output
       end
 
       # The number of syllables in the text.

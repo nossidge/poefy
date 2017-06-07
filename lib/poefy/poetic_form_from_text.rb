@@ -20,7 +20,8 @@ module Poefy
       lines = lines.map do |line|
         hash = {}
         hash[:orig] = line
-        hash[:downcase] = humanize_instr(line).
+        hash[:humanized] = humanize_instr(line)
+        hash[:downcase] = hash[:humanized].
                           gsub(/[[:punct:]]/, '').
                           downcase
         hash
@@ -52,7 +53,7 @@ module Poefy
 
         # The rhyme for the line.
         # ToDo: For now, just get the first rhyme of the tag array.
-        rhyme_tag = get_rhymes(hash[:downcase]).first
+        rhyme_tag = get_rhymes(line[:humanized]).first
         hash[:rhyme_tag] = rhyme_tag || ' '
         hash[:rhyme_letter] = rhyme_tag
         hash[:rhyme] = ' ' if hash[:downcase] == ''
