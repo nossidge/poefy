@@ -28,11 +28,30 @@ module Poefy
         (text.gsub(/[[:punct:]]/,'').scan(/^[^ ]+/).first rescue '') || ''
       end
 
-      # Uses 'ruby_rhymes' to find the rhyme key for a text.
-      def get_rhymes text
-        out = (numeric?(text[-1]) ? [] : text.to_phrase.rhymes.keys) rescue []
-        out = rhyme_initialism(text) if out.empty?
-        out
+      # Return info that is returned using 'ruby_rhymes' '#to_phrase'
+      # But also account for numbers and initialisms.
+      def phrase_info text
+        input = humanize_instr text
+        phrase = input.to_phrase rescue nil
+        return { rhymes: [], syllables: 0, last_word: '' } if phrase.nil?
+        last_word = phrase.last_word.downcase rescue ''
+        rhy = phrase.rhymes.keys rescue []
+        rhy = rhyme_initialism(input) if rhy.empty?
+        syl = phrase.syllables rescue 0
+        { rhymes: rhy, syllables: syl, last_word: last_word }
+      end
+
+      # Humanize every number in the text.
+      # This will not work for floats.
+      # It will also break emoticons, but GIGO.
+      def humanize_instr text
+        output = text
+        loop do
+          num = output[/\d+/]
+          break if not num
+          output.sub!(num, num.to_i.humanize)
+        end
+        output
       end
 
       # We will only call this method if there are no dictionary rhymes.
@@ -44,14 +63,9 @@ module Poefy
         last_word = text.split.last
         if last_word and last_word == last_word.upcase
           letter = last_word.scan(/[A-Z]/).last
-          output = get_rhymes letter
+          output = letter.to_phrase.rhymes.keys rescue []
         end
         output
-      end
-
-      # The number of syllables in the text.
-      def syllables text
-        text.to_phrase.syllables rescue 0
       end
 
       # Final line must close with sentence-end punctuation.
@@ -121,19 +135,6 @@ module Poefy
         square = (string[0] == '[' and string[-1] == ']')
         curly  = (string[0] == '{' and string[-1] == '}')
         square or curly
-      end
-
-      # Humanize every number in the text.
-      # This will not work for floats.
-      # It will also break emoticons, but GIGO.
-      def humanize_instr text
-        output = text
-        loop do
-          num = output[/\d+/]
-          break if not num
-          output.sub!(num, num.to_i.humanize)
-        end
-        output
       end
 
   end

@@ -158,17 +158,28 @@ module Poefy
       def save_sql_import_file lines
         sql_lines = []
         lines.map do |line|
-          next if Wordfilter.blacklisted? line
-          line_ = format_sql_string line
-          final = line.to_phrase.last_word.downcase rescue ''
 
-          final_ = format_sql_string final
-          syll = syllables line
-          get_rhymes(line).each do |rhyme|
+          # Don't add the line if it contains a blacklisted? substring.
+          next if Wordfilter.blacklisted? line
+
+          # Format the line for SQL parsing.
+          line_ = format_sql_string line
+
+          # Get the phrase info for the line.
+          phrase = phrase_info line
+          syll   = phrase[:syllables]
+          rhymes = phrase[:rhymes]
+          final_ = format_sql_string phrase[:last_word]
+
+          # There may be more than one rhyme, so add a database
+          #   record for each rhyme.
+          rhymes.each do |rhyme|
             rhyme_ = format_sql_string rhyme
             sql_lines << "\"#{line_}\"\t#{syll}\t\"#{final_}\"\t\"#{rhyme_}\""
           end
         end
+
+        # Save the SQL spec to a temporary file, and return the filename.
         sql_file = tmpfile
         File.open(sql_file, 'w') { |fo| fo.puts sql_lines }
         sql_file
