@@ -81,7 +81,9 @@ module Poefy
           # If the word has no rhymes, and it is uppercase, then assume
           #   it's an initialism and count each letter's syllables.
           if word.to_phrase.rhyme_keys.empty? and word == word.upcase
-            syll_count += word.gsub(/[^A-Z]/,'').length
+            word.gsub(/[^A-Z]/,'').split('').each do |i|
+              syll_count += i.to_phrase.syllables
+            end
           else
             syll_count += word.to_phrase.syllables
           end
