@@ -37,7 +37,7 @@ module Poefy
         last_word = phrase.last_word.downcase rescue ''
         rhy = phrase.rhymes.keys rescue []
         rhy = rhyme_initialism(input) if rhy.empty?
-        syl = phrase.syllables rescue 0
+        syl = syllables_correct text rescue 0
         { rhymes: rhy, syllables: syl, last_word: last_word }
       end
 
@@ -66,6 +66,27 @@ module Poefy
           output = letter.to_phrase.rhymes.keys rescue []
         end
         output
+      end
+
+      # Get the correct syllable count, even for initialisms.
+      # e.g. "Flew in from Miami Beach BOAC"
+      #      "I'm back in the U.S.S.R"
+      def syllables_correct text
+        syll_count = 0
+
+        # This is similar to how 'ruby_rhymes' splits to word.
+        # But that gem ignores case, which we need.
+        text.gsub(/[^A-Z ']/i,'').split.each do |word|
+
+          # If the word has no rhymes, and it is uppercase, then assume
+          #   it's an initialism and count each letter's syllables.
+          if word.to_phrase.rhyme_keys.empty? and word == word.upcase
+            syll_count += word.gsub(/[^A-Z]/,'').length
+          else
+            syll_count += word.to_phrase.syllables
+          end
+        end
+        syll_count
       end
 
       # Final line must close with sentence-end punctuation.
