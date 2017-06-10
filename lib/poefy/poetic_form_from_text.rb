@@ -15,6 +15,16 @@ module Poefy
       # If lines is not an array, assume string and split on newlines.
       lines = lines.respond_to?(:each) ? lines : lines.split("\n")
 
+      # Remove duplicate '' elements that are neighbours in the array.
+      # https://genius.com/The-monkees-im-a-believer-lyrics
+      prev_line = ''
+      lines.map! do |i|
+        out = (i == '' && prev_line == '') ? nil : i
+        prev_line = i
+        out
+      end
+      lines.compact!
+
       # For refrains, we don't care about the lines exactly, just
       #   the structure. So we can delete punctuation and downcase.
       lines = lines.map do |line|
