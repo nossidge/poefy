@@ -27,6 +27,7 @@ require_relative 'poefy/string_manipulation.rb'
 require_relative 'poefy/handle_error.rb'
 require_relative 'poefy/database.rb'
 require_relative 'poefy/conditional_satisfaction.rb'
+require_relative 'poefy/core_extensions/array.rb'
 
 ################################################################################
 

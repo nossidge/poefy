@@ -61,19 +61,14 @@ module Poefy
         hash[:syllable] = phrase[:syllables]
         hash[:last_word] = phrase[:last_word]
 
-        # The rhyme for the line.
-        # ToDo: For now, just get the first rhyme of the tag array.
-        rhyme_tag = phrase[:rhymes].first
-        hash[:rhyme_tag] = rhyme_tag || ' '
-        hash[:rhyme_letter] = rhyme_tag
-        hash[:rhyme] = ' ' if hash[:downcase] == ''
+        # The rhyme tag array for the line.
+        hash[:rhyme_tags] = phrase[:rhymes]
 
         # Map [:refrain] and [:exact].
         # (They are mutually exclusive)
         # If it needs to be an exact line, we don't need rhyme tokens.
         if bracketed?(line[:orig].strip)
           hash[:exact] = line[:orig]
-          hash[:rhyme] = ' '
           hash[:rhyme_letter] = nil
           hash[:syllable] = 0
         elsif refrains.keys.include?(line[:downcase])
@@ -81,6 +76,32 @@ module Poefy
         end
 
         hash
+      end
+
+      # [:rhyme_tags] may well contain more than one rhyme tag.
+      # e.g. 'wind' rhymes with 'sinned' and 'find'.
+      # So we will compare this array against the rhymes of each
+      #   other line in the array, to find the correct one to use.
+      # We will work from the closest lines, until we find a match.
+      lines.each.with_index do |line, index|
+
+        # Compare each other rhyme tag, order by closeness.
+        found_rhyme = nil
+        lines.by_closeness(index)[:by_closeness].each do |i|
+          i[:rhyme_tags].each do |tag|
+            if line[:rhyme_tags].include?(tag)
+              found_rhyme = tag
+              break
+            end
+          end
+        end
+
+        # If we haven't found the rhyme, then it doesn't matter,
+        #   just use the first in the tag array.
+        found_rhyme = line[:rhyme_tags].first if not found_rhyme
+        lines[index][:rhyme_tags]   = *found_rhyme
+        lines[index][:rhyme_tag]    =  found_rhyme
+        lines[index][:rhyme_letter] =  found_rhyme
       end
 
       # Split into separate sections, [:rhyme] and [:syllable].
