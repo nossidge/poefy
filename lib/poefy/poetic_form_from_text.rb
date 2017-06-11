@@ -88,7 +88,7 @@ module Poefy
         # Compare each other rhyme tag, order by closeness.
         found_rhyme = line[:rhyme_tags].first
         if line[:rhyme_tags].length > 1
-          lines.by_closeness(index)[:array].each do |i|
+          lines.by_distance(index)[:array].each do |i|
             i[:rhyme_tags].each do |tag|
               if line[:rhyme_tags].include?(tag)
                 found_rhyme = tag

@@ -13,15 +13,15 @@
 #     :array => self array minus value, ordered by closeness to index }
 # Example usage:
 #   lines = (1..4).to_a * 2
-#   puts lines.by_closeness
-#   puts lines.by_closeness(3)
+#   puts lines.by_distance
+#   puts lines.by_distance(3)
 module Poefy
   module CoreExtensions
     module Array
-      def by_closeness index = nil
+      def by_distance index = nil
         if index.nil?
           self.map.with_index do |value, index|
-            self.by_closeness index
+            self.by_distance index
           end
         else
           others, counter = [], 0
