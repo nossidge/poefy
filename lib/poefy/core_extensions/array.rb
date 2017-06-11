@@ -5,12 +5,12 @@
 # Monkey patch the Array class.
 ################################################################################
 
-# [others] is the same array as [self], but ordered by closeness to the index.
+# [array] is the same array as [self], but ordered by closeness to the index.
 # Optionally pass an integer, for results for just that index element.
 # Returns a hash, or an array of hashes, in the form:
-#   { :index        => original index,
-#     :value        => original element,
-#     :by_closeness => self array minus value, ordered by closeness to index }
+#   { :index => original index,
+#     :value => original element,
+#     :array => self array minus value, ordered by closeness to index }
 # Example usage:
 #   lines = (1..4).to_a * 2
 #   puts lines.by_closeness
@@ -35,7 +35,7 @@ module Poefy
             others << above if above
             break if !above and !below
           end
-          { index: index, value: self[index], by_closeness: others }
+          { index: index, value: self[index], array: others }
         end
       end
     end
