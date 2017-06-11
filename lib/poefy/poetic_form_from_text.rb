@@ -86,19 +86,20 @@ module Poefy
       lines.each.with_index do |line, index|
 
         # Compare each other rhyme tag, order by closeness.
-        found_rhyme = nil
-        lines.by_closeness(index)[:by_closeness].each do |i|
-          i[:rhyme_tags].each do |tag|
-            if line[:rhyme_tags].include?(tag)
-              found_rhyme = tag
-              break
+        found_rhyme = line[:rhyme_tags].first
+        if line[:rhyme_tags].length > 1
+          lines.by_closeness(index)[:by_closeness].each do |i|
+            i[:rhyme_tags].each do |tag|
+              if line[:rhyme_tags].include?(tag)
+                found_rhyme = tag
+                break
+              end
             end
           end
         end
 
         # If we haven't found the rhyme, then it doesn't matter,
         #   just use the first in the tag array.
-        found_rhyme = line[:rhyme_tags].first if not found_rhyme
         lines[index][:rhyme_tags]   = *found_rhyme
         lines[index][:rhyme_tag]    =  found_rhyme
         lines[index][:rhyme_letter] =  found_rhyme
