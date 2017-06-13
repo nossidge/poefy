@@ -96,6 +96,13 @@ def parse_options
       options[:proper] = false
     end
 
+    # Repeat options.
+    opts.separator nil
+    opts.on('-n', '--number INTEGER',
+            "Number of poems to generate") do |n|
+      options[:number] = n.to_i
+    end
+
     # Database options.
     opts.separator nil
     opts.on('-o', '--overwrite',
@@ -218,9 +225,15 @@ end
 # Create poefy object using the options.
 poefy = Poefy::PoefyGen.new first_arg, options
 
-# Make a new poem, and output it.
-poem = poefy.poem
-puts poem if poem
+# Make the correct number of poems, and output them.
+number = options[:number] || 1
+number.times do |i|
+  poem = poefy.poem
+  if poem
+    puts poem
+    puts nil if i < number - 1
+  end
+end
 
 # Close the database connection.
 poefy.close
