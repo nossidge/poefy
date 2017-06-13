@@ -46,8 +46,11 @@ def parse_options
       poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
     ].gsub('      ','       ')
 
-    databases = Poefy.all_databases.join("\n" + ' ' * 21)
-    databases = "Databases available: " + databases
+    databases = (Poefy.all_databases - ['test'])
+                 .each_slice(4).to_a
+                 .map { |i| i.join ', ' }
+                 .join("\n" + ' ' * 21)
+    databases = 'Databases available: ' + databases
 
     opts.banner = program_info + "\n" + usage + "\n" + databases + "\n\n"
 
