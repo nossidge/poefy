@@ -18,11 +18,13 @@ module Poefy
 
     # Make a database using the given lines.
     def make_database input, overwrite = @overwrite
+      lines = validate_lines input
+      lines.map(&:strip!)
       @db.close if @db
       if overwrite
-        @db.make_new! validate_lines input
+        @db.make_new! lines
       else
-        @db.make_new validate_lines input
+        @db.make_new lines
       end
     end
     def make_database! input
@@ -43,7 +45,6 @@ module Poefy
 
       # If lines is not an array, assume string and split on newlines.
       lines = lines.respond_to?(:each) ? lines : lines.split("\n")
-      lines.map(&:strip!)
       lines
     end
 

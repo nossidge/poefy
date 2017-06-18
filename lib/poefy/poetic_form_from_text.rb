@@ -30,7 +30,8 @@ module Poefy
       lines = lines.map do |line|
         hash = {}
         hash[:orig] = line
-        hash[:downcase] = line.gsub(/[[:punct:]]/, '').downcase
+        hash[:strip] = line.strip
+        hash[:downcase] = line.strip.gsub(/[[:punct:]]/, '').downcase
         hash
       end
 
@@ -50,16 +51,17 @@ module Poefy
         hash = {}
 
         # Text of the line.
-        hash[:orig] = line[:orig]
+        hash[:strip] = line[:strip]
         hash[:downcase] = line[:downcase]
 
         # Get the phrase info for the line.
-        phrase = phrase_info line[:orig]
+        phrase = phrase_info line[:strip]
 
         # Misc details.
         hash[:num] = index + 1
         hash[:syllable] = phrase[:syllables]
         hash[:last_word] = phrase[:last_word]
+        hash[:indent] = (line[:orig].length - line[:orig].lstrip.length) / 2
 
         # The rhyme tag array for the line.
         hash[:rhyme_tags] = phrase[:rhymes]
@@ -67,8 +69,8 @@ module Poefy
         # Map [:refrain] and [:exact].
         # (They are mutually exclusive)
         # If it needs to be an exact line, we don't need rhyme tokens.
-        if bracketed?(line[:orig].strip)
-          hash[:exact] = line[:orig]
+        if bracketed?(line[:strip])
+          hash[:exact] = line[:strip]
           hash[:rhyme_letter] = nil
           hash[:syllable] = 0
         elsif refrains.keys.include?(line[:downcase])
@@ -120,9 +122,15 @@ module Poefy
         syllable[index+1] = line[:syllable] if line[:syllable] > 0
       end
 
+      # Has to be a single character, so 9 is the maximum.
+      indent = lines.map do |line|
+        line[:indent] >= 9 ? 9 : line[:indent]
+      end.join
+
       poetic_form = {
         rhyme: rhyme,
-        syllable: syllable
+        syllable: syllable,
+        indent: indent
       }
       poetic_form
     end
