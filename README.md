@@ -280,6 +280,8 @@ The program will scan by line, looking for rhyme, syllables and repeated lines. 
 
 Any line that is bracketed in `[square]` or `{curly}` braces will be duplicated exactly in the output. This is for lines such as "chorus" or "1st verse" descriptions. This seems to work nicely with lyrics from genius.com.
 
+Also, any indentation will be preserved, assuming 2 spaces per "indent".
+
 Here's an example of a song that can be sung to the same tune as "[I Want to Hold Your Hand][1]", but using lyrics from all Beatles songs:
 
 ````
