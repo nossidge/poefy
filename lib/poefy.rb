@@ -10,6 +10,7 @@
 # https://en.wikipedia.org/wiki/List_of_compositions_by_Guillaume_de_Machaut#Virelais
 ################################################################################
 
+require 'conditional_sample'
 require 'ruby_rhymes'
 require 'wordfilter'
 require 'humanize'
@@ -26,7 +27,7 @@ require_relative 'poefy/poetic_form_from_text.rb'
 require_relative 'poefy/string_manipulation.rb'
 require_relative 'poefy/handle_error.rb'
 require_relative 'poefy/database.rb'
-require_relative 'poefy/conditional_satisfaction.rb'
+require_relative 'poefy/conditional_sample.rb'
 require_relative 'poefy/core_extensions/array.rb'
 
 ################################################################################
@@ -42,7 +43,7 @@ module Poefy
     include Poefy::PoeticForms
     include Poefy::PoeticFormFromText
     include Poefy::StringManipulation
-    include Poefy::ConditionalSatisfaction
+    include Poefy::ConditionalSample
     include Poefy::HandleError
 
   end

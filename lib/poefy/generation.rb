@@ -204,7 +204,7 @@ module Poefy
         # Loop through each rhyme group to find lines that satisfy the conditions.
         distinct_line_conds.each do |rhyme_letter, line_conds|
 
-          # The conditions that will be passed to '#conditional_selection'.
+          # The conditions that will be passed to '#conditional_sample'.
           # This is an array of procs, one for each line.
           conditions = line_conds.map do |cond|
             proc { |arr, elem| diff_end(arr, elem) and validate_line(elem, cond)}
@@ -314,7 +314,7 @@ module Poefy
 
         begin
           Timeout::timeout(2) do
-            output = conditional_selection(lines.shuffle, conditions)
+            output = lines.shuffle.conditional_sample(conditions)
           end
         rescue
           output = []
