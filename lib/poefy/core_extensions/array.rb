@@ -5,60 +5,99 @@
 # Monkey patch the Array class.
 ################################################################################
 
-# [array] is the same array as [self], but ordered by closeness to the index.
-# Optionally pass an integer, for results for just that index element.
-# Returns a Struct, or an array of Structs, in the form:
-#   .index => original index
-#   .value => original element
-#   .array => self array minus value, ordered by closeness to index
-# Example usage:
-#   lines = (1..4).to_a * 2
-#   puts lines.by_distance
-#   puts lines.by_distance(3)
-#   lines.by_distance(3).each { ... }
+#--
+# Declare module structure.
+#++
 module Poefy
   module CoreExtensions
-
-    # Output struct for #by_distance method.
-    # Array is the most useful data, but index and value are also kept.
-    IndexValueArray = Struct.new(:index, :value, :array) do
-      alias_method :to_a, :array
-      include Enumerable
-      def each &block
-        array.each do |i|
-          block.call i
-        end
-      end
-    end
-
     module Array
-
-      def by_distance index = nil
-        if index.nil?
-          self.map.with_index do |value, index|
-            self.by_distance index
-          end
-        else
-          others, counter = [], 0
-          loop do
-            counter += 1
-            below_index = index - counter
-            below_index = nil if below_index < 0
-            below = self[below_index] if below_index
-            above = self[index + counter]
-            others << below if below
-            others << above if above
-            break if !above and !below
-          end
-          IndexValueArray.new(index, self[index], others)
-        end
+      module SortByDistance
       end
     end
   end
 end
 
+#--
+# Define module methods.
+#++
+module Poefy::CoreExtensions::Array::SortByDistance
+
+  ##
+  # Take an array index and return a permutation of the
+  # items sorted by distance from that index.
+  # If 'index' is not specified, return an Enumerator
+  # of the results for all indices, in order.
+  #
+  # The ':reverse' keyword argument switches the equally close
+  # neighbours from lowest index first to highest first.
+  # It's an option added mostly for completeness, but it's
+  # there if you need it.
+  #
+  def sort_by_distance_from_index index = nil, reverse: false
+
+    # Return Enumerator of all possible output arrays.
+    if index.nil?
+      Enumerator.new(self.count) do |y|
+        self.each.with_index do |value, index|
+          y << self.sort_by_distance_from_index(index, reverse: reverse)
+        end
+      end
+
+    # Return Enumerator of results for a single index.
+    else
+      Enumerator.new(self.count) do |y|
+        y << self[index]
+        counter = 0
+        loop do
+          counter += 1
+
+          # Consider negative indices OOB, not from array tail.
+          below_index = index - counter
+          below_index = nil if below_index < 0
+          below = self[below_index] if below_index
+
+          # This is fine, uses nil as default value if OOB.
+          above = self[index + counter]
+
+          # Both the elements with index one higher and one lower
+          # are equally close neighbours to the subject element.
+          # The default is to output the element with the lowest
+          # index first. With ':reverse' set to true, the highest
+          # index is appended first.
+          if reverse
+            y << above if above
+            y << below if below
+          else
+            y << below if below
+            y << above if above
+          end
+
+          # Break if we're at the last element.
+          break if !above and !below
+        end
+      end
+    end
+  end
+
+  ##
+  # Find all elements that match 'value' and return the
+  # sort_by_distance results for all, as an Enumerator.
+  #
+  def sort_by_distance_from_value value = nil, reverse: false
+    matching = self.each_index.select { |i| self[i] == value }
+    Enumerator.new(matching.count) do |y|
+      matching.each do |index|
+        y << self.sort_by_distance_from_index(index, reverse: reverse)
+      end
+    end
+  end
+end
+
+#--
+# Extend Array class.
+#++
 class Array
-  include Poefy::CoreExtensions::Array
+  include Poefy::CoreExtensions::Array::SortByDistance
 end
 
 ################################################################################

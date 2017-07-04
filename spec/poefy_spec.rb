@@ -693,23 +693,38 @@ describe Poefy::PoefyGen do
         end.new
       end
 
-      it "80 should rhyme with weighty" do
+      it "'80' should rhyme with 'weighty'" do
         lines = ["Lorem ipsum dolor weighty", "Lorem ipsum dolor 80"]
         form = obj.poetic_form_from_text(lines)
         expect(form[:rhyme].uniq.count).to be 1
       end
-      it "80 should not rhyme with shoe" do
+      it "'80' should not rhyme with 'shoe'" do
         lines = ["Lorem ipsum dolor shoe", "Lorem ipsum dolor 80"]
         form = obj.poetic_form_from_text(lines)
         expect(form[:rhyme].uniq.count).to_not be 1
       end
-      it "2 should rhyme with shoe" do
+      it "'2' should rhyme with 'shoe'" do
         lines = ["Lorem ipsum dolor shoe", "Lorem ipsum dolor 2"]
         form = obj.poetic_form_from_text(lines)
         expect(form[:rhyme].uniq.count).to be 1
       end
-      it "2 should not rhyme with weighty" do
+      it "'2' should not rhyme with 'weighty'" do
         lines = ["Lorem ipsum dolor weighty", "Lorem ipsum dolor 2"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to_not be 1
+      end
+      it "'wind' should rhyme with 'sinned'" do
+        lines = ["A mighty wind", "A whitey sinned"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to be 1
+      end
+      it "'wind' should rhyme with 'mind'" do
+        lines = ["A mighty wind", "A flighty mind"]
+        form = obj.poetic_form_from_text(lines)
+        expect(form[:rhyme].uniq.count).to be 1
+      end
+      it "'wind' should not rhyme with 'drunk'" do
+        lines = ["A mighty wind", "A fighty drunk"]
         form = obj.poetic_form_from_text(lines)
         expect(form[:rhyme].uniq.count).to_not be 1
       end
