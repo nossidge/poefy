@@ -105,9 +105,9 @@ def parse_options
 
     # Database options.
     opts.separator nil
-    opts.on('-o', '--overwrite',
-            "Overwrite existing database with new input") do
-      options[:overwrite] = true
+    opts.on('-d', '--database',
+            "Create new or overwrite existing database with piped input") do
+      options[:database] = true
     end
     opts.on('-l', '--local',
             "Default is to use database files from /data/\n" + ' ' * 39 +
@@ -193,7 +193,7 @@ options[:form] = second_arg if second_arg != ''
 
 # If we need to make a database.
 # Exit the program after database is generated.
-if options[:overwrite]
+if options[:database]
   poefy = Poefy::PoefyGen.new first_arg
   if data
     poefy.make_database data, true

@@ -2,7 +2,7 @@
 
 by [Paul Thompson](https://tilde.town/~nossidge) - nossidge@gmail.com
 
-Create poems from an input text file, by generating and querying a SQLite database that describes each line.
+Create rhyming poems from an input text file, by generating and querying a SQLite database that describes each line.
 
 Poems are created using a template to select lines from the database, according to closing rhyme, syllable count, and regex matching.
 
@@ -38,7 +38,7 @@ The code rather hackily uses system to call `sqlite3`, so make sure you have tha
 
 Make a poefy database from a text file:
 
-    $ poefy shakespeare -o < shakespeare_sonnets.txt
+    $ poefy shakespeare -d < shakespeare_sonnets.txt
 
 Now, whenever you want to make poems using Shakespeare's lines, you can just use `poefy shakespeare` and it will read from the already created database:
 
@@ -48,9 +48,9 @@ Now, whenever you want to make poems using Shakespeare's lines, you can just use
 
 The file extension `.db` is assumed for all databases. You can leave it out if you want.
 
-If you later want to remake the database, for example to add new lines, you can use the `-o` option and the existing database will be overwritten.
+If you later want to remake the database, for example to add new lines, you can use the `-d` option and the existing database will be overwritten.
 
-    $ cat shakespeare_sonnets.txt shakespeare_plays.txt | poefy shakespeare -o
+    $ cat shakespeare_sonnets.txt shakespeare_plays.txt | poefy shakespeare -d
 
 This database is stored in the same directory as the gem, so it can be accessed by all users on your system. To store a database in a different directory, you can use the `-l` or `--local` option:
 
@@ -270,7 +270,7 @@ You can do the same thing for the other keys: `rhyme`, `final_word`, and `syllab
 
 #### Special case: poetic form from text file
 
-If you pipe in text and don't use the `-o` option to create a database, then the output will be a poem with the same structure as the file. This can also be accomplished if the second argument is a reference to a text file. So, assuming you have a `lyrics` script that will return song lines for you:
+If you pipe in text and don't use the `-d` option to create a database, then the output will be a poem with the same structure as the file. This can also be accomplished if the second argument is a reference to a text file. So, assuming you have a `lyrics` script that will return song lines for you:
 
     $ lyrics 'carly rae jepsen' 'call me maybe' | tee jep.txt | poefy whitman
     $ poefy whitman < jep.txt
@@ -432,26 +432,26 @@ Databases are created using data piped into poefy, so you can do any pre-process
 
 Use awk to get final field from tab delimited IRC logs.
 
-    $ awk -F$'\t' '{print $NF}' irc_log_20170413.txt | poefy -o irc
+    $ awk -F$'\t' '{print $NF}' irc_log_20170908.txt | poefy -d irc
 
 
 ### Make a database, ignoring short lines
 
 Use sed to filter out lines that are too short:
 
-    $ sed -r '/^.{,20}$/d' st_therese_of_lisieux.txt | poefy -o therese
+    $ sed -r '/^.{,20}$/d' st_therese_of_lisieux.txt | poefy -d therese
 
 
 ### Make a database, ignoring uppercase lines
 
 Use sed to filter out lines that do not contain lowercase letters. For example, the sonnets file contains lines with the number of the sonnet, e.g. "CXLVII."
 
-    $ sed -r 'sed '/[a-z]/!d' shakespeare_sonnets.txt | poefy -o shakespeare
+    $ sed -r 'sed '/[a-z]/!d' shakespeare_sonnets.txt | poefy -d shakespeare
 
 
 ### Problem: it won't output lines that I know are valid
 
-This code uses a gem called `wordfilter` that will automatically filter out lines that contain [grotty words](https://github.com/dariusk/wordfilter/blob/master/lib/badwords.json). If you really definitely truly don't want to exclude a certain word, you can remove them from the blacklist. For example, if your input lines are from a dissertation on the dance styles of the ska and reggae music scenes, you can call:
+This code uses a gem called `wordfilter` that will automatically filter out lines that contain [grotty words](https://github.com/dariusk/wordfilter/blob/master/lib/badwords.json). If you really definitely truly don't want to exclude a certain word, you can remove that word from the blacklist. For example, if your input lines are from a dissertation on the dance styles of the ska and reggae music scenes, in your Ruby code you can call:
 
 ```ruby
 Wordfilter.remove_word('skank')

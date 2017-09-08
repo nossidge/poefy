@@ -8,20 +8,17 @@
 module Poefy
 
   def self.version_number
-    Gem::Version.new VERSION::STRING
+    major = 1
+    minor = 0
+    tiny  = 0
+    pre   = nil
+
+    string = [major, minor, tiny, pre].compact.join('.')
+    Gem::Version.new string
   end
 
   def self.version_date
-    '2017-06-19'
-  end
-
-  module VERSION
-    MAJOR = 0
-    MINOR = 6
-    TINY  = 1
-    PRE   = nil
-
-    STRING = [MAJOR, MINOR, TINY, PRE].compact.join('.')
+    '2017-09-08'
   end
 
 end
