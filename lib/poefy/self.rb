@@ -13,7 +13,9 @@ module Poefy
     path = File.expand_path('../../../data', __FILE__)
     Dir["#{path}/*.db"].map do |i|
       File.basename(i, '.db')
-    end.reject{ |i| i.start_with?('spec_') }
+    end.reject do |i|
+      i.start_with?('spec_')
+    end - ['test']
   end
 
 end

@@ -46,7 +46,7 @@ def parse_options
       poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
     ].gsub('      ','       ')
 
-    databases = (Poefy.all_databases - ['test'])
+    databases = (Poefy.all_databases)
                  .each_slice(4).to_a
                  .map { |i| i.join ', ' }
                  .join("\n" + ' ' * 21)
