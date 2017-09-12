@@ -164,25 +164,18 @@ end
 if first_arg == 'make_dbs'
   path = File.expand_path('../../data', __FILE__)
 
-  input = `sed '/[a-z]/!d' #{path}/shakespeare_sonnets.txt`
-  poefy = Poefy::PoefyGen.new 'shakespeare'
-  poefy.make_database input, false
-
-  input = `sed '/[a-z]/!d' #{path}/st_therese_of_lisieux.txt`
-  poefy = Poefy::PoefyGen.new 'therese'
-  poefy.make_database input, false
-
-  input = `sed '/[a-z]/!d' #{path}/whitman_leaves.txt`
-  poefy = Poefy::PoefyGen.new 'whitman'
-  poefy.make_database input, false
-
-  input = `sed '/[a-z]/!d' #{path}/emily_dickinson.txt`
-  poefy = Poefy::PoefyGen.new 'dickinson'
-  poefy.make_database input, false
-
-  input = `sed '/[a-z]/!d' #{path}/english_as_she_is_spoke.txt`
-  poefy = Poefy::PoefyGen.new 'spoke'
-  poefy.make_database input, false
+  # Exclude all lines which do not contain lowercase letters.
+  make_db = proc do |database, textfile|
+    file = path + '/' + textfile
+    input = File.readlines(file).keep_if { |i| i =~ /[a-z]/ }
+    poefy = Poefy::PoefyGen.new database
+    poefy.make_database input, false
+  end
+  make_db.call 'shakespeare', 'shakespeare_sonnets.txt'
+  make_db.call 'therese',     'st_therese_of_lisieux.txt'
+  make_db.call 'whitman',     'whitman_leaves.txt'
+  make_db.call 'dickinson',   'emily_dickinson.txt'
+  make_db.call 'spoke',       'english_as_she_is_spoke.txt'
 
   exit 0
 end
