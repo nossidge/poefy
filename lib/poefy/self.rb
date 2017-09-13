@@ -18,6 +18,11 @@ module Poefy
     end - ['test']
   end
 
+  # Array of all names of poetic forms.
+  def self.all_poetic_forms
+    PoeticForms::POETIC_FORMS.keys.reject { |i| i == :default }
+  end
+
 end
 
 ################################################################################
