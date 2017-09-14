@@ -191,7 +191,7 @@ module Poefy
       # Define all stored procedures.
       def create_sprocs table_name
         sql = {}
-        sql[:rbc] = %Q[
+        sql[:rbc] = <<-SQL
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
@@ -200,8 +200,8 @@ module Poefy
           )
           GROUP BY rhyme
           HAVING rc >= ?
-        ]
-        sql[:rbcs] = %Q[
+        SQL
+        sql[:rbcs] = <<-SQL
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
@@ -211,16 +211,16 @@ module Poefy
           )
           GROUP BY rhyme
           HAVING rc >= ?
-        ]
-        sql[:la] = %Q[
+        SQL
+        sql[:la] = <<-SQL
           SELECT line, syllables, final_word, rhyme
           FROM #{table_name} WHERE rhyme = ?
-        ]
-        sql[:las] = %Q[
+        SQL
+        sql[:las] = <<-SQL
           SELECT line, syllables, final_word, rhyme
           FROM #{table_name} WHERE rhyme = ?
           AND syllables BETWEEN ? AND ?
-        ]
+        SQL
         sql.each do |key, value|
           begin
             @sproc[key] = db.prepare value
