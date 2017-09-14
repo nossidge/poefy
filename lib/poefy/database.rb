@@ -51,7 +51,7 @@ module Poefy
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
           end
-          create_sprocs
+          create_sprocs 'lines'
         end
       end
       @db
@@ -193,13 +193,13 @@ module Poefy
       ##########################################################################
 
       # Define all stored procedures.
-      def create_sprocs
+      def create_sprocs table_name
         sql = {}
         sql[:rbc] = %Q[
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM lines
+            FROM #{table_name}
             GROUP BY rhyme, final_word
           )
           GROUP BY rhyme
@@ -209,7 +209,7 @@ module Poefy
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM lines
+            FROM #{table_name}
             WHERE syllables BETWEEN ? AND ?
             GROUP BY rhyme, final_word
           )
@@ -218,11 +218,11 @@ module Poefy
         ]
         sql[:la] = %Q[
           SELECT line, syllables, final_word, rhyme
-          FROM lines WHERE rhyme = ?
+          FROM #{table_name} WHERE rhyme = ?
         ]
         sql[:las] = %Q[
           SELECT line, syllables, final_word, rhyme
-          FROM lines WHERE rhyme = ?
+          FROM #{table_name} WHERE rhyme = ?
           AND syllables BETWEEN ? AND ?
         ]
         sql.each do |key, value|
