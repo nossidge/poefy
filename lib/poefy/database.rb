@@ -6,7 +6,6 @@
 ################################################################################
 
 require 'sqlite3'
-require 'tempfile'
 
 require_relative 'string_manipulation.rb'
 require_relative 'handle_error.rb'
@@ -36,7 +35,7 @@ module Poefy
       ObjectSpace.define_finalizer(self, @@final.call(@db, @sproc))
     end
 
-    # Open global database session, if not already existing.
+    # Open instance database session, if not already existing.
     # This is called in all methods where it is needed. So no need to
     #   execute it before any calling code.
     def db
@@ -80,33 +79,26 @@ module Poefy
 
     # Force new database, overwriting existing.
     def make_new! lines
-
-      # Convert the lines array into an import file.
-      sql_import_file = save_sql_import_file lines
+      table_name = 'lines'
 
       # Delete any existing database.
       File.delete(@db_file) if File.exists?(@db_file)
 
-      # Write SQL and SQLite instructions to temp file,
-      #   import to database, delete temp file.
-      # The SQL file is finicky. Each line requires no leading whitespace.
-      sql_instruction_file = tmpfile
-      sql = %Q[
-        CREATE TABLE IF NOT EXISTS lines (
-          line TEXT, syllables INT, final_word TEXT, rhyme TEXT
-        );
-        CREATE INDEX idx ON lines (rhyme, final_word, line);
-        .separator "\t"
-        .import #{sql_import_file} lines
-      ].split("\n").map(&:strip).join("\n")
-      File.open(sql_instruction_file, 'w') { |fo| fo.write sql }
+      # Create a new database.
+      @db = SQLite3::Database.new(@db_file)
 
-      # Create the database using the SQL instructions.
-      `sqlite3 #{@db_file} < #{sql_instruction_file}`
+      # Create the lines table and the index.
+      create_table table_name
 
-      # Delete temporary files.
-      File.delete sql_instruction_file
-      File.delete sql_import_file
+      # Convert the lines array into an expanded array of rhyme metadata.
+      import_data = lines_rhyme_metadata lines
+
+      # Import the data.
+      db.transaction do |db_tr|
+        import_data.each do |line|
+          db_tr.execute "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )", line
+        end
+      end
     end
 
     # Execute an SQL request.
@@ -152,42 +144,46 @@ module Poefy
 
     private
 
-      # Turn an array of string lines into an SQL import file.
-      # Format is "line, final_word, rhyme, syllables"
-      # Use tabs as delimiters.
-      def save_sql_import_file lines
-        sql_lines = []
+      # Create the table and the index.
+      def create_table table_name
+        db.execute <<-SQL
+          CREATE TABLE #{table_name} (
+            line        TEXT,
+            syllables   SMALLINT,
+            final_word  TEXT,
+            rhyme       TEXT
+          );
+        SQL
+        db.execute <<-SQL
+          CREATE INDEX idx ON #{table_name} (
+            rhyme, final_word, line
+          );
+        SQL
+      end
+
+      # For each line, figure out the needed rhyme metadata.
+      # Output is an array: [line, final_word, rhyme, syllables]
+      def lines_rhyme_metadata lines
+        output = []
         lines.map do |line|
 
           # Don't add the line if it contains a blacklisted? substring.
           next if Wordfilter.blacklisted? line
 
-          # Format the line for SQL parsing.
-          line_ = format_sql_string line
-
           # Get the phrase info for the line.
           phrase = phrase_info line
           syll   = phrase[:syllables]
           rhymes = phrase[:rhymes]
-          final_ = format_sql_string phrase[:last_word]
+          final  = phrase[:last_word]
 
           # There may be more than one rhyme, so add a database
           #   record for each rhyme.
           rhymes.each do |rhyme|
-            rhyme_ = format_sql_string rhyme
-            sql_lines << "\"#{line_}\"\t#{syll}\t\"#{final_}\"\t\"#{rhyme_}\""
+            output << [line, syll, final, rhyme]
           end
         end
 
-        # Save the SQL spec to a temporary file, and return the filename.
-        sql_file = tmpfile
-        File.open(sql_file, 'w') { |fo| fo.puts sql_lines }
-        sql_file
-      end
-
-      # Generate a random temporary file.
-      def tmpfile
-        Dir::Tmpname.make_tmpname ['tmp-','.txt'], nil
+        output
       end
 
       ##########################################################################

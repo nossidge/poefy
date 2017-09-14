@@ -29,8 +29,6 @@ The repo comes with some text files included. To generate databases for these fi
 
     $ poefy make_dbs
 
-The code rather hackily uses system to call `sqlite3`, so make sure you have that installed and in your PATH.
-
 
 ## Usage
 
