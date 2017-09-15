@@ -44,8 +44,7 @@ module Poefy
           @db = nil
         else
           begin
-            @db = SQLite3::Database.open(@db_file)
-            @db.results_as_hash = true
+            db_open
           rescue
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
@@ -65,7 +64,7 @@ module Poefy
 
     # See if the database file exists or not.
     def exists?
-      File.exists?(@db_file)
+      db_exists?
     end
 
     # Creates a database with the correct format.
@@ -81,11 +80,8 @@ module Poefy
     def make_new! lines
       table_name = 'lines'
 
-      # Delete any existing database.
-      File.delete(@db_file) if File.exists?(@db_file)
-
       # Create a new database.
-      @db = SQLite3::Database.new(@db_file)
+      db_new
 
       # Create the lines table and the index.
       create_table table_name
@@ -94,25 +90,16 @@ module Poefy
       import_data = lines_rhyme_metadata lines
 
       # Import the data.
-      db.transaction do |db_tr|
-        import_data.each do |line|
-          db_tr.execute "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )", line
-        end
-      end
+      db_insert_rows table_name, import_data
     end
 
     # Execute an SQL request.
     def execute! sql
       begin
-        db.execute sql
+        db_execute! sql
       rescue
         return handle_error 'ERROR: Database has incorrect table structure', []
       end
-    end
-
-    # Format a string for SQL.
-    def format_sql_string string
-      string.gsub('"','""')
     end
 
     # Public interfaces for private stored procedure methods.
@@ -144,9 +131,47 @@ module Poefy
 
     private
 
+      ##########################################################################
+
+      # These methods are database-specific.
+      # They should be implemented in separate gems.
+
+      # Create a new database.
+      def db_new
+        File.delete(@db_file) if File.exists?(@db_file)
+        @db = SQLite3::Database.new(@db_file)
+      end
+
+      # Open a connection to the database.
+      def db_open
+        @db = SQLite3::Database.open(@db_file)
+        @db.results_as_hash = true
+      end
+
+      # See if the database file exists or not.
+      def db_exists?
+        File.exists?(@db_file)
+      end
+
+      # Execute a query.
+      def db_execute! sql
+        db.execute sql
+      end
+
+      # Insert an array of lines.
+      def db_insert_rows table_name, rows
+        db.transaction do |db_tr|
+          rows.each do |line|
+            db_tr.execute "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )", line
+          end
+        end
+      end
+
+      ##########################################################################
+
       # Create the table and the index.
       def create_table table_name
-        db.execute <<-SQL
+        db_execute! <<-SQL
           CREATE TABLE #{table_name} (
             line        TEXT,
             syllables   SMALLINT,
@@ -154,7 +179,7 @@ module Poefy
             rhyme       TEXT
           );
         SQL
-        db.execute <<-SQL
+        db_execute! <<-SQL
           CREATE INDEX idx ON #{table_name} (
             rhyme, final_word, line
           );
