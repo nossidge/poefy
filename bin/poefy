@@ -114,6 +114,11 @@ def parse_options
             "With this option, use files from elsewhere") do
       options[:local] = true
     end
+    opts.on('-D', '--databases',
+            "List all the installed databases") do
+      puts Poefy.all_databases
+      exit 0
+    end
 
     # Help output.
     opts.separator nil
