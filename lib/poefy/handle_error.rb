@@ -20,6 +20,14 @@ module Poefy
         return_value
       end
 
+      def raise_error msg
+        if @console
+          STDERR.puts msg
+          exit 1
+        end
+        raise msg
+      end
+
   end
 
 end
