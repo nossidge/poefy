@@ -2,20 +2,14 @@
 # Encoding: UTF-8
 
 ################################################################################
-# Line-based, used only to rearrange lines of text, not create new lines.
-# Also uses 'wordfilter' to get rid of yucky words.
-#
-# https://en.wikipedia.org/wiki/Category:Western_medieval_lyric_forms
-# https://en.wikipedia.org/wiki/Virelai
-# https://en.wikipedia.org/wiki/List_of_compositions_by_Guillaume_de_Machaut#Virelais
+# Create a database from text lines.
+# Read the database to generate poetry.
 ################################################################################
 
 require 'conditional_sample'
 require 'ruby_rhymes'
 require 'wordfilter'
 require 'humanize'
-require 'tempfile'
-require 'sqlite3'
 require 'timeout'
 
 require_relative 'poefy/version.rb'
@@ -32,8 +26,6 @@ require_relative 'poefy/core_extensions/array.rb'
 
 ################################################################################
 
-# Create a database from text lines.
-# Read the database to generate poetry.
 module Poefy
 
   class PoefyGen
