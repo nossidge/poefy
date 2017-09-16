@@ -31,8 +31,23 @@ module Poefy
       @db_file = db_file
       @console = console
       @sproc = {}
+
+      db_type
       db
       ObjectSpace.define_finalizer(self, @@final.call(@db, @sproc))
+    end
+
+    ############################################################################
+
+    # Validate that a database type has been required.
+    # This will be overwritten by a database-specific method,
+    #   so raise an error if no database has been specified yet.
+    # Due to the way 'bin/poefy' is set up, that code will fail before
+    #   this point is reached, so this error is only from Ruby calls.
+    def db_type
+      msg = "No database interface specified. " +
+            "Please require 'poefy/sqlite3' or 'poefy/pg'"
+      raise LoadError, msg
     end
 
     # Open instance database session, if not already existing.
@@ -130,42 +145,6 @@ module Poefy
     end
 
     private
-
-      ##########################################################################
-
-      # These methods are database-specific.
-      # They should be implemented in separate gems.
-
-      # Create a new database.
-      def db_new
-        File.delete(@db_file) if File.exists?(@db_file)
-        @db = SQLite3::Database.new(@db_file)
-      end
-
-      # Open a connection to the database.
-      def db_open
-        @db = SQLite3::Database.open(@db_file)
-        @db.results_as_hash = true
-      end
-
-      # See if the database file exists or not.
-      def db_exists?
-        File.exists?(@db_file)
-      end
-
-      # Execute a query.
-      def db_execute! sql
-        db.execute sql
-      end
-
-      # Insert an array of lines.
-      def db_insert_rows table_name, rows
-        db.transaction do |db_tr|
-          rows.each do |line|
-            db_tr.execute "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )", line
-          end
-        end
-      end
 
       ##########################################################################
 

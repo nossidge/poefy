@@ -9,6 +9,25 @@ require 'optparse'
 
 require_relative '../lib/poefy.rb'
 
+# Default to use PostgreSQL before SQLite.
+# Errors if neither gem is installed.
+# ToDo: Replace with 'poefy/pg' and 'poefy/sqlite3'
+begin
+  require_relative '../lib/poefy/pg.rb'
+rescue LoadError
+  begin
+    require_relative '../lib/poefy/sqlite3.rb'
+  rescue LoadError
+    msg = "ERROR: Please specify the type of database to use." +
+        "\n       The 'poefy' gem does not implement a database interface" +
+        "\n       by default; you must install one of the below gems:" +
+        "\n         gem install poefy-sqlite3" +
+        "\n         gem install poefy-pg"
+    STDERR.puts msg
+    exit 1
+  end
+end
+
 ################################################################################
 
 def parse_options
