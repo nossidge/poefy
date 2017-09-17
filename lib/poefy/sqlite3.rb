@@ -23,6 +23,11 @@ module Poefy
 
     private
 
+      # The name of the table.
+      def db_table_name
+        'lines'
+      end
+
       # Create a new database.
       def db_new
         File.delete(db_file) if File.exists?(db_file)

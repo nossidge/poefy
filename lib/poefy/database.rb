@@ -65,7 +65,7 @@ module Poefy
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
           end
-          create_sprocs 'lines'
+          create_sprocs sprocs_hash db_table_name
         end
       end
       @db
@@ -94,19 +94,18 @@ module Poefy
 
     # Force new database, overwriting existing.
     def make_new! lines
-      table_name = 'lines'
 
       # Create a new database.
       db_new
 
       # Create the lines table and the index.
-      create_table table_name
+      create_table db_table_name
 
       # Convert the lines array into an expanded array of rhyme metadata.
       import_data = lines_rhyme_metadata lines
 
       # Import the data.
-      db_insert_rows table_name, import_data
+      db_insert_rows db_table_name, import_data
     end
 
     # Execute an SQL request.
@@ -193,8 +192,8 @@ module Poefy
 
       ##########################################################################
 
-      # Define all stored procedures.
-      def create_sprocs table_name
+      # Define SQL of the stored procedures.
+      def sprocs_hash table_name
         sql = {}
         sql[:rbc] = <<-SQL
           SELECT rhyme, COUNT(rhyme) AS rc
@@ -226,7 +225,12 @@ module Poefy
           FROM #{table_name} WHERE rhyme = ?
           AND syllables BETWEEN ? AND ?
         SQL
-        sql.each do |key, value|
+        sql
+      end
+
+      # Create the stored procedures in the database.
+      def create_sprocs sprocs
+        sprocs.each do |key, value|
           begin
             @sproc[key] = db.prepare value
           rescue
