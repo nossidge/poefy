@@ -23,6 +23,11 @@ module Poefy
     PoeticForms::POETIC_FORMS.keys.reject { |i| i == :default }
   end
 
+  # Find the root of the directory tree.
+  def self.root
+    File.expand_path('../../../', __FILE__)
+  end
+
 end
 
 ################################################################################
