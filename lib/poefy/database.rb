@@ -65,7 +65,7 @@ module Poefy
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
           end
-          create_sprocs sprocs_hash db_table_name
+          create_sprocs sprocs_hash
         end
       end
       @db
@@ -193,13 +193,13 @@ module Poefy
       ##########################################################################
 
       # Define SQL of the stored procedures.
-      def sprocs_hash table_name
+      def sprocs_hash
         sql = {}
         sql[:rbc] = <<-SQL
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{table_name}
+            FROM #{db_table_name}
             GROUP BY rhyme, final_word
           )
           GROUP BY rhyme
@@ -209,7 +209,7 @@ module Poefy
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{table_name}
+            FROM #{db_table_name}
             WHERE syllables BETWEEN ? AND ?
             GROUP BY rhyme, final_word
           )
@@ -218,61 +218,15 @@ module Poefy
         SQL
         sql[:la] = <<-SQL
           SELECT line, syllables, final_word, rhyme
-          FROM #{table_name} WHERE rhyme = ?
+          FROM #{db_table_name} WHERE rhyme = ?
         SQL
         sql[:las] = <<-SQL
           SELECT line, syllables, final_word, rhyme
-          FROM #{table_name} WHERE rhyme = ?
+          FROM #{db_table_name} WHERE rhyme = ?
           AND syllables BETWEEN ? AND ?
         SQL
         sql
       end
-
-      # Create the stored procedures in the database.
-      def create_sprocs sprocs
-        sprocs.each do |key, value|
-          begin
-            @sproc[key] = db.prepare value
-          rescue
-            raise 'ERROR: Database table structure is invalid'
-            return handle_error 'ERROR: Database table structure is invalid'
-          end
-        end
-      end
-
-      # Find rhymes and counts greater than a certain length.
-      def sproc_rhymes_by_count rhyme_count
-        @sproc[:rbc].reset!
-        @sproc[:rbc].bind_param(1, rhyme_count)
-        @sproc[:rbc].execute.to_a
-      end
-
-      # Also adds syllable selection.
-      def sproc_rhymes_by_count_syllables rhyme_count, syllable_min_max
-        @sproc[:rbcs].reset!
-        @sproc[:rbcs].bind_param(1, syllable_min_max[:min])
-        @sproc[:rbcs].bind_param(2, syllable_min_max[:max])
-        @sproc[:rbcs].bind_param(3, rhyme_count)
-        @sproc[:rbcs].execute.to_a
-      end
-
-      # Find all lines for a certain rhyme.
-      def sproc_lines_all rhyme
-        @sproc[:la].reset!
-        @sproc[:la].bind_param(1, rhyme)
-        @sproc[:la].execute.to_a
-      end
-
-      # Also adds syllable selection.
-      def sproc_lines_all_syllables rhyme, syllable_min_max
-        @sproc[:las].reset!
-        @sproc[:las].bind_param(1, rhyme)
-        @sproc[:las].bind_param(2, syllable_min_max[:min])
-        @sproc[:las].bind_param(3, syllable_min_max[:max])
-        @sproc[:las].execute.to_a
-      end
-
-      ##########################################################################
 
   end
 

@@ -59,6 +59,8 @@ module Poefy
         end
       end
 
+      ##########################################################################
+
       # Find the correct database file.
       # If local, just use the value.
       # Else, use the database in /data/ directory.
@@ -72,6 +74,52 @@ module Poefy
           file = File.basename(@name, '.db')
           @db_file = path + '/' + file + '.db'
         end
+      end
+
+      ##########################################################################
+
+      # Create the stored procedures in the database.
+      def create_sprocs sprocs
+        sprocs.each do |key, value|
+          begin
+            @sproc[key] = db.prepare value
+          rescue
+            raise 'ERROR: Database table structure is invalid'
+            return handle_error 'ERROR: Database table structure is invalid'
+          end
+        end
+      end
+
+      # Find rhymes and counts greater than a certain length.
+      def sproc_rhymes_by_count rhyme_count
+        @sproc[:rbc].reset!
+        @sproc[:rbc].bind_param(1, rhyme_count)
+        @sproc[:rbc].execute.to_a
+      end
+
+      # Also adds syllable selection.
+      def sproc_rhymes_by_count_syllables rhyme_count, syllable_min_max
+        @sproc[:rbcs].reset!
+        @sproc[:rbcs].bind_param(1, syllable_min_max[:min])
+        @sproc[:rbcs].bind_param(2, syllable_min_max[:max])
+        @sproc[:rbcs].bind_param(3, rhyme_count)
+        @sproc[:rbcs].execute.to_a
+      end
+
+      # Find all lines for a certain rhyme.
+      def sproc_lines_all rhyme
+        @sproc[:la].reset!
+        @sproc[:la].bind_param(1, rhyme)
+        @sproc[:la].execute.to_a
+      end
+
+      # Also adds syllable selection.
+      def sproc_lines_all_syllables rhyme, syllable_min_max
+        @sproc[:las].reset!
+        @sproc[:las].bind_param(1, rhyme)
+        @sproc[:las].bind_param(2, syllable_min_max[:min])
+        @sproc[:las].bind_param(3, syllable_min_max[:max])
+        @sproc[:las].execute.to_a
       end
 
   end
