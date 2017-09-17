@@ -25,19 +25,19 @@ module Poefy
 
       # Create a new database.
       def db_new
-        File.delete(@db_file) if File.exists?(@db_file)
-        @db = SQLite3::Database.new(@db_file)
+        File.delete(db_file) if File.exists?(db_file)
+        @db = SQLite3::Database.new(db_file)
       end
 
       # Open a connection to the database.
       def db_open
-        @db = SQLite3::Database.open(@db_file)
+        @db = SQLite3::Database.open(db_file)
         @db.results_as_hash = true
       end
 
       # See if the database file exists or not.
       def db_exists?
-        File.exists?(@db_file)
+        File.exists?(db_file)
       end
 
       # Execute a query.
@@ -51,6 +51,21 @@ module Poefy
           rows.each do |line|
             db_tr.execute "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )", line
           end
+        end
+      end
+
+      # Find the correct database file.
+      # If local, just use the value.
+      # Else, use the database in /data/ directory.
+      def db_file
+        if @local
+          @name
+        elsif @db_file
+          @db_file
+        else
+          path = Poefy.root + '/data'
+          file = File.basename(@name, '.db')
+          @db_file = path + '/' + file + '.db'
         end
       end
 

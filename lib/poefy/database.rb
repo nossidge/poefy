@@ -19,7 +19,7 @@ module Poefy
     include Poefy::StringManipulation
     include Poefy::HandleError
 
-    attr_reader :console, :db_file
+    attr_reader :name, :local, :console
 
     # Finalizer must be a class variable.
     @@final = proc { |dbase, sproc| proc {
@@ -27,9 +27,10 @@ module Poefy
       dbase.close if dbase
     } }
 
-    def initialize db_file, console = false
-      @db_file = db_file
+    def initialize name, local = false, console = false
+      @local = local
       @console = console
+      @name = name.to_s
       @sproc = {}
 
       db_type

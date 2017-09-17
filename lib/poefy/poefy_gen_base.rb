@@ -13,7 +13,7 @@ module Poefy
 
     def initialize db_name, options = {}
       handle_options options
-      @db = Poefy::Database.new get_database_file(db_name.to_s), @console
+      @db = Poefy::Database.new db_name, @local, @console
     end
 
     # Make a database using the given lines.
@@ -49,19 +49,6 @@ module Poefy
     end
 
     private
-
-      # Find the correct database file.
-      # If local, just use the value.
-      # Else, use the database in /data/ directory.
-      def get_database_file database_name
-        if @local
-          database_name
-        else
-          path = File.expand_path('../../../data', __FILE__)
-          file = File.basename(database_name, '.db')
-          path + '/' + file + '.db'
-        end
-      end
 
       # Handle the optional initialize options hash.
       def handle_options options
