@@ -78,9 +78,64 @@ module Poefy
 
       ##########################################################################
 
+      # Create the table and the index.
+      def create_table table_name
+        db_execute! <<-SQL
+          CREATE TABLE #{table_name} (
+            line        TEXT,
+            syllables   SMALLINT,
+            final_word  TEXT,
+            rhyme       TEXT
+          );
+        SQL
+        db_execute! <<-SQL
+          CREATE INDEX idx ON #{table_name} (
+            rhyme, final_word, line
+          );
+        SQL
+      end
+
+      ##########################################################################
+
+      # Define SQL of the stored procedures.
+      def sprocs_sql_hash
+        sql = {}
+        sql[:rbc] = <<-SQL
+          SELECT rhyme, COUNT(rhyme) AS rc
+          FROM (
+            SELECT rhyme, final_word, COUNT(final_word) AS wc
+            FROM #{db_table_name}
+            GROUP BY rhyme, final_word
+          )
+          GROUP BY rhyme
+          HAVING rc >= ?
+        SQL
+        sql[:rbcs] = <<-SQL
+          SELECT rhyme, COUNT(rhyme) AS rc
+          FROM (
+            SELECT rhyme, final_word, COUNT(final_word) AS wc
+            FROM #{db_table_name}
+            WHERE syllables BETWEEN ? AND ?
+            GROUP BY rhyme, final_word
+          )
+          GROUP BY rhyme
+          HAVING rc >= ?
+        SQL
+        sql[:la] = <<-SQL
+          SELECT line, syllables, final_word, rhyme
+          FROM #{db_table_name} WHERE rhyme = ?
+        SQL
+        sql[:las] = <<-SQL
+          SELECT line, syllables, final_word, rhyme
+          FROM #{db_table_name} WHERE rhyme = ?
+          AND syllables BETWEEN ? AND ?
+        SQL
+        sql
+      end
+
       # Create the stored procedures in the database.
-      def create_sprocs sprocs
-        sprocs.each do |key, value|
+      def create_sprocs sprocs_hash
+        sprocs_hash.each do |key, value|
           begin
             @sproc[key] = db.prepare value
           rescue

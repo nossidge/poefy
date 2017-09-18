@@ -65,7 +65,7 @@ module Poefy
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
           end
-          create_sprocs sprocs_hash
+          create_sprocs sprocs_sql_hash
         end
       end
       @db
@@ -148,23 +148,6 @@ module Poefy
 
       ##########################################################################
 
-      # Create the table and the index.
-      def create_table table_name
-        db_execute! <<-SQL
-          CREATE TABLE #{table_name} (
-            line        TEXT,
-            syllables   SMALLINT,
-            final_word  TEXT,
-            rhyme       TEXT
-          );
-        SQL
-        db_execute! <<-SQL
-          CREATE INDEX idx ON #{table_name} (
-            rhyme, final_word, line
-          );
-        SQL
-      end
-
       # For each line, figure out the needed rhyme metadata.
       # Output is an array: [line, final_word, rhyme, syllables]
       def lines_rhyme_metadata lines
@@ -188,44 +171,6 @@ module Poefy
         end
 
         output
-      end
-
-      ##########################################################################
-
-      # Define SQL of the stored procedures.
-      def sprocs_hash
-        sql = {}
-        sql[:rbc] = <<-SQL
-          SELECT rhyme, COUNT(rhyme) AS rc
-          FROM (
-            SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{db_table_name}
-            GROUP BY rhyme, final_word
-          )
-          GROUP BY rhyme
-          HAVING rc >= ?
-        SQL
-        sql[:rbcs] = <<-SQL
-          SELECT rhyme, COUNT(rhyme) AS rc
-          FROM (
-            SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{db_table_name}
-            WHERE syllables BETWEEN ? AND ?
-            GROUP BY rhyme, final_word
-          )
-          GROUP BY rhyme
-          HAVING rc >= ?
-        SQL
-        sql[:la] = <<-SQL
-          SELECT line, syllables, final_word, rhyme
-          FROM #{db_table_name} WHERE rhyme = ?
-        SQL
-        sql[:las] = <<-SQL
-          SELECT line, syllables, final_word, rhyme
-          FROM #{db_table_name} WHERE rhyme = ?
-          AND syllables BETWEEN ? AND ?
-        SQL
-        sql
       end
 
   end
