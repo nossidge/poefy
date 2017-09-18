@@ -25,7 +25,6 @@ describe Poefy::PoefyGen do
 
     before(:each) do
       @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
-      puts @poefy.db.db_type
     end
     after(:each) do
       @poefy.close
@@ -626,61 +625,108 @@ describe Poefy::PoefyGen do
 
   describe "using the form_from_text option" do
     before(:all) do
-      @file = "#{@root}/data/i_want_to_hold_your_hand.txt"
+      @text = <<-TEXT
+        [Chorus 1]
+        Oh yeah, I'll tell you something
+        I think you'll understand
+        When I'll say that something
+        I want to hold your hand
+        I want to hold your hand
+        I want to hold your hand
+
+        [Verse 1]
+        Oh please, say to me
+        You'll let me be your man
+        And please, say to me
+        You'll let me hold your hand
+        I'll let me hold your hand
+        I want to hold your hand
+      TEXT
+      @line_count = @text.split("\n").count
     end
 
     it "should use the exact poetic form 1" do
-      poefy = Poefy::PoefyGen.new(:beatles, {
-        form_from_text: @file
+      poefy = Poefy::PoefyGen.new(:whitman, {
+        form_from_text: @text
       })
       poem = poefy.poem
-      expect(poem.count).to be 46
+      poem.map!(&:strip!)
+      expect(poem.count).to be @line_count
+      expect(poem[0]).to eq "[Chorus one]"
+      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[5]).to eq poem[4]
+      expect(poem[6]).to eq poem[4]
     end
 
     it "should use the exact poetic form 2" do
-      poefy = Poefy::PoefyGen.new :beatles
+      poefy = Poefy::PoefyGen.new :whitman
       poem = poefy.poem({
-        form_from_text: @file
+        form_from_text: @text
       })
-      expect(poem.count).to be 46
+      poem.map!(&:strip!)
+      expect(poem.count).to be @line_count
+      expect(poem[0]).to eq "[Chorus one]"
+      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[5]).to eq poem[4]
+      expect(poem[6]).to eq poem[4]
     end
 
     it "should correctly modify the poetic form 1" do
-      poefy = Poefy::PoefyGen.new(:beatles, {
-        form_from_text: @file,
+      poefy = Poefy::PoefyGen.new(:whitman, {
+        form_from_text: @text,
         syllable: 6
       })
       poem = poefy.poem
-      expect(poem.count).to be 46
+      poem.map!(&:strip!)
+      expect(poem.count).to be @line_count
+      expect(poem[0]).to eq "[Chorus one]"
+      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[5]).to eq poem[4]
+      expect(poem[6]).to eq poem[4]
     end
 
     it "should correctly modify the poetic form 2" do
-      poefy = Poefy::PoefyGen.new :beatles
+      poefy = Poefy::PoefyGen.new :whitman
       poem = poefy.poem({
-        form_from_text: @file,
+        form_from_text: @text,
         syllable: 6
       })
-      expect(poem.count).to be 46
+      poem.map!(&:strip!)
+      expect(poem.count).to be @line_count
+      expect(poem[0]).to eq "[Chorus one]"
+      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[5]).to eq poem[4]
+      expect(poem[6]).to eq poem[4]
     end
 
     it "should correctly modify the poetic form 3" do
-      poefy = Poefy::PoefyGen.new(:beatles, {
-        form_from_text: @file
+      poefy = Poefy::PoefyGen.new(:whitman, {
+        form_from_text: @text
       })
       poem = poefy.poem({
         syllable: 6
       })
-      expect(poem.count).to be 46
+      poem.map!(&:strip!)
+      expect(poem.count).to be @line_count
+      expect(poem[0]).to eq "[Chorus one]"
+      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[5]).to eq poem[4]
+      expect(poem[6]).to eq poem[4]
     end
 
     it "should correctly replace the poetic form" do
-      poefy = Poefy::PoefyGen.new(:beatles, {
+      poefy = Poefy::PoefyGen.new(:whitman, {
         syllable: 6
       })
       poem = poefy.poem({
-        form_from_text: @file
+        form_from_text: @text
       })
-      expect(poem.count).to be 46
+      poem.map!(&:strip!)
+      expect(poem.count).to be @line_count
+      expect(poem[0]).to eq "[Chorus one]"
+      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[5]).to eq poem[4]
+      expect(poem[6]).to eq poem[4]
     end
 
     ############################################################################
