@@ -6,7 +6,10 @@
 describe Poefy::PoefyGen do
 
   before(:all) do
-    @root = File.expand_path('../../', __FILE__)
+    # ToDo: Replace with 'poefy/sqlite3'
+    require_relative '../lib/poefy/sqlite3.rb'
+
+    @root = Poefy.root
     db_file = "#{@root}/data/spec_test_tiny.db"
     File.delete(db_file) if File.exists?(db_file)
   end
@@ -22,6 +25,7 @@ describe Poefy::PoefyGen do
 
     before(:each) do
       @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
+      puts @poefy.db.db_type
     end
     after(:each) do
       @poefy.close
