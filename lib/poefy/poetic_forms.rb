@@ -357,7 +357,6 @@ module Poefy
         output.reject!{ |k| k <= 0 }
 
         # Return sorted hash.
-        # ToDo: Doesn't need to be sorted in final code.
         sort_hash output
       end
 

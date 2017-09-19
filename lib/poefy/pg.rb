@@ -43,7 +43,7 @@ module Poefy
       end
 
       # See if the table exists or not.
-      # ToDo
+      # Attempt to access table, and return false on error.
       def db_exists?
         db_open
         begin
