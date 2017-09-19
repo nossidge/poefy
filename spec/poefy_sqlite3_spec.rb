@@ -3,7 +3,7 @@
 
 ################################################################################
 
-describe Poefy::PoefyGen do
+describe Poefy::PoefyGen, "-- SQLite" do
 
   before(:all) do
     # ToDo: Replace with 'poefy/sqlite3'
@@ -18,7 +18,7 @@ describe Poefy::PoefyGen do
     File.delete(db_file) if File.exists?(db_file)
   end
 
-  describe "using tiny dataset spec_test_tiny.db / spec_test_tiny.txt" do
+  describe "using tiny dataset spec_test_tiny / spec_test_tiny.txt" do
 
     file_txt = "spec_test_tiny.txt"
     file_db  = "spec_test_tiny.db"
@@ -194,7 +194,7 @@ describe Poefy::PoefyGen do
 
   ##############################################################################
 
-  describe "using dataset shakespeare.db / shakespeare_sonnets.txt" do
+  describe "using dataset shakespeare / shakespeare_sonnets.txt" do
 
     file_txt = "shakespeare_sonnets.txt"
     file_db  = "shakespeare.db"
@@ -299,7 +299,7 @@ describe Poefy::PoefyGen do
 
   ##############################################################################
 
-  describe "using dataset whitman.db / whitman_leaves.txt" do
+  describe "using dataset whitman / whitman_leaves.txt" do
 
     file_txt = "whitman_leaves.txt"
     file_db  = "whitman.db"
