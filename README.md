@@ -2,7 +2,7 @@
 
 by [Paul Thompson](https://tilde.town/~nossidge) - nossidge@gmail.com
 
-Create rhyming poems from an input text file, by generating and querying a SQLite database that describes each line.
+Create rhyming poems from an input text file, by generating and querying a SQLite or PostgreSQL database that describes each line.
 
 Poems are created using a template to select lines from the database, according to closing rhyme, syllable count, and regex matching.
 
@@ -25,7 +25,7 @@ Or install it yourself as:
 
     $ gem install poefy
 
-The repo comes with some text files included. To generate databases for these files, execute the special `make_dbs` command:
+The repo comes with some text files included. To generate corpora for these files, execute the special `make_dbs` command:
 
     $ poefy make_dbs
 
@@ -34,34 +34,38 @@ The repo comes with some text files included. To generate databases for these fi
 
 ### From the Command Line
 
-Make a poefy database from a text file:
+To make a poefy corpus from a text file, run either of the below:
 
-    $ poefy shakespeare -d < shakespeare_sonnets.txt
+    $ poefy shakespeare -m < shakespeare_sonnets.txt
+    $ poefy shakespeare --make < shakespeare_sonnets.txt
 
-Now, whenever you want to make poems using Shakespeare's lines, you can just use `poefy shakespeare` and it will read from the already created database:
+This will create a corpus decribing each line of Shakespeare's sonnets. The type of corpus depends on whether you are using PosgreSQL (saved as a table in the 'poefy' database) or SQLite (saved to a database file as ROOT/data/CORPUS.db).
+
+Now, whenever you want to make poems using Shakespeare's lines, you can just use `poefy shakespeare` and it will read from the already created corpora:
 
     $ poefy shakespeare sonnet
     $ poefy shakespeare limerick
-    $ poefy shakespeare.db villanelle
+    $ poefy shakespeare villanelle
 
-The file extension `.db` is assumed for all databases. You can leave it out if you want.
+If you later want to remake the corpus, for example to add new lines, you can use the `-m` option again and the existing corpus will be overwritten.
 
-If you later want to remake the database, for example to add new lines, you can use the `-d` option and the existing database will be overwritten.
+    $ cat shakespeare_sonnets.txt shakespeare_plays.txt | poefy shakespeare -m
 
-    $ cat shakespeare_sonnets.txt shakespeare_plays.txt | poefy shakespeare -d
+You can use the `-L` or `--list` option to view available corpora.
 
-This database is stored in the same directory as the gem, so it can be accessed by all users on your system. To store a database in a different directory, you can use the `-l` or `--local` option:
+__For SQLite users only:__
+This corpus database file is stored in the same directory as the gem, so it can be accessed by all users on your system. To store a corpus in a different directory, you can use the `-l` or `--local` option:
 
     $ poefy -l path/to/eliot.db < eliot.txt
 
 You then need to use the `-l` option when generating poems:
 
     $ poefy -l path/to/eliot.db rondeau
-    $ poefy -l path/to/eliot    ballade
+    $ poefy path/to/eliot.db ballade -l
     $ cd path/to
     $ poefy -l eliot.db ballata
 
-You can use the `-h` or `--help` option to view available databases.
+Note that using this option, you *do* need to specify the '.db' file extension of the chosen corpus.
 
 
 #### Option `-f` or `--form`
@@ -237,7 +241,7 @@ To clarify: using the `-p` or `--proper` option will DISABLE this functionality.
 
 If the second argument is `rhyme`, then output all lines that rhyme with the word.
 
-This gives a basic look into the database contents.
+This gives a basic look into the contents of the corpus table.
 
 ````
 $ poefy dickinson rhyme confuse
@@ -268,7 +272,7 @@ You can do the same thing for the other keys: `rhyme`, `final_word`, and `syllab
 
 #### Special case: poetic form from text file
 
-If you pipe in text and don't use the `-d` option to create a database, then the output will be a poem with the same structure as the file. This can also be accomplished if the second argument is a reference to a text file. So, assuming you have a `lyrics` script that will return song lines for you:
+If you pipe in text and don't use the `-m` option to create a corpus, then the output will be a poem with the same structure as the file. This can also be accomplished if the second argument is a reference to a text file. So, assuming you have a [`lyrics`][1] script that will return song lines for you:
 
     $ lyrics 'carly rae jepsen' 'call me maybe' | tee jep.txt | poefy whitman
     $ poefy whitman < jep.txt
@@ -280,7 +284,7 @@ Any line that is bracketed in `[square]` or `{curly}` braces will be duplicated 
 
 Also, any indentation will be preserved, assuming 2 spaces per "indent".
 
-Here's an example of a song that can be sung to the same tune as "[I Want to Hold Your Hand][1]", but using lyrics from all Beatles songs:
+Here's an example of a song that can be sung to the same tune as "[I Want to Hold Your Hand][2]", but using lyrics from all Beatles songs:
 
 ````
 $ poefy beatles data/beatles/i_want_to_hold_your_hand.txt
@@ -341,7 +345,8 @@ I'll let me hold your hand       You're not the hurting kind
 I want to hold your hand         What goes on in your mind?
 ````
 
-[1]: https://genius.com/The-beatles-i-want-to-hold-your-hand-lyrics
+[1]: https://github.com/nossidge/lyrics
+[2]: https://genius.com/The-beatles-i-want-to-hold-your-hand-lyrics
 
 
 ### As a Ruby Gem
@@ -430,21 +435,21 @@ Databases are created using data piped into poefy, so you can do any pre-process
 
 Use awk to get final field from tab delimited IRC logs.
 
-    $ awk -F$'\t' '{print $NF}' irc_log_20170908.txt | poefy -d irc
+    $ awk -F$'\t' '{print $NF}' irc_log_20170908.txt | poefy -m irc
 
 
 ### Make a database, ignoring short lines
 
 Use sed to filter out lines that are too short:
 
-    $ sed -r '/^.{,20}$/d' st_therese_of_lisieux.txt | poefy -d therese
+    $ sed -r '/^.{,20}$/d' st_therese_of_lisieux.txt | poefy -m therese
 
 
 ### Make a database, ignoring uppercase lines
 
 Use sed to filter out lines that do not contain lowercase letters. For example, the sonnets file contains lines with the number of the sonnet, e.g. "CXLVII."
 
-    $ sed -r 'sed '/[a-z]/!d' shakespeare_sonnets.txt | poefy -d shakespeare
+    $ sed -r 'sed '/[a-z]/!d' shakespeare_sonnets.txt | poefy -m shakespeare
 
 
 ### Problem: it won't output lines that I know are valid
