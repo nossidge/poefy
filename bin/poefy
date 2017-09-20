@@ -58,20 +58,20 @@ def parse_options
       Paul Thompson - nossidge@gmail.com
     ].gsub('      ','  ')
 
-    usage = %[Usage: poefy shakespeare < shakespeare_sonnets.txt
+    usage = %[Usage: poefy shakespeare -m < shakespeare_sonnets.txt
       poefy shakespeare sonnet
       poefy spoke haiku
       poefy therese -r 'abab cdcd efef gg' -i '0101 0101 0011 01'
       poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
     ].gsub('      ','       ')
 
-    databases = (Poefy::Database.list)
-                 .each_slice(4).to_a
-                 .map { |i| i.join ', ' }
-                 .join("\n" + ' ' * 21)
-    databases = 'Databases available: ' + databases
+    corpora = (Poefy::Database.list)
+               .each_slice(4).to_a
+               .map { |i| i.join ', ' }
+               .join("\n" + ' ' * 21)
+    corpora = 'Corpora available: ' + corpora
 
-    opts.banner = program_info + "\n" + usage + "\n" + databases + "\n\n"
+    opts.banner = program_info + "\n" + usage + "\n" + corpora + "\n\n"
 
     # These will be further validated within the class.
     opts.on('-f', '--form STRING',
@@ -81,7 +81,7 @@ def parse_options
             ' ' * 39 + forms_by_4.join("\n" + ' ' * 39)) do |s|
       options[:form] = s
     end
-    opts.on('-r', '--rhyme STRING', "See big block of text below") do |s|
+    opts.on('-r', '--rhyme STRING', "(See 'Description of rhyme string' below)") do |s|
       options[:rhyme] = s
     end
     opts.on('-i', '--indent STRING', "Indentation of each line") do |s|
@@ -122,21 +122,29 @@ def parse_options
       options[:number] = n.to_i
     end
 
-    # Database options.
+    # Corpus options.
     opts.separator nil
-    opts.on('-d', '--database',
-            "Create new or overwrite existing database with piped input") do
-      options[:database] = true
+    opts.on('-m', '--make STRING',
+            "Make new or overwrite existing corpus with piped input\n" + ' ' * 39 +
+            "Argument is a description of the corpus") do |s|
+      # ToDo: String option is the description.
+      options[:make_corpus] = true
+      options[:corpus_desc] = s
     end
-    opts.on('-l', '--local',
-            "Default is to use database files from /data/\n" + ' ' * 39 +
-            "With this option, use files from elsewhere") do
-      options[:local] = true
+    opts.on('-d', '--desc STRING',
+            "Overwrite the description of the corpus") do |s|
+      # ToDo: String option is the description.
+      options[:corpus_desc] = s
     end
-    opts.on('-D', '--databases',
-            "List all the installed databases") do
+    opts.on('-L', '--list',
+            "List all the installed corpora") do
       puts Poefy::Database.list
       exit 0
+    end
+    opts.on('-l', '--local',
+            "(SQLite only) Default is to use database files from /data/\n" + ' ' * 39 +
+            "With this option, paths are relative to working directory") do
+      options[:local] = true
     end
 
     # Help output.
@@ -176,15 +184,15 @@ options = parse_options
 # Read data lines from STDIN.
 data = (not STDIN.tty? and not STDIN.closed?) ? STDIN.read : nil
 
-# Database is the first argument.
+# Corpus name is the first argument.
 first_arg = ARGV.first
 if first_arg.nil?
-  STDERR.puts "ERROR: Please specify a database to read from / to"
+  STDERR.puts "ERROR: Please specify a corpus name to read from/to"
   exit 1
 end
 
-# If the first argument is 'make_dbs', then make
-#   databases from the included text files.
+# If the first argument is 'make_dbs', then make corpora
+#   from the text files included in the main repo.
 if first_arg == 'make_dbs'
   path = File.expand_path('../../data', __FILE__)
 
@@ -208,16 +216,16 @@ end
 second_arg = (ARGV.length > 1) ? ARGV[1] : ''
 options[:form] = second_arg if second_arg != ''
 
-# If we need to make a database.
-# Exit the program after database is generated.
-if options[:database]
+# If we need to make a corpus.
+# Exit the program after corpus is generated.
+if options[:make_corpus]
   poefy = Poefy::PoefyGen.new first_arg
   if data
     poefy.make_database data, true
     poefy.close
     exit 0
   else
-    STDERR.puts 'ERROR: Need text input to generate a database'
+    STDERR.puts 'ERROR: Need text input to generate a corpus'
     STDERR.puts '       Please pipe some data into the program'
     exit 1
   end
