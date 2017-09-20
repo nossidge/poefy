@@ -34,7 +34,7 @@ def parse_options
   options = { console: true }
 
   # Set up variables used later.
-  forms = Poefy::PoeticForms::POETIC_FORMS.keys.reject { |i| i == :default }
+  forms = Poefy.poetic_forms
   forms_by_4 = forms.each_slice(4).to_a.map { |i| i.join ', ' }
   rhyme_docs = "    This is the most important argument.
       All other form strings are based on this.
@@ -65,7 +65,7 @@ def parse_options
       poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
     ].gsub('      ','       ')
 
-    databases = (Poefy.all_databases)
+    databases = (Poefy::Database.list)
                  .each_slice(4).to_a
                  .map { |i| i.join ', ' }
                  .join("\n" + ' ' * 21)
@@ -135,7 +135,7 @@ def parse_options
     end
     opts.on('-D', '--databases',
             "List all the installed databases") do
-      puts Poefy.all_databases
+      puts Poefy::Database.list
       exit 0
     end
 

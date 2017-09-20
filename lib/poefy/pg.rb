@@ -15,6 +15,39 @@ module Poefy
 
   class Database
 
+    # Open a connection, execute a query, close the connection.
+    def self.single_exec! sql
+      output = nil
+      begin
+        con = PG.connect(
+          :dbname   => 'poefy',
+          :user     => 'poefy',
+          :password => 'poefy'
+        )
+        output = con.exec(sql).values
+      rescue PG::Error => e
+        puts e.message
+      ensure
+        con.close if con
+      end
+      output
+    end
+
+    # List all tables in the database.
+    # Does not include tables used for testing.
+    def self.list
+      rs = self.single_exec! <<-SQL
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public';
+      SQL
+      rs = rs.flatten.reject do |i|
+        i.start_with?('spec_')
+      end - ['test']
+    end
+
+    ############################################################################
+
     # This is the type of database that is being used.
     # It is also used as a signifier that a database has been specified.
     def db_type

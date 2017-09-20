@@ -15,6 +15,19 @@ module Poefy
 
   class Database
 
+    # List all database files in the directory.
+    # Does not include databases used for testing.
+    def self.list
+      path = Poefy.root + '/data'
+      Dir["#{path}/*.db"].map do |i|
+        File.basename(i, '.db')
+      end.reject do |i|
+        i.start_with?('spec_')
+      end - ['test']
+    end
+
+    ############################################################################
+
     # This is the type of database that is being used.
     # It is also used as a signifier that a database has been specified.
     def db_type
