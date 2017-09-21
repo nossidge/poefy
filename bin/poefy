@@ -124,16 +124,14 @@ def parse_options
 
     # Corpus options.
     opts.separator nil
-    opts.on('-m', '--make STRING',
+    opts.on('-m', '--make [STRING]',
             "Make new or overwrite existing corpus with piped input\n" + ' ' * 39 +
             "Argument is a description of the corpus") do |s|
-      # ToDo: String option is the description.
       options[:make_corpus] = true
       options[:corpus_desc] = s
     end
     opts.on('-d', '--desc STRING',
             "Overwrite the description of the corpus") do |s|
-      # ToDo: String option is the description.
       options[:corpus_desc] = s
     end
     opts.on('-L', '--list',
@@ -194,20 +192,39 @@ end
 # If the first argument is 'make_dbs', then make corpora
 #   from the text files included in the main repo.
 if first_arg == 'make_dbs'
-  path = File.expand_path('../../data', __FILE__)
 
   # Exclude all lines which do not contain lowercase letters.
-  make_db = proc do |database, textfile|
-    file = path + '/' + textfile
+  make_db = proc do |database, textfile, description|
+    file  = Poefy.root + '/data/' + textfile
     input = File.readlines(file).keep_if { |i| i =~ /[a-z]/ }
     poefy = Poefy::PoefyGen.new database
-    poefy.make_database input, false
+    poefy.make_database input, description, false
   end
-  make_db.call 'shakespeare', 'shakespeare_sonnets.txt'
-  make_db.call 'therese',     'st_therese_of_lisieux.txt'
-  make_db.call 'whitman',     'whitman_leaves.txt'
-  make_db.call 'dickinson',   'emily_dickinson.txt'
-  make_db.call 'spoke',       'english_as_she_is_spoke.txt'
+  [
+    [
+      'shakespeare',
+      'shakespeare_sonnets.txt',
+      "Shakespeare's sonnets"
+    ],[
+      'therese',
+      'st_therese_of_lisieux.txt',
+      "St. Thérèse of Lisieux"
+    ],[
+      'whitman',
+      'whitman_leaves.txt',
+      "Walt Whitman, Leaves of Grass"
+    ],[
+      'dickinson',
+      'emily_dickinson.txt',
+      "Emily Dickinson"
+    ],[
+      'spoke',
+      'english_as_she_is_spoke.txt',
+      "English As She Is Spoke"
+    ]
+  ].each do |i|
+    make_db.call *i
+  end
 
   exit 0
 end
@@ -221,12 +238,26 @@ options[:form] = second_arg if second_arg != ''
 if options[:make_corpus]
   poefy = Poefy::PoefyGen.new first_arg
   if data
-    poefy.make_database data, true
+    poefy.make_database data, options[:corpus_desc], true
     poefy.close
     exit 0
   else
     STDERR.puts 'ERROR: Need text input to generate a corpus'
     STDERR.puts '       Please pipe some data into the program'
+    exit 1
+  end
+end
+
+# If we need to update a corpus description.
+# Exit the program after corpus is generated.
+if options[:corpus_desc]
+  poefy = Poefy::PoefyGen.new first_arg
+  begin
+    poefy.db.db_desc options[:corpus_desc]
+    poefy.close
+    exit 0
+  rescue
+    STDERR.puts "ERROR: Corpus '#{first_arg}' does not yet exist"
     exit 1
   end
 end

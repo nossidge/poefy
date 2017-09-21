@@ -88,18 +88,18 @@ module Poefy
     #   Delete database if already exists.
     #   Create database using SQL import file.
     #   Delete both files.
-    def make_new lines
-      make_new!(lines) if !exists?
+    def make_new lines, description = nil
+      make_new!(lines, description) if !exists?
     end
 
     # Force new database, overwriting existing.
-    def make_new! lines
+    def make_new! lines, description = nil
 
       # Create a new database.
       db_new
 
       # Create the lines table and the index.
-      create_table db_table_name
+      create_table db_table_name, description
 
       # Convert the lines array into an expanded array of rhyme metadata.
       import_data = lines_rhyme_metadata lines

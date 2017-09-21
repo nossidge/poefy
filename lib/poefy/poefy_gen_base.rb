@@ -17,18 +17,18 @@ module Poefy
     end
 
     # Make a database using the given lines.
-    def make_database input, overwrite = @overwrite
+    def make_database input, description = nil, overwrite = @overwrite
       lines = validate_lines input
       lines.map(&:strip!)
       @db.close if @db
       if overwrite
-        @db.make_new! lines
+        @db.make_new! lines, description
       else
-        @db.make_new lines
+        @db.make_new lines, description
       end
     end
-    def make_database! input
-      make_database input, true
+    def make_database! input, description = nil
+      make_database input, description, true
     end
 
     # Close the database.

@@ -16,7 +16,7 @@ module Poefy
   class Database
 
     # Open a connection, execute a query, close the connection.
-    def self.single_exec! sql
+    def self.single_exec! sql, sql_args = nil
       output = nil
       begin
         con = PG.connect(
@@ -24,7 +24,11 @@ module Poefy
           :user     => 'poefy',
           :password => 'poefy'
         )
-        output = con.exec(sql).values
+        output = if sql_args
+          con.exec(sql, [*sql_args]).values
+        else
+          con.exec(sql).values
+        end
       rescue PG::Error => e
         puts e.message
       ensure
@@ -52,6 +56,12 @@ module Poefy
     # It is also used as a signifier that a database has been specified.
     def db_type
       'pg'
+    end
+
+    # Update a description of the database.
+    def db_desc description
+      safe_desc = description.to_s.gsub("'","''")
+      db_execute! "COMMENT ON TABLE #{db_table_name} IS '#{safe_desc}';"
     end
 
     private
@@ -105,7 +115,7 @@ module Poefy
       ##########################################################################
 
       # Create the table and the index.
-      def create_table table_name
+      def create_table table_name, description = nil
         index_name = 'idx_' + table_name
         db_execute! <<-SQL
           SET client_min_messages TO WARNING;
@@ -121,6 +131,7 @@ module Poefy
             rhyme, final_word, line
           );
         SQL
+        db_desc description
       end
 
       ##########################################################################

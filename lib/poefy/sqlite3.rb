@@ -34,6 +34,12 @@ module Poefy
       'sqlite3'
     end
 
+    # Update a description of the database.
+    def db_desc description
+      db.execute "DELETE FROM comment;"
+      db.execute "INSERT INTO comment VALUES ( ? );", description.to_s
+    end
+
     private
 
       # The name of the table.
@@ -92,7 +98,7 @@ module Poefy
       ##########################################################################
 
       # Create the table and the index.
-      def create_table table_name
+      def create_table table_name, description = nil
         db_execute! <<-SQL
           CREATE TABLE #{table_name} (
             line        TEXT,
@@ -102,10 +108,16 @@ module Poefy
           );
         SQL
         db_execute! <<-SQL
+          CREATE TABLE comment (
+            comment     TEXT
+          );
+        SQL
+        db_execute! <<-SQL
           CREATE INDEX idx ON #{table_name} (
             rhyme, final_word, line
           );
         SQL
+        db_desc description
       end
 
       ##########################################################################
