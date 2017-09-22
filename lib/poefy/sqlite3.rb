@@ -15,15 +15,45 @@ module Poefy
 
   class Database
 
+    # Open a connection, execute a query, close the connection.
+    def self.single_exec! database_name, sql
+      path = Database::path database_name
+      con = SQLite3::Database.open path
+      rs = con.execute sql
+      con.close
+      rs
+    end
+
     # List all database files in the directory.
     # Does not include databases used for testing.
     def self.list
-      path = Poefy.root + '/data'
-      Dir["#{path}/*.db"].map do |i|
+      Dir[Poefy.root + '/data/*.db'].map do |i|
         File.basename(i, '.db')
       end.reject do |i|
         i.start_with?('spec_')
       end - ['test']
+    end
+
+    # Get the description of a database.
+    def self.desc database_name
+      sql = "SELECT comment FROM comment;"
+      Database::single_exec!(database_name, sql).flatten.first
+    end
+
+    # List all database files and their descriptions.
+    def self.list_with_desc
+      Database::list.map do |i|
+        begin
+          [i, Database::desc(i)]
+        rescue
+          [i, '']
+        end
+      end
+    end
+
+    # Get the path of a database.
+    def self.path database_name
+      Poefy.root + '/data/' + database_name + '.db'
     end
 
     ############################################################################
@@ -34,8 +64,11 @@ module Poefy
       'sqlite3'
     end
 
-    # Update a description of the database.
-    def db_desc description
+    # Get/set the description of the database.
+    def desc
+      Database::desc @name
+    end
+    def desc=(description)
       db.execute "DELETE FROM comment;"
       db.execute "INSERT INTO comment VALUES ( ? );", description.to_s
     end
@@ -117,7 +150,7 @@ module Poefy
             rhyme, final_word, line
           );
         SQL
-        db_desc description
+        self.desc = description
       end
 
       ##########################################################################

@@ -40,14 +40,34 @@ module Poefy
     # List all tables in the database.
     # Does not include tables used for testing.
     def self.list
-      rs = self.single_exec! <<-SQL
+      rs = Database::single_exec! <<-SQL
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public';
       SQL
-      rs = rs.flatten.reject do |i|
+      rs.flatten.reject do |i|
         i.start_with?('spec_')
       end - ['test']
+    end
+
+    # Get the description of a table.
+    def self.desc table_name
+      rs = Database::single_exec! <<-SQL
+        SELECT obj_description('#{table_name}'::regclass, 'pg_class')
+        AS desc;
+      SQL
+      rs.flatten.first
+    end
+
+    # List all database files and their descriptions.
+    def self.list_with_desc
+      Database::list.map do |i|
+        begin
+          [i, Database::desc(i)]
+        rescue
+          [i, '']
+        end
+      end
     end
 
     ############################################################################
@@ -58,8 +78,11 @@ module Poefy
       'pg'
     end
 
-    # Update a description of the database.
-    def db_desc description
+    # Get/set the description of the table.
+    def desc
+      Database::desc db_table_name
+    end
+    def desc=(description)
       safe_desc = description.to_s.gsub("'","''")
       db_execute! "COMMENT ON TABLE #{db_table_name} IS '#{safe_desc}';"
     end
@@ -131,7 +154,7 @@ module Poefy
             rhyme, final_word, line
           );
         SQL
-        db_desc description
+        self.desc = description
       end
 
       ##########################################################################

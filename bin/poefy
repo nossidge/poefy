@@ -253,7 +253,7 @@ end
 if options[:corpus_desc]
   poefy = Poefy::PoefyGen.new first_arg
   begin
-    poefy.db.db_desc options[:corpus_desc]
+    poefy.db.desc = options[:corpus_desc]
     poefy.close
     exit 0
   rescue
