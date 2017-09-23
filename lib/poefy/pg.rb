@@ -84,13 +84,13 @@ module Poefy
     end
     def desc=(description)
       safe_desc = description.to_s.gsub("'","''")
-      db_execute! "COMMENT ON TABLE #{table} IS '#{safe_desc}';"
+      execute! "COMMENT ON TABLE #{table} IS '#{safe_desc}';"
     end
 
     # See if the table exists or not.
     # Attempt to access table, and return false on error.
     def exists?
-      db_open
+      open_connection
       @db.exec("SELECT count(*) FROM #{table};")
       true
     rescue PG::UndefinedTable
@@ -105,12 +105,12 @@ module Poefy
       end
 
       # Create a new table.
-      def db_new
-        db_open
+      def new_connection
+        open_connection
       end
 
       # Open a connection to the database.
-      def db_open
+      def open_connection
         @db ||= PG.connect(
           :dbname   => 'poefy',
           :user     => 'poefy',
@@ -119,12 +119,12 @@ module Poefy
       end
 
       # Execute a query.
-      def db_execute! sql
+      def execute! sql
         db.exec sql
       end
 
       # Insert an array of lines.
-      def db_insert_rows table_name, rows
+      def insert_lines table_name, rows
         sql = "INSERT INTO #{table_name} VALUES ( $1, $2, $3, $4 )"
         db.transaction do |db_tr|
           rows.each do |line|
@@ -138,7 +138,7 @@ module Poefy
       # Create the table and the index.
       def create_table table_name, description = nil
         index_name = 'idx_' + table_name
-        db_execute! <<-SQL
+        execute! <<-SQL
           SET client_min_messages TO WARNING;
           DROP INDEX IF EXISTS #{index_name};
           DROP TABLE IF EXISTS #{table_name};

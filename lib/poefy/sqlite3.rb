@@ -86,27 +86,28 @@ module Poefy
       end
 
       # Create a new database.
-      def db_new
+      def new_connection
         File.delete(db_file) if File.exists?(db_file)
         @db = SQLite3::Database.new(db_file)
       end
 
       # Open a connection to the database.
-      def db_open
+      def open_connection
         @db = SQLite3::Database.open(db_file)
         @db.results_as_hash = true
       end
 
       # Execute a query.
-      def db_execute! sql
+      def execute! sql
         db.execute sql
       end
 
-      # Insert an array of lines.
-      def db_insert_rows table_name, rows
+      # Insert an array of poefy-described lines.
+      def insert_lines table_name, rows
+        sql = "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )"
         db.transaction do |db_tr|
           rows.each do |line|
-            db_tr.execute "INSERT INTO #{table_name} VALUES ( ?, ?, ?, ? )", line
+            db_tr.execute sql, line
           end
         end
       end
@@ -132,7 +133,7 @@ module Poefy
 
       # Create the table and the index.
       def create_table table_name, description = nil
-        db_execute! <<-SQL
+        execute! <<-SQL
           CREATE TABLE #{table_name} (
             line        TEXT,
             syllables   SMALLINT,
@@ -140,12 +141,12 @@ module Poefy
             rhyme       TEXT
           );
         SQL
-        db_execute! <<-SQL
+        execute! <<-SQL
           CREATE TABLE comment (
             comment     TEXT
           );
         SQL
-        db_execute! <<-SQL
+        execute! <<-SQL
           CREATE INDEX idx ON #{table_name} (
             rhyme, final_word, line
           );

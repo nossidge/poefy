@@ -59,7 +59,7 @@ module Poefy
           @db = nil
         else
           begin
-            db_open
+            open_connection
           rescue
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
@@ -90,7 +90,7 @@ module Poefy
     def make_new! lines, description = nil
 
       # Create a new database.
-      db_new
+      new_connection
 
       # Create the lines table and the index.
       create_table table, description
@@ -99,14 +99,7 @@ module Poefy
       import_data = lines_rhyme_metadata lines
 
       # Import the data.
-      db_insert_rows table, import_data
-    end
-
-    # Execute an SQL request.
-    def execute! sql
-      db_execute! sql
-    rescue
-      handle_error 'ERROR: Database has incorrect table structure', []
+      insert_lines table, import_data
     end
 
     # Public interfaces for private stored procedure methods.
