@@ -64,7 +64,7 @@ module Poefy
             @db = nil
             return handle_error 'ERROR: Database contains invalid structure'
           end
-          create_sprocs sprocs_sql_hash
+          create_sprocs
         end
       end
       @db

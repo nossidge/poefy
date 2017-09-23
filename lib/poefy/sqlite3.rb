@@ -193,15 +193,14 @@ module Poefy
       end
 
       # Create the stored procedures in the database.
-      def create_sprocs sprocs_hash
-        sprocs_hash.each do |key, value|
-          begin
-            @sproc[key] = db.prepare value
-          rescue
-            raise 'ERROR: Database table structure is invalid'
-            return handle_error 'ERROR: Database table structure is invalid'
-          end
+      def create_sprocs
+        sprocs_sql_hash.each do |key, value|
+          @sproc[key] = db.prepare value
         end
+      rescue
+        handle_error \
+          "ERROR: Database table structure is invalid.\n" +
+          "       Please manually DROP the corrupt table and recreate it."
       end
 
       # Find rhymes and counts greater than a certain length.
