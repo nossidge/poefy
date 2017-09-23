@@ -32,7 +32,7 @@ module Poefy
       @name = name.to_s
       @sproc = {}
 
-      db_type
+      type
       db
       ObjectSpace.define_finalizer(self, @@final.call(@db, @sproc))
     end
@@ -44,7 +44,7 @@ module Poefy
     #   so raise an error if no database has been specified yet.
     # Due to the way 'bin/poefy' is set up, that code will fail before
     #   this point is reached, so this error is only from Ruby calls.
-    def db_type
+    def type
       msg = "No database interface specified. " +
             "Please require 'poefy/sqlite3' or 'poefy/pg'"
       raise LoadError, msg
@@ -77,11 +77,6 @@ module Poefy
       @db = nil
     end
 
-    # See if the database file exists or not.
-    def exists?
-      db_exists?
-    end
-
     # Creates a database with the correct format.
     #   Convert input lines array to SQL import format file.
     #   Delete database if already exists.
@@ -98,22 +93,20 @@ module Poefy
       db_new
 
       # Create the lines table and the index.
-      create_table db_table_name, description
+      create_table table, description
 
       # Convert the lines array into an expanded array of rhyme metadata.
       import_data = lines_rhyme_metadata lines
 
       # Import the data.
-      db_insert_rows db_table_name, import_data
+      db_insert_rows table, import_data
     end
 
     # Execute an SQL request.
     def execute! sql
-      begin
-        db_execute! sql
-      rescue
-        return handle_error 'ERROR: Database has incorrect table structure', []
-      end
+      db_execute! sql
+    rescue
+      handle_error 'ERROR: Database has incorrect table structure', []
     end
 
     # Public interfaces for private stored procedure methods.

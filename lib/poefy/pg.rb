@@ -74,23 +74,33 @@ module Poefy
 
     # This is the type of database that is being used.
     # It is also used as a signifier that a database has been specified.
-    def db_type
+    def type
       'pg'
     end
 
     # Get/set the description of the table.
     def desc
-      Database::desc db_table_name
+      Database::desc table
     end
     def desc=(description)
       safe_desc = description.to_s.gsub("'","''")
-      db_execute! "COMMENT ON TABLE #{db_table_name} IS '#{safe_desc}';"
+      db_execute! "COMMENT ON TABLE #{table} IS '#{safe_desc}';"
+    end
+
+    # See if the table exists or not.
+    # Attempt to access table, and return false on error.
+    def exists?
+      db_open
+      @db.exec("SELECT count(*) FROM #{table};")
+      true
+    rescue PG::UndefinedTable
+      false
     end
 
     private
 
       # The name of the table.
-      def db_table_name
+      def table
         @name
       end
 
@@ -106,18 +116,6 @@ module Poefy
           :user     => 'poefy',
           :password => 'poefy'
         )
-      end
-
-      # See if the table exists or not.
-      # Attempt to access table, and return false on error.
-      def db_exists?
-        db_open
-        begin
-          @db.exec("SELECT count(*) FROM #{db_table_name};")
-          true
-        rescue PG::UndefinedTable
-          false
-        end
       end
 
       # Execute a query.
@@ -166,7 +164,7 @@ module Poefy
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{db_table_name}
+            FROM #{table}
             GROUP BY rhyme, final_word
           ) AS sub_table
           GROUP BY rhyme
@@ -176,7 +174,7 @@ module Poefy
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{db_table_name}
+            FROM #{table}
             WHERE syllables BETWEEN $1 AND $2
             GROUP BY rhyme, final_word
           ) AS sub_table
@@ -185,11 +183,11 @@ module Poefy
         SQL
         sql[:la] = <<-SQL
           SELECT line, syllables, final_word, rhyme
-          FROM #{db_table_name} WHERE rhyme = $1
+          FROM #{table} WHERE rhyme = $1
         SQL
         sql[:las] = <<-SQL
           SELECT line, syllables, final_word, rhyme
-          FROM #{db_table_name} WHERE rhyme = $1
+          FROM #{table} WHERE rhyme = $1
           AND syllables BETWEEN $2 AND $3
         SQL
         sql

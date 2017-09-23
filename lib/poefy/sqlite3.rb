@@ -60,7 +60,7 @@ module Poefy
 
     # This is the type of database that is being used.
     # It is also used as a signifier that a database has been specified.
-    def db_type
+    def type
       'sqlite3'
     end
 
@@ -73,10 +73,15 @@ module Poefy
       db.execute "INSERT INTO comment VALUES ( ? );", description.to_s
     end
 
+    # See if the database file exists or not.
+    def exists?
+      File.exists?(db_file)
+    end
+
     private
 
       # The name of the table.
-      def db_table_name
+      def table
         'lines'
       end
 
@@ -90,11 +95,6 @@ module Poefy
       def db_open
         @db = SQLite3::Database.open(db_file)
         @db.results_as_hash = true
-      end
-
-      # See if the database file exists or not.
-      def db_exists?
-        File.exists?(db_file)
       end
 
       # Execute a query.
@@ -162,7 +162,7 @@ module Poefy
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{db_table_name}
+            FROM #{table}
             GROUP BY rhyme, final_word
           )
           GROUP BY rhyme
@@ -172,7 +172,7 @@ module Poefy
           SELECT rhyme, COUNT(rhyme) AS rc
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
-            FROM #{db_table_name}
+            FROM #{table}
             WHERE syllables BETWEEN ? AND ?
             GROUP BY rhyme, final_word
           )
@@ -181,11 +181,11 @@ module Poefy
         SQL
         sql[:la] = <<-SQL
           SELECT line, syllables, final_word, rhyme
-          FROM #{db_table_name} WHERE rhyme = ?
+          FROM #{table} WHERE rhyme = ?
         SQL
         sql[:las] = <<-SQL
           SELECT line, syllables, final_word, rhyme
-          FROM #{db_table_name} WHERE rhyme = ?
+          FROM #{table} WHERE rhyme = ?
           AND syllables BETWEEN ? AND ?
         SQL
         sql
