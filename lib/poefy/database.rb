@@ -2,10 +2,9 @@
 # Encoding: UTF-8
 
 ################################################################################
-# Class for connecting to a sqlite3 database.
+# Base class for connecting to a database.
+# Install gem 'poefy-sqlite3' or 'poefy-pg' for implementation.
 ################################################################################
-
-require 'sqlite3'
 
 require_relative 'string_manipulation.rb'
 require_relative 'handle_error.rb'
