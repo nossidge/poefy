@@ -10,10 +10,11 @@ module Poefy
 
     # Array of all databases (SQLite) or tables (Postgres)
     # Does not include databases used for testing.
-    def databases
+    def corpora
       Poefy::Database.list
     end
-    alias_method :tables, :databases
+    alias_method :tables,    :corpora
+    alias_method :databases, :corpora
 
     # Array of all names of poetic forms.
     def poetic_forms

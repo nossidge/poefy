@@ -19,20 +19,20 @@ module Poefy
     def self.single_exec! sql, sql_args = nil
       output = nil
       begin
-        con = PG.connect(
+        connection = PG.connect(
           :dbname   => 'poefy',
           :user     => 'poefy',
           :password => 'poefy'
         )
         output = if sql_args
-          con.exec(sql, [*sql_args]).values
+          connection.exec(sql, [*sql_args]).values
         else
-          con.exec(sql).values
+          connection.exec(sql).values
         end
       rescue PG::Error => e
         puts e.message
       ensure
-        con.close if con
+        connection.close if connection
       end
       output
     end

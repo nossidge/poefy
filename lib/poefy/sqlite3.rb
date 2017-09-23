@@ -18,9 +18,9 @@ module Poefy
     # Open a connection, execute a query, close the connection.
     def self.single_exec! database_name, sql
       path = Database::path database_name
-      con = SQLite3::Database.open path
-      rs = con.execute sql
-      con.close
+      connection = SQLite3::Database.open path
+      rs = connection.execute sql
+      connection.close
       rs
     end
 
