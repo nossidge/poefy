@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email         = ['nossidge@gmail.com']
 
   s.summary       = %q{Create rhyming poetry by rearranging lines of text}
-  s.description   = %q{Create poems from an input text file, by generating and querying a SQLite database describing each line. Poems are created using a template to select lines from the database, according to closing rhyme, syllable count, and regex matching.}
+  s.description   = %q{Create poems from an input text file, by generating and querying a SQLite or PostgreSQL database describing each line. Poems are created using a template to select lines from the database, according to closing rhyme, syllable count, and regex matching.}
   s.homepage      = 'https://github.com/nossidge/poefy'
 
   s.version       = Poefy.version_number
@@ -22,6 +22,15 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
   s.bindir        = 'bin'
+
+  s.post_install_message = %q{---
+    Thanks for installing poefy.
+    Please also install one of the below gems:
+      $ gem install poefy-pg
+      $ gem install poefy-sqlite
+    Then run this command to generate the included corpora:
+      $ poefy make_dbs
+    ---}.split("\n").map{ |i| i.sub('    ','') }.join("\n")
 
   s.add_development_dependency('bundler', '~> 1.13')
   s.add_development_dependency('rake',    '~> 10.0')
