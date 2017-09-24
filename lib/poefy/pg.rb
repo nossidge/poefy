@@ -52,11 +52,8 @@ module Poefy
 
     # Get the description of a table.
     def self.desc table_name
-      rs = Database::single_exec! <<-SQL
-        SELECT obj_description('#{table_name}'::regclass, 'pg_class')
-        AS desc;
-      SQL
-      rs.flatten.first
+      sql = "SELECT obj_description($1::regclass, 'pg_class');"
+      single_exec!(sql, [*table_name]).flatten.first.to_s
     end
 
     # List all database files and their descriptions.
@@ -89,7 +86,8 @@ module Poefy
 
     # The number of lines in the table.
     def count
-      sql = "SELECT COUNT(line) AS num FROM #{table};"
+      return 0 if not exists?
+      sql = "SELECT COUNT(*) AS num FROM #{table};"
       execute!(sql).first['num'].to_i
     end
 
@@ -97,7 +95,7 @@ module Poefy
     # Attempt to access table, and return false on error.
     def exists?
       open_connection
-      @db.exec("SELECT count(*) FROM #{table};")
+      @db.exec("SELECT $1::regclass", [*table])
       true
     rescue PG::UndefinedTable
       false
@@ -125,8 +123,8 @@ module Poefy
       end
 
       # Execute a query.
-      def execute! sql
-        db.exec sql
+      def execute! sql, *args
+        db.exec sql, *args
       end
 
       # Insert an array of lines.

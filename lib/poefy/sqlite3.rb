@@ -75,7 +75,8 @@ module Poefy
 
     # The number of lines in the table.
     def count
-      sql = "SELECT COUNT(line) AS num FROM #{table};"
+      return 0 if not exists?
+      sql = "SELECT COUNT(*) AS num FROM #{table};"
       execute!(sql).first['num'].to_i
     end
 
