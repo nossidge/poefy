@@ -53,7 +53,7 @@ module Poefy
 
     # Get the path of a database.
     def self.path database_name
-      Poefy.root + '/data/' + database_name + '.db'
+      Poefy.root + '/data/' + File.basename(database_name, '.db') + '.db'
     end
 
     ############################################################################
@@ -69,8 +69,8 @@ module Poefy
       Database::desc @name
     end
     def desc=(description)
-      db.execute "DELETE FROM comment;"
-      db.execute "INSERT INTO comment VALUES ( ? );", description.to_s
+      execute! "DELETE FROM comment;"
+      execute! "INSERT INTO comment VALUES ( ? );", description.to_s
     end
 
     # The number of lines in the table.
@@ -95,6 +95,7 @@ module Poefy
       def new_connection
         File.delete(db_file) if File.exists?(db_file)
         @db = SQLite3::Database.new(db_file)
+        @db.results_as_hash = true
       end
 
       # Open a connection to the database.
@@ -104,8 +105,8 @@ module Poefy
       end
 
       # Execute a query.
-      def execute! sql
-        db.execute sql
+      def execute! sql, *args
+        db.execute sql, *args
       end
 
       # Insert an array of poefy-described lines.
