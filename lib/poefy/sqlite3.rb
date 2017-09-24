@@ -73,6 +73,12 @@ module Poefy
       db.execute "INSERT INTO comment VALUES ( ? );", description.to_s
     end
 
+    # The number of lines in the table.
+    def count
+      sql = "SELECT COUNT(line) AS num FROM #{table};"
+      execute!(sql).first['num'].to_i
+    end
+
     # See if the database file exists or not.
     def exists?
       File.exists?(db_file)

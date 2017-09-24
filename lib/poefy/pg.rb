@@ -87,6 +87,12 @@ module Poefy
       execute! "COMMENT ON TABLE #{table} IS '#{safe_desc}';"
     end
 
+    # The number of lines in the table.
+    def count
+      sql = "SELECT COUNT(line) AS num FROM #{table};"
+      execute!(sql).first['num'].to_i
+    end
+
     # See if the table exists or not.
     # Attempt to access table, and return false on error.
     def exists?
