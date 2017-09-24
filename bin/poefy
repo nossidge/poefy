@@ -9,23 +9,31 @@ require 'optparse'
 
 require_relative '../lib/poefy.rb'
 
-# Default to use PostgreSQL before SQLite.
-# Errors if neither gem is installed.
+# Attempt to load exactly one of the below files.
+# Array is ordered by priority, so use PostgreSQL before SQLite.
 # ToDo: Replace with 'poefy/pg' and 'poefy/sqlite3'
-begin
-  require_relative '../lib/poefy/pg.rb'
-rescue LoadError
+loaded_file = nil
+[
+  '../lib/poefy/pg.rb',
+  '../lib/poefy/sqlite3.rb'
+].each do |file|
   begin
-    require_relative '../lib/poefy/sqlite3.rb'
+    require_relative file
+    loaded_file = file
+    break
   rescue LoadError
-    msg = "ERROR: Please specify the type of database to use." +
-        "\n       The 'poefy' gem does not implement a database interface" +
-        "\n       by default; you must install one of the below gems:" +
-        "\n         gem install poefy-sqlite3" +
-        "\n         gem install poefy-pg"
-    STDERR.puts msg
-    exit 1
   end
+end
+
+# Exit and send error to the console if no file loaded.
+if loaded_file.nil?
+  msg = "ERROR: Please specify the type of database to use." +
+      "\n       The 'poefy' gem does not implement a database interface" +
+      "\n       by default; you must install one of the below gems:" +
+      "\n         gem install poefy-sqlite3" +
+      "\n         gem install poefy-pg"
+  STDERR.puts msg
+  exit 1
 end
 
 ################################################################################
