@@ -10,11 +10,16 @@ describe Poefy::PoefyGen, "-- Postgres" do
     require_relative '../lib/poefy/pg.rb'
     @root = Poefy.root
   end
+  after(:all) do
+    sql = "DROP TABLE spec_test_tiny;"
+    Poefy::Database.single_exec! sql
+  end
 
   describe "using tiny dataset 'spec_test_tiny'" do
 
-    file_txt = "spec_test_tiny.txt"
-    file_db  = "spec_test_tiny"
+    file_txt  = "spec_test_tiny.txt"
+    file_db   = "spec_test_tiny"
+    row_count = 12
 
     before(:each) do
       @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
@@ -30,6 +35,38 @@ describe Poefy::PoefyGen, "-- Postgres" do
       it "should make the database '#{file_db}" do
         @poefy.make_database! "#{@root}/data/#{file_txt}"
         expect(@poefy.db.exists?).to be true
+        expect(@poefy.db.count).to be row_count
+      end
+    end
+
+    # Make sure that the description can be updated as specified
+    #   and that it doesn't cause SQL injection.
+    describe "corpus description using #desc=" do
+      it "@poefy.db.desc is initially empty" do
+        expect(@poefy.db.desc).to eq ''
+      end
+
+      values = [
+        "test",
+        " -- test",
+        "; -- test",
+        "test' -- ",
+        "test'' -- ",
+        "'test' -- ",
+        "'test'' -- ",
+        "Shakespeare's sonnets",
+        "Shakespeare's -- sonnets",
+        "Shakespeare's; -- sonnets",
+        "test' ; INSERT INTO spec_test_tiny VALUES('foo') -- ",
+        "105 OR 1=1",
+        "' or ''='"
+      ]
+      values.each do |value|
+        it "@poefy.db.desc = #{value}" do
+          @poefy.db.desc = value
+          expect(@poefy.db.desc).to eq value
+          expect(@poefy.db.count).to be row_count
+        end
       end
     end
 

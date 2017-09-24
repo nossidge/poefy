@@ -20,8 +20,9 @@ describe Poefy::PoefyGen, "-- SQLite" do
 
   describe "using tiny dataset spec_test_tiny / spec_test_tiny.txt" do
 
-    file_txt = "spec_test_tiny.txt"
-    file_db  = "spec_test_tiny.db"
+    file_txt  = "spec_test_tiny.txt"
+    file_db   = "spec_test_tiny.db"
+    row_count = 12
 
     before(:each) do
       @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
@@ -36,9 +37,41 @@ describe Poefy::PoefyGen, "-- SQLite" do
     describe "#make_database( '#{@root}/data/#{file_txt}', true )" do
       it "should make the database '#{@root}/data/#{file_db}" do
         db_file = "#{@root}/data/#{file_db}"
-        @poefy.make_database "#{@root}/data/#{file_txt}", true
+        @poefy.make_database! "#{@root}/data/#{file_txt}"
         expect(@poefy.db.exists?).to be true
         expect(File.exists?(db_file)).to be true
+        expect(@poefy.db.count).to be row_count
+      end
+    end
+
+    # Make sure that the description can be updated as specified
+    #   and that it doesn't cause SQL injection.
+    describe "corpus description using #desc=" do
+      it "@poefy.db.desc is initially empty" do
+        expect(@poefy.db.desc).to eq ''
+      end
+
+      values = [
+        "test",
+        " -- test",
+        "; -- test",
+        "test' -- ",
+        "test'' -- ",
+        "'test' -- ",
+        "'test'' -- ",
+        "Shakespeare's sonnets",
+        "Shakespeare's -- sonnets",
+        "Shakespeare's; -- sonnets",
+        "test' ; INSERT INTO spec_test_tiny VALUES('foo') -- ",
+        "105 OR 1=1",
+        "' or ''='"
+      ]
+      values.each do |value|
+        it "@poefy.db.desc = #{value}" do
+          @poefy.db.desc = value
+          expect(@poefy.db.desc).to eq value
+          expect(@poefy.db.count).to be row_count
+        end
       end
     end
 
