@@ -1,3 +1,11 @@
+__Warning: This project is undergoing serious revision at the moment, and parts of this readme are invalid.__
+
+__For the correct documentation for the most recent gem version (0.6.1), please see the revision here:
+[README.md](https://github.com/nossidge/poefy/blob/fb4e39a88296074075a8ad1708e60747f3323baf/README.md)__
+
+__Version 1.0.0 is coming soon, with Postgres support as the major feature.__
+
+
 # Poefy
 
 by [Paul Thompson](https://tilde.town/~nossidge) - nossidge@gmail.com
@@ -11,19 +19,46 @@ I wrote this because I was banging my head against a wall trying to use [Tracery
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'poefy'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
+### Install the base gem
 
     $ gem install poefy
+
+
+### Install a database gem
+
+You have two options when it comes to databases.
+
+
+#### PostgreSQL
+
+Install [PostgreSQL 9.0+](https://www.postgresql.org/download/)
+
+Install the below gem.
+
+    $ gem install poefy-pg
+
+Create a new user:
+
+    username: 'poefy'
+    password: 'poefy'
+
+Then create a new database, with the above user as the owner:
+
+    database: 'poefy'
+
+Everything is called 'poefy'. Nice and easy.
+
+
+#### SQLite
+
+Install [SQLite 3.0+](https://sqlite.org/download.html)
+
+Just install the below gem. There is no further setup needed.
+
+    $ gem install poefy-sqlite3
+
+
+### Set up some example corpora
 
 The repo comes with some text files included. To generate corpora for these files, execute the special `make_dbs` command:
 
