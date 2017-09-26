@@ -3,7 +3,7 @@
 
 ################################################################################
 
-describe Poefy::PoefyGen, "-- Unit tests" do
+describe Poefy::Poem, "-- Unit tests" do
 
   describe "#transform_string_regex" do
 

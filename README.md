@@ -355,7 +355,7 @@ To make a poefy database and generate poems from it:
 
 ```ruby
 require 'poefy'
-poefy = Poefy::PoefyGen.new('shakespeare')
+poefy = Poefy::Poem.new('shakespeare')
 poefy.make_database('shakespeare_sonnets.txt')
 poefy.close
 ```
@@ -366,7 +366,7 @@ You only have to make the database once. And then to generate poems:
 
 ```ruby
 # Different ways to generate sonnets
-poefy = Poefy::PoefyGen.new('shakespeare')
+poefy = Poefy::Poem.new('shakespeare')
 puts poefy.poem ({ rhyme: 'ababcdcdefefgg' })
 puts poefy.poem ({ rhyme: 'abab cdcd efef gg', indent: '0101 0101 0011 01' })
 puts poefy.poem ({ form: 'sonnet' })
@@ -386,7 +386,7 @@ All options can be specified at object initialisation, and subsequent poems will
 
 ```ruby
 # Default to use rondeau poetic form, and proper sentence validation
-poefy = Poefy::PoefyGen.new('shakespeare', { form: 'rondeau', proper: true })
+poefy = Poefy::Poem.new('shakespeare', { form: 'rondeau', proper: true })
 
 # Generate a properly sentenced rondeau
 puts poefy.poem
@@ -412,7 +412,7 @@ transform_hash = {
    4 => proc { |line, num, poem| line.upcase },
   12 => proc { |line, num, poem| line.upcase }
 }
-poefy = Poefy::PoefyGen.new 'shakespeare'
+poefy = Poefy::Poem.new 'shakespeare'
 puts poefy.poem({ form: :sonnet, transform: transform_hash })
 poefy.close
 ```
@@ -423,7 +423,7 @@ If you don't include a hash, then the proc will be applied to each line. So to a
 
 ```ruby
 transform_proc = proc { |line, num, poem| "#{num.to_s.rjust(2)} #{line}" }
-poefy = Poefy::PoefyGen.new 'shakespeare'
+poefy = Poefy::Poem.new 'shakespeare'
 puts poefy.poem({ form: :sonnet, transform: transform_proc })
 poefy.close
 ```

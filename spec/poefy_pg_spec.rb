@@ -3,7 +3,7 @@
 
 ################################################################################
 
-describe Poefy::PoefyGen, "-- Postgres" do
+describe Poefy::Poem, "-- Postgres" do
 
   before(:all) do
     # ToDo: Replace with 'poefy/pg'
@@ -40,7 +40,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     row_count = text_array.count
 
     before(:each) do
-      @poefy = Poefy::PoefyGen.new(corpus, { proper: false })
+      @poefy = Poefy::Poem.new(corpus, { proper: false })
     end
     after(:each) do
       @poefy.close
@@ -281,7 +281,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     forms_pass = forms.keys - forms_fail
 
     before(:each) do
-      @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
+      @poefy = Poefy::Poem.new(file_db, { proper: false })
     end
     after(:each) do
       @poefy.close
@@ -383,7 +383,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     forms_pass = forms.keys
 
     before(:each) do
-      @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
+      @poefy = Poefy::Poem.new(file_db, { proper: false })
     end
     after(:each) do
       @poefy.close
@@ -468,11 +468,11 @@ describe Poefy::PoefyGen, "-- Postgres" do
 
   ##############################################################################
 
-  describe "reusing the same PoefyGen instance" do
+  describe "reusing the same Poem instance" do
     it "should correctly merge the option hashes" do
 
       # Default to use rondeau poetic form, and proper sentence validation
-      poefy = Poefy::PoefyGen.new(
+      poefy = Poefy::Poem.new(
         'spec_shakespeare',
         { form: 'rondeau', proper: true }
       )
@@ -510,7 +510,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
   describe "using the transform option" do
 
     it "should correctly transform the output 1" do
-      poefy = Poefy::PoefyGen.new :spec_shakespeare
+      poefy = Poefy::Poem.new :spec_shakespeare
       transform_hash = {
          4 => proc { |line, num, poem| line.upcase },
         12 => proc { |line, num, poem| line.upcase }
@@ -523,7 +523,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly transform the output 2" do
-      poefy = Poefy::PoefyGen.new :spec_shakespeare
+      poefy = Poefy::Poem.new :spec_shakespeare
       transform_hash = {
          4 => proc { |line, num, poem| poem.count },
         -3 => proc { |line, num, poem| poem.count },
@@ -538,7 +538,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly transform the output 3" do
-      poefy = Poefy::PoefyGen.new :spec_shakespeare
+      poefy = Poefy::Poem.new :spec_shakespeare
       transform_proc = proc { |line, num, poem| line.downcase }
       poem = poefy.poem({ form: :sonnet, transform: transform_proc })
       expect(poem.count).to be 14
@@ -549,7 +549,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly transform the output 4" do
-      poefy = Poefy::PoefyGen.new :spec_shakespeare
+      poefy = Poefy::Poem.new :spec_shakespeare
       transform_proc = proc { |line, num, poem| "#{num} #{line.downcase}" }
       poem = poefy.poem({ form: :sonnet, transform: transform_proc })
       expect(poem.count).to be 14
@@ -587,7 +587,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should use the exact poetic form 1" do
-      poefy = Poefy::PoefyGen.new(:spec_whitman, {
+      poefy = Poefy::Poem.new(:spec_whitman, {
         form_from_text: @text
       })
       poem = poefy.poem
@@ -601,7 +601,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should use the exact poetic form 2" do
-      poefy = Poefy::PoefyGen.new :spec_whitman
+      poefy = Poefy::Poem.new :spec_whitman
       poem = poefy.poem({
         form_from_text: @text
       })
@@ -615,7 +615,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly modify the poetic form 1" do
-      poefy = Poefy::PoefyGen.new(:spec_whitman, {
+      poefy = Poefy::Poem.new(:spec_whitman, {
         form_from_text: @text,
         syllable: 6
       })
@@ -630,7 +630,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly modify the poetic form 2" do
-      poefy = Poefy::PoefyGen.new :spec_whitman
+      poefy = Poefy::Poem.new :spec_whitman
       poem = poefy.poem({
         form_from_text: @text,
         syllable: 6
@@ -645,7 +645,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly modify the poetic form 3" do
-      poefy = Poefy::PoefyGen.new(:spec_whitman, {
+      poefy = Poefy::Poem.new(:spec_whitman, {
         form_from_text: @text
       })
       poem = poefy.poem({
@@ -661,7 +661,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
     end
 
     it "should correctly replace the poetic form" do
-      poefy = Poefy::PoefyGen.new(:spec_whitman, {
+      poefy = Poefy::Poem.new(:spec_whitman, {
         syllable: 6
       })
       poem = poefy.poem({

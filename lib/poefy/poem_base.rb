@@ -2,12 +2,12 @@
 # Encoding: UTF-8
 
 ################################################################################
-# Base internals for the PoefyGen class.
+# Base internals for the Poem class.
 ################################################################################
 
 module Poefy
 
-  module PoefyGenBase
+  module PoemBase
 
     attr_reader :console, :db, :local, :overwrite
 

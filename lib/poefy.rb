@@ -14,7 +14,7 @@ require 'timeout'
 
 require_relative 'poefy/version.rb'
 require_relative 'poefy/self.rb'
-require_relative 'poefy/poefy_gen_base.rb'
+require_relative 'poefy/poem_base.rb'
 require_relative 'poefy/generation.rb'
 require_relative 'poefy/poetic_forms.rb'
 require_relative 'poefy/poetic_form_from_text.rb'
@@ -28,9 +28,9 @@ require_relative 'poefy/core_extensions/array.rb'
 
 module Poefy
 
-  class PoefyGen
+  class Poem
 
-    include Poefy::PoefyGenBase
+    include Poefy::PoemBase
     include Poefy::Generation
     include Poefy::PoeticForms
     include Poefy::PoeticFormFromText

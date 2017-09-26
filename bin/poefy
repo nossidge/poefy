@@ -2,7 +2,7 @@
 # Encoding: UTF-8
 
 ################################################################################
-# Use Poefy::PoefyGen to make a poem from the command line.
+# Use Poefy::Poem to make a poem from the command line.
 ################################################################################
 
 require 'optparse'
@@ -205,7 +205,7 @@ if first_arg == 'make_dbs'
   make_db = proc do |database, textfile, description|
     file  = Poefy.root + '/data/' + textfile
     input = File.readlines(file).keep_if { |i| i =~ /[a-z]/ }
-    poefy = Poefy::PoefyGen.new database
+    poefy = Poefy::Poem.new database
     poefy.make_database! input, description
   end
   [
@@ -244,7 +244,7 @@ options[:form] = second_arg if second_arg != ''
 # If we need to make a corpus.
 # Exit the program after corpus is generated.
 if options[:make_corpus]
-  poefy = Poefy::PoefyGen.new first_arg
+  poefy = Poefy::Poem.new first_arg
   if data
     poefy.make_database data, options[:corpus_desc], true
     poefy.close
@@ -259,7 +259,7 @@ end
 # If we need to update a corpus description.
 # Exit the program after corpus is generated.
 if options[:corpus_desc]
-  poefy = Poefy::PoefyGen.new first_arg
+  poefy = Poefy::Poem.new first_arg
   begin
     poefy.db.desc = options[:corpus_desc]
     poefy.close
@@ -273,7 +273,7 @@ end
 # If the second argument is 'rhyme', then output all
 #   lines that rhyme with the word.
 if second_arg == 'rhyme'
-  poefy = Poefy::PoefyGen.new first_arg
+  poefy = Poefy::Poem.new first_arg
   third_arg  = (ARGV.length > 2) ? ARGV[2] : nil
   fourth_arg = (ARGV.length > 3) ? ARGV[3] : nil
   puts poefy.rhymes(third_arg, fourth_arg)
@@ -287,7 +287,7 @@ if data or File.exists?(second_arg)
 end
 
 # Create poefy object using the options.
-poefy = Poefy::PoefyGen.new first_arg, options
+poefy = Poefy::Poem.new first_arg, options
 
 # Make the correct number of poems, and output them.
 number = options[:number] || 1
