@@ -357,6 +357,7 @@ To make a poefy database and generate poems from it:
 require 'poefy'
 poefy = Poefy::PoefyGen.new('shakespeare')
 poefy.make_database('shakespeare_sonnets.txt')
+poefy.close
 ```
 
 `make_database` will accept a filename string, an array of lines, or a long string delimited by newlines.
@@ -378,6 +379,7 @@ puts poefy.poem ({ form: 'sonnet', indent: '01010101001101' })
 puts poefy.poem ({ form: 'sonnet', proper: false })
 puts poefy.poem ({ form_from_text: 'how_do_i_love_thee.txt' })
 puts poefy.poem ({ form_from_text: 'how_do_i_love_thee.txt', syllable: 0 })
+poefy.close
 ```
 
 All options can be specified at object initialisation, and subsequent poems will use those options as default:
@@ -394,6 +396,8 @@ puts poefy.poem ({ proper: false })
 
 # Generate a proper rondeau with a certain indentation
 puts poefy.poem ({ indent: '01012 0012 010112' })
+
+poefy.close
 ```
 
 
@@ -410,6 +414,7 @@ transform_hash = {
 }
 poefy = Poefy::PoefyGen.new 'shakespeare'
 puts poefy.poem({ form: :sonnet, transform: transform_hash })
+poefy.close
 ```
 
 The key for the hash corresponds to the line of the poem, starting from 1 (not 0). You can use negative keys to specify from the end of the poem. Any key that is not an integer or is out of the array bounds will be ignored.
@@ -420,6 +425,7 @@ If you don't include a hash, then the proc will be applied to each line. So to a
 transform_proc = proc { |line, num, poem| "#{num.to_s.rjust(2)} #{line}" }
 poefy = Poefy::PoefyGen.new 'shakespeare'
 puts poefy.poem({ form: :sonnet, transform: transform_proc })
+poefy.close
 ```
 
 The proc arguments `|line, num, poem|` are: the text of the line that is being replaced, the number of the line, and the full poem array as it was before any transformations had occurred.

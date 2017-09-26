@@ -20,21 +20,13 @@ module Poefy
 
     attr_reader :name, :local, :console
 
-    # Finalizer must be a class variable.
-    @@final = proc { |dbase, sproc| proc {
-      sproc.each { |k, v| v.close }
-      dbase.close if dbase
-    } }
-
     def initialize name, local = false, console = false
       @local = local
       @console = console
       @name = name.to_s
       @sproc = {}
-
       type
       db
-      ObjectSpace.define_finalizer(self, @@final.call(@db, @sproc))
     end
 
     ############################################################################
