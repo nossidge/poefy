@@ -51,20 +51,14 @@ module Poefy
     end
 
     # Open instance database session, if not already existing.
-    # This is called in all methods where it is needed. So no need to
-    #   execute it before any calling code.
     def db
-      if not @db
-        if !exists?
-          @db = nil
-        else
-          begin
-            open_connection
-          rescue
-            @db = nil
-            return handle_error 'ERROR: Database contains invalid structure'
-          end
+      if not @db and exists?
+        begin
+          open_connection
           create_sprocs
+        rescue
+          @db = nil
+          return handle_error 'ERROR: Database contains invalid structure'
         end
       end
       @db
@@ -100,6 +94,9 @@ module Poefy
 
       # Import the data.
       insert_lines table, import_data
+
+      # Recreate the stored procedures.
+      create_sprocs
     end
 
     # Public interfaces for private stored procedure methods.
