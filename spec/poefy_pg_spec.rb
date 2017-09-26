@@ -9,23 +9,38 @@ describe Poefy::PoefyGen, "-- Postgres" do
     # ToDo: Replace with 'poefy/pg'
     require_relative '../lib/poefy/pg.rb'
     @root = Poefy.root
+    dbs = %w{spec_test_tiny spec_shakespeare spec_whitman}
+    dbs.each do |db_name|
+      Poefy::Database.single_exec! <<-SQL
+        SET client_min_messages TO WARNING;
+        DROP TABLE IF EXISTS #{db_name};
+      SQL
+    end
   end
 
   after(:all) do
     dbs = %w{spec_test_tiny spec_shakespeare spec_whitman}
     dbs.each do |db_name|
-      Poefy::Database.single_exec! "DROP TABLE #{db_name};"
+      Poefy::Database.single_exec! <<-SQL
+        SET client_min_messages TO WARNING;
+        DROP TABLE IF EXISTS #{db_name};
+      SQL
     end
   end
 
-  describe "using tiny dataset 'spec_test_tiny'" do
+  ##############################################################################
 
-    file_txt  = "spec_test_tiny.txt"
-    file_db   = "spec_test_tiny"
-    row_count = 12
+  describe "using tiny dataset 'spec_test_tiny'" do
+    corpus = "spec_test_tiny"
+
+    # Create a small corpus of a few rhymes.
+    text_array = %w{man plan flan can dan fish dish wish bee sea tree flea}
+    text_array.map!{ |i| 'a ' + i }
+    text_string = text_array.join("\n")
+    row_count = text_array.count
 
     before(:each) do
-      @poefy = Poefy::PoefyGen.new(file_db, { proper: false })
+      @poefy = Poefy::PoefyGen.new(corpus, { proper: false })
     end
     after(:each) do
       @poefy.close
@@ -34,11 +49,41 @@ describe Poefy::PoefyGen, "-- Postgres" do
       expect(@poefy).to_not be_nil
     end
 
-    describe "#make_database( '#{@root}/data/#{file_txt}', true )" do
-      it "should make the database '#{file_db}" do
-        @poefy.make_database! "#{@root}/data/#{file_txt}"
+    # Create corpora in the three different ways.
+    describe "@poefy#make_database!" do
+
+      it "Use array of strings" do
+        @poefy.make_database! text_array
         expect(@poefy.db.exists?).to be true
         expect(@poefy.db.count).to be row_count
+        poem = @poefy.poem({ rhyme: 'aabb' })
+        expect(poem.count).to be 4
+      end
+
+      it "Use one long newline delimited string" do
+        @poefy.make_database! text_string
+        expect(@poefy.db.exists?).to be true
+        expect(@poefy.db.count).to be row_count
+        poem = @poefy.poem({ rhyme: 'aabb' })
+        expect(poem.count).to be 4
+      end
+
+      it "Use text lines from a file" do
+
+        # Create a temp file.
+        tmp = Tempfile.new('spec-', Poefy.root + '/spec')
+        text_path = tmp.path
+        tmp.write text_string
+        tmp.close
+
+        @poefy.make_database! text_path
+        expect(@poefy.db.exists?).to be true
+        expect(@poefy.db.count).to be row_count
+        poem = @poefy.poem({ rhyme: 'aabb' })
+        expect(poem.count).to be 4
+
+        # Delete the temp file.
+        tmp.delete
       end
     end
 
@@ -225,7 +270,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
 
   ##############################################################################
 
-  describe "using dataset shakespeare / shakespeare_sonnets.txt" do
+  describe "using dataset 'spec_shakespeare'" do
 
     file_txt = "shakespeare_sonnets.txt"
     file_db  = "spec_shakespeare"
@@ -328,7 +373,7 @@ describe Poefy::PoefyGen, "-- Postgres" do
 
   ##############################################################################
 
-  describe "using dataset whitman / whitman_leaves.txt" do
+  describe "using dataset 'spec_whitman'" do
 
     file_txt = "whitman_leaves.txt"
     file_db  = "spec_whitman"
