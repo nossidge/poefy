@@ -45,7 +45,7 @@ module Poefy
       # This will not work for floats.
       # It will also break emoticons, but GIGO.
       def humanize_instr text
-        output = text
+        output = text.dup
         loop do
           num = output[/\d+/]
           break if not num
