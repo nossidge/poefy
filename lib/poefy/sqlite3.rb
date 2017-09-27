@@ -85,6 +85,27 @@ module Poefy
       File.exists?(db_file)
     end
 
+    # Get all rhyming lines for the word.
+    def rhymes word, key = nil
+      return nil if word.nil?
+
+      sql = <<-SQL
+        SELECT rhyme, final_word, syllables, line
+        FROM lines
+        WHERE rhyme = ?
+        ORDER BY rhyme, final_word, syllables, line
+      SQL
+      output = word.to_phrase.rhymes.keys.map do |rhyme|
+        rs = execute!(sql, [rhyme]).to_a
+        rs.each{ |a| a.reject!{ |k| k.is_a? Numeric }}
+      end.flatten
+
+      if !key.nil? and %w[rhyme final_word syllables line].include?(key)
+        output.map!{ |i| i[key] }
+      end
+      output
+    end
+
     private
 
       # The name of the table.
@@ -168,17 +189,17 @@ module Poefy
       def sprocs_sql_hash
         sql = {}
         sql[:rbc] = <<-SQL
-          SELECT rhyme, COUNT(rhyme) AS rc
+          SELECT rhyme, COUNT(rhyme) AS count
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
             FROM #{table}
             GROUP BY rhyme, final_word
           )
           GROUP BY rhyme
-          HAVING rc >= ?
+          HAVING count >= ?
         SQL
         sql[:rbcs] = <<-SQL
-          SELECT rhyme, COUNT(rhyme) AS rc
+          SELECT rhyme, COUNT(rhyme) AS count
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
             FROM #{table}
@@ -186,7 +207,7 @@ module Poefy
             GROUP BY rhyme, final_word
           )
           GROUP BY rhyme
-          HAVING rc >= ?
+          HAVING count >= ?
         SQL
         sql[:la] = <<-SQL
           SELECT line, syllables, final_word, rhyme

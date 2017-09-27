@@ -59,28 +59,6 @@ module Poefy
       output
     end
 
-    # Get all rhyming lines for the word.
-    def rhymes word, key = nil
-      return nil if word.nil?
-      sproc = @db.db.prepare %Q[
-        SELECT rhyme, final_word, syllables, line
-        FROM lines
-        WHERE rhyme = ?
-        ORDER BY rhyme, final_word, syllables, line
-      ]
-      output = word.to_phrase.rhymes.keys.map do |rhyme|
-        sproc.reset!
-        sproc.bind_param(1, rhyme)
-        sproc.execute.to_a
-      end.flatten
-      sproc.close
-      if !key.nil? and %w[rhyme final_word syllables line].include?(key)
-        output.map!{ |i| i[key] }
-      end
-      output
-    end
-
-
     private
 
       # Use the constraints in 'poetic_form' to generate a poem.

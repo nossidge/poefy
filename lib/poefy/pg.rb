@@ -101,6 +101,26 @@ module Poefy
       false
     end
 
+    # Get all rhyming lines for the word.
+    def rhymes word, key = nil
+      return nil if word.nil?
+
+      sql = <<-SQL
+        SELECT rhyme, final_word, syllables, line
+        FROM #{table}
+        WHERE rhyme = $1
+        ORDER BY rhyme, final_word, syllables, line
+      SQL
+      output = word.to_phrase.rhymes.keys.map do |rhyme|
+        execute!(sql, [rhyme]).to_a
+      end.flatten
+
+      if !key.nil? and %w[rhyme final_word syllables line].include?(key)
+        output.map!{ |i| i[key] }
+      end
+      output
+    end
+
     private
 
       # The name of the table.
@@ -165,7 +185,7 @@ module Poefy
       def sprocs_sql_hash
         sql = {}
         sql[:rbc] = <<-SQL
-          SELECT rhyme, COUNT(rhyme) AS rc
+          SELECT rhyme, COUNT(rhyme) AS count
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
             FROM #{table}
@@ -175,7 +195,7 @@ module Poefy
           HAVING COUNT(rhyme) >= $1
         SQL
         sql[:rbcs] = <<-SQL
-          SELECT rhyme, COUNT(rhyme) AS rc
+          SELECT rhyme, COUNT(rhyme) AS count
           FROM (
             SELECT rhyme, final_word, COUNT(final_word) AS wc
             FROM #{table}
@@ -214,7 +234,7 @@ module Poefy
         rs.values.map do |row|
           {
             'rhyme' => row[0],
-            'rc'    => row[1].to_i
+            'count' => row[1].to_i
           }
         end
       end
@@ -230,7 +250,7 @@ module Poefy
         rs.values.map do |row|
           {
             'rhyme' => row[0],
-            'rc'    => row[1].to_i
+            'count' => row[1].to_i
           }
         end
       end
