@@ -16,6 +16,13 @@ module Poefy
     alias_method :tables,    :corpora
     alias_method :databases, :corpora
 
+    # Same, but with the description of the corpus too.
+    def corpora_with_desc
+      Poefy::Database.list_with_desc
+    end
+    alias_method :tables_with_desc,    :corpora_with_desc
+    alias_method :databases_with_desc, :corpora_with_desc
+
     # Array of all names of poetic forms.
     def poetic_forms
       PoeticForms::POETIC_FORMS.keys.reject { |i| i == :default }

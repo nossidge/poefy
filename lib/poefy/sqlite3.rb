@@ -31,7 +31,7 @@ module Poefy
         File.basename(i, '.db')
       end.reject do |i|
         i.start_with?('spec_')
-      end - ['test']
+      end.sort - ['test']
     end
 
     # Get the description of a database.
@@ -48,7 +48,7 @@ module Poefy
         rescue
           [i, '']
         end
-      end
+      end.to_h
     end
 
     # Get the path of a database.

@@ -47,7 +47,7 @@ module Poefy
       SQL
       rs.flatten.reject do |i|
         i.start_with?('spec_')
-      end - ['test']
+      end.sort - ['test']
     end
 
     # Get the description of a table.
@@ -64,7 +64,7 @@ module Poefy
         rescue
           [i, '']
         end
-      end
+      end.to_h
     end
 
     ############################################################################

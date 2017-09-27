@@ -38,6 +38,17 @@ end
 
 ################################################################################
 
+# List the corpora & descriptions in a nice table format.
+def corpora
+  output = Poefy.corpora_with_desc
+  width = output.keys.max_by(&:length).length
+  output.map do |key, value|
+    sprintf "%-#{width}s  %s", key, value
+  end
+end
+
+################################################################################
+
 def parse_options
   options = { console: true }
 
@@ -67,19 +78,17 @@ def parse_options
     ].gsub('      ','  ')
 
     usage = %[Usage: poefy shakespeare -m < shakespeare_sonnets.txt
+      poefy shakespeare -d "The sonnets of Shakespeare"
       poefy shakespeare sonnet
       poefy spoke haiku
       poefy therese -r 'abab cdcd efef gg' -i '0101 0101 0011 01'
       poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
+      poefy -Lc
     ].gsub('      ','       ')
 
-    corpora = (Poefy::Database.list)
-               .each_slice(4).to_a
-               .map { |i| i.join ', ' }
-               .join("\n" + ' ' * 21)
-    corpora = 'Corpora available: ' + corpora
+    list = 'Corpora: ' + corpora.join("\n         ")
 
-    opts.banner = program_info + "\n" + usage + "\n" + corpora + "\n\n"
+    opts.banner = program_info + "\n" + usage + "\n" + list + "\n\n"
 
     # These will be further validated within the class.
     opts.on('-f', '--form STRING',
@@ -142,15 +151,26 @@ def parse_options
             "Overwrite the description of the corpus") do |s|
       options[:corpus_desc] = s
     end
-    opts.on('-L', '--list',
-            "List all the installed corpora") do
-      puts Poefy::Database.list
-      exit 0
-    end
     opts.on('-l', '--local',
             "(SQLite only) Default is to use database files from /data/\n" + ' ' * 39 +
             "With this option, paths are relative to working directory") do
       options[:local] = true
+    end
+
+    # Database internals.
+    opts.separator nil
+    opts.on('-L', '--list [C|D]',
+            "List all the installed corpora\n" + ' ' * 39 +
+            "Append 'c' or 'd' to list just the corpora or descriptions") do |s|
+      s ||= ' '
+      if s[0].casecmp('c').zero?
+        puts Poefy.corpora
+      elsif s[0].casecmp('d').zero?
+        puts Poefy.corpora_with_desc.values
+      else
+        puts corpora
+      end
+      exit 0
     end
 
     # Help output.
