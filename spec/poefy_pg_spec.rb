@@ -593,8 +593,8 @@ describe Poefy::Poem, "-- Postgres" do
       poem = poefy.poem
       poem.map!(&:strip!)
       expect(poem.count).to be @line_count
-      expect(poem[0]).to eq "[Chorus one]"
-      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[0]).to eq "[Chorus 1]"
+      expect(poem[8]).to eq "[Verse 1]"
       expect(poem[5]).to eq poem[4]
       expect(poem[6]).to eq poem[4]
       poefy.close
@@ -607,8 +607,8 @@ describe Poefy::Poem, "-- Postgres" do
       })
       poem.map!(&:strip!)
       expect(poem.count).to be @line_count
-      expect(poem[0]).to eq "[Chorus one]"
-      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[0]).to eq "[Chorus 1]"
+      expect(poem[8]).to eq "[Verse 1]"
       expect(poem[5]).to eq poem[4]
       expect(poem[6]).to eq poem[4]
       poefy.close
@@ -622,8 +622,8 @@ describe Poefy::Poem, "-- Postgres" do
       poem = poefy.poem
       poem.map!(&:strip!)
       expect(poem.count).to be @line_count
-      expect(poem[0]).to eq "[Chorus one]"
-      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[0]).to eq "[Chorus 1]"
+      expect(poem[8]).to eq "[Verse 1]"
       expect(poem[5]).to eq poem[4]
       expect(poem[6]).to eq poem[4]
       poefy.close
@@ -637,8 +637,8 @@ describe Poefy::Poem, "-- Postgres" do
       })
       poem.map!(&:strip!)
       expect(poem.count).to be @line_count
-      expect(poem[0]).to eq "[Chorus one]"
-      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[0]).to eq "[Chorus 1]"
+      expect(poem[8]).to eq "[Verse 1]"
       expect(poem[5]).to eq poem[4]
       expect(poem[6]).to eq poem[4]
       poefy.close
@@ -653,8 +653,8 @@ describe Poefy::Poem, "-- Postgres" do
       })
       poem.map!(&:strip!)
       expect(poem.count).to be @line_count
-      expect(poem[0]).to eq "[Chorus one]"
-      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[0]).to eq "[Chorus 1]"
+      expect(poem[8]).to eq "[Verse 1]"
       expect(poem[5]).to eq poem[4]
       expect(poem[6]).to eq poem[4]
       poefy.close
@@ -669,8 +669,8 @@ describe Poefy::Poem, "-- Postgres" do
       })
       poem.map!(&:strip!)
       expect(poem.count).to be @line_count
-      expect(poem[0]).to eq "[Chorus one]"
-      expect(poem[8]).to eq "[Verse one]"
+      expect(poem[0]).to eq "[Chorus 1]"
+      expect(poem[8]).to eq "[Verse 1]"
       expect(poem[5]).to eq poem[4]
       expect(poem[6]).to eq poem[4]
       poefy.close
