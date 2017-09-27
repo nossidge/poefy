@@ -16,7 +16,7 @@ module Poefy
     # Generate specific poem types.
     def poem poetic_form = @poetic_form
 
-      if !@db.exists?
+      if !@corpus.exists?
         return handle_error 'ERROR: Database does not yet exist', nil
       end
 
@@ -221,7 +221,7 @@ module Poefy
           # If all the lines include a 'syllable' condition,
           #   then we can specify to only query for matching lines.
           min_max = syllable_min_max line_conds
-          rhymes = @db.sproc_rhymes_all!(line_conds.count, min_max)
+          rhymes = @corpus.sproc_rhymes_all!(line_conds.count, min_max)
 
           # Get just the rhyme part of the hash.
           rhymes = rhymes.map{ |i| i['rhyme'] }
@@ -306,7 +306,7 @@ module Poefy
       # (In a reasonable time-frame)
       def try_rhyme conditions, rhyme, syllable_min_max = nil, regex_all = nil
         output = []
-        lines = @db.sproc_lines_all!(rhyme, syllable_min_max)
+        lines = @corpus.sproc_lines_all!(rhyme, syllable_min_max)
 
         # To reduce the number of permutations, reject lines
         #   that do not match any of the lines regex.

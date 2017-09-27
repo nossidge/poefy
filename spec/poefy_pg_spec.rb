@@ -54,16 +54,16 @@ describe Poefy::Poem, "-- Postgres" do
 
       it "Use array of strings" do
         @poefy.make_database! text_array
-        expect(@poefy.db.exists?).to be true
-        expect(@poefy.db.count).to be row_count
+        expect(@poefy.corpus.exists?).to be true
+        expect(@poefy.corpus.count).to be row_count
         poem = @poefy.poem({ rhyme: 'aabb' })
         expect(poem.count).to be 4
       end
 
       it "Use one long newline delimited string" do
         @poefy.make_database! text_string
-        expect(@poefy.db.exists?).to be true
-        expect(@poefy.db.count).to be row_count
+        expect(@poefy.corpus.exists?).to be true
+        expect(@poefy.corpus.count).to be row_count
         poem = @poefy.poem({ rhyme: 'aabb' })
         expect(poem.count).to be 4
       end
@@ -77,8 +77,8 @@ describe Poefy::Poem, "-- Postgres" do
         tmp.close
 
         @poefy.make_database! text_path
-        expect(@poefy.db.exists?).to be true
-        expect(@poefy.db.count).to be row_count
+        expect(@poefy.corpus.exists?).to be true
+        expect(@poefy.corpus.count).to be row_count
         poem = @poefy.poem({ rhyme: 'aabb' })
         expect(poem.count).to be 4
 
@@ -90,8 +90,8 @@ describe Poefy::Poem, "-- Postgres" do
     # Make sure that the description can be updated as specified
     #   and that it doesn't cause SQL injection.
     describe "corpus description using #desc=" do
-      it "@poefy.db.desc is initially empty" do
-        expect(@poefy.db.desc).to eq ''
+      it "@poefy.corpus.desc is initially empty" do
+        expect(@poefy.corpus.desc).to eq ''
       end
 
       values = [
@@ -110,10 +110,10 @@ describe Poefy::Poem, "-- Postgres" do
         "' or ''='"
       ]
       values.each do |value|
-        it "@poefy.db.desc = #{value}" do
-          @poefy.db.desc = value
-          expect(@poefy.db.desc).to eq value
-          expect(@poefy.db.count).to be row_count
+        it "@poefy.corpus.desc = #{value}" do
+          @poefy.corpus.desc = value
+          expect(@poefy.corpus.desc).to eq value
+          expect(@poefy.corpus.count).to be row_count
         end
       end
     end
@@ -295,7 +295,7 @@ describe Poefy::Poem, "-- Postgres" do
       it "should make the database '#{@root}/data/#{file_db}" do
         input = `sed '/[a-z]/!d' #{@root}/data/#{file_txt}`
         @poefy.make_database! input
-        expect(@poefy.db.exists?).to be true
+        expect(@poefy.corpus.exists?).to be true
       end
     end
 
@@ -397,7 +397,7 @@ describe Poefy::Poem, "-- Postgres" do
       it "should make the database '#{@root}/data/#{file_db}" do
         input = `sed '/[a-z]/!d' #{@root}/data/#{file_txt}`
         @poefy.make_database! input
-        expect(@poefy.db.exists?).to be true
+        expect(@poefy.corpus.exists?).to be true
       end
     end
 

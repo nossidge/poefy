@@ -281,7 +281,7 @@ end
 if options[:corpus_desc]
   poefy = Poefy::Poem.new first_arg
   begin
-    poefy.db.desc = options[:corpus_desc]
+    poefy.corpus.desc = options[:corpus_desc]
     poefy.close
     exit 0
   rescue
@@ -296,7 +296,7 @@ if second_arg == 'rhyme'
   poefy = Poefy::Poem.new first_arg
   third_arg  = (ARGV.length > 2) ? ARGV[2] : nil
   fourth_arg = (ARGV.length > 3) ? ARGV[3] : nil
-  puts poefy.rhymes(third_arg, fourth_arg)
+  puts poefy.corpus.rhymes(third_arg, fourth_arg)
   exit 0
 end
 

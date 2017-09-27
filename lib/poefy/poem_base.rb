@@ -9,22 +9,22 @@ module Poefy
 
   module PoemBase
 
-    attr_reader :console, :db, :local, :overwrite
+    attr_reader :console, :corpus, :local, :overwrite
 
     def initialize db_name, options = {}
       handle_options options
-      @db = Poefy::Database.new db_name, @local, @console
+      @corpus = Poefy::Database.new db_name, @local, @console
     end
 
     # Make a database using the given lines.
     def make_database input, description = nil, overwrite = @overwrite
       lines = validate_lines input
       lines.map(&:strip!)
-      @db.close if @db
+      @corpus.close if @corpus
       if overwrite
-        @db.make_new! lines, description
+        @corpus.make_new! lines, description
       else
-        @db.make_new lines, description
+        @corpus.make_new lines, description
       end
     end
     def make_database! input, description = nil
@@ -33,7 +33,7 @@ module Poefy
 
     # Close the database.
     def close
-      @db.close
+      @corpus.close
     end
 
     # Validate the lines. Arg could be a filename,
