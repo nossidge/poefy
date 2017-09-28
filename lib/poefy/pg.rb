@@ -256,7 +256,7 @@ module Poefy
       end
 
       # Find all lines for a certain rhyme.
-      def sproc_lines_all rhyme
+      def sproc_lines_by_rhyme rhyme
         rs = db.exec_prepared 'la', [rhyme]
         rs.values.map do |row|
           {
@@ -269,7 +269,7 @@ module Poefy
       end
 
       # Also adds syllable selection.
-      def sproc_lines_all_syllables rhyme, syllable_min_max
+      def sproc_lines_by_rhyme_syllables rhyme, syllable_min_max
         arg_array = [
           rhyme,
           syllable_min_max[:min],

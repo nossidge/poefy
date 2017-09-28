@@ -249,14 +249,14 @@ module Poefy
       end
 
       # Find all lines for a certain rhyme.
-      def sproc_lines_all rhyme
+      def sproc_lines_by_rhyme rhyme
         @sproc[:la].reset!
         @sproc[:la].bind_param(1, rhyme)
         @sproc[:la].execute.to_a
       end
 
       # Also adds syllable selection.
-      def sproc_lines_all_syllables rhyme, syllable_min_max
+      def sproc_lines_by_rhyme_syllables rhyme, syllable_min_max
         @sproc[:las].reset!
         @sproc[:las].bind_param(1, rhyme)
         @sproc[:las].bind_param(2, syllable_min_max[:min])
