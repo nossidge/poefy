@@ -18,9 +18,9 @@ module Poefy
     # Open a connection, execute a query, close the connection.
     def self.single_exec! database_name, sql
       path = Database::path database_name
-      connection = SQLite3::Database.open path
-      rs = connection.execute sql
-      connection.close
+      con = SQLite3::Database.open path
+      rs = con.execute sql
+      con.close
       rs
     end
 
@@ -36,8 +36,12 @@ module Poefy
 
     # Get the description of a database.
     def self.desc database_name
-      sql = "SELECT comment FROM comment;"
-      Database::single_exec!(database_name, sql).flatten.first
+      begin
+        sql = "SELECT comment FROM comment;"
+        Database::single_exec!(database_name, sql).flatten.first
+      rescue
+        ''
+      end
     end
 
     # List all database files and their descriptions.

@@ -19,20 +19,18 @@ module Poefy
     def self.single_exec! sql, sql_args = nil
       output = nil
       begin
-        connection = PG.connect(
+        con = PG.connect(
           :dbname   => 'poefy',
           :user     => 'poefy',
           :password => 'poefy'
         )
         output = if sql_args
-          connection.exec(sql, [*sql_args]).values
+          con.exec(sql, [*sql_args]).values
         else
-          connection.exec(sql).values
+          con.exec(sql).values
         end
-      rescue PG::Error => e
-        puts e.message
       ensure
-        connection.close if connection
+        con.close if con
       end
       output
     end
@@ -52,8 +50,12 @@ module Poefy
 
     # Get the description of a table.
     def self.desc table_name
-      sql = "SELECT obj_description($1::regclass, 'pg_class');"
-      single_exec!(sql, [*table_name]).flatten.first.to_s
+      begin
+        sql = "SELECT obj_description($1::regclass, 'pg_class');"
+        single_exec!(sql, [table_name]).flatten.first.to_s
+      rescue
+        ''
+      end
     end
 
     # List all database files and their descriptions.
