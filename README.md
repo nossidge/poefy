@@ -468,6 +468,86 @@ The proc arguments `|line, num, poem|` are: the text of the line that is being r
 The transformations are implemented after the poem has been generated, but before the `indent` has occurred.
 
 
+#### Corpus internals
+
+The `Poefy::Poem.poem` method will do the work of creating a poem for you, but the object also exposes more information about the corpus, if you need it. This is done through the `Poefy::Poem.corpus` object.
+
+```ruby
+# If the corpus database already exists:
+poefy = Poefy::Poem.new('shakespeare')
+puts poefy.corpus.type      # "sqlite3" or "pg"
+puts poefy.corpus.name      # "shakespeare"
+puts poefy.corpus.count     # 2137
+puts poefy.corpus.exists?   # true
+
+# If the corpus has not been generated yet:
+poefy = Poefy::Poem.new('plath')
+puts poefy.corpus.type      # "sqlite3" or "pg"
+puts poefy.corpus.name      # "plath"
+puts poefy.corpus.count     # 0
+puts poefy.corpus.exists?   # false
+```
+
+To view or change the description of the corpus.
+
+```ruby
+poefy = Poefy::Poem.new('shakespeare')
+puts 'Initial description:  ' + poefy.corpus.desc
+
+poefy.corpus.desc = 'a brand new string'
+puts 'Updated description:  ' + poefy.corpus.desc
+
+# Output:
+# Initial description:  Shakespeare's sonnets
+# Updated description:  a brand new string
+```
+
+There's also a public interface to find rhyming lines within the corpus. Let's say we need to find 6 lines with the same rhyme. First, we will get an array of all rhyme keys that have at least 6 distinct final words. Then select one rhyme at random. Use that rhyme to find all lines that have that rhyme key, and remove lines with duplicate last words (so that we don't rhyme e.g. "tree" with "tree"). Then grab a sample 6 lines from that array.
+
+```ruby
+poefy = Poefy::Poem.new('shakespeare')
+line_count = 6
+
+rhymes = poefy.corpus.rhymes_by_count(line_count)
+rhyme = rhymes.sample['rhyme']
+lines = poefy.corpus.lines_by_rhyme(rhyme)
+lines = lines.map{ |i| i['line'] }.shuffle
+lines.uniq!{ |i| i.to_phrase.last_word.downcase }
+puts lines.sample(line_count)
+
+# Mine eye and heart are at a mortal war,
+# Like as the waves make towards the pebbled shore,
+# Let those whom nature hath not made for store,
+# All mine was thine, before thou hadst this more.
+# O! though I love what others do abhor,
+# To show false Art what beauty was of yore.
+```
+
+You can also specify a range for the lines' syllable counts. Just use a hash with keys ':min' and ':max' as the second argument.
+
+```ruby
+poefy = Poefy::Poem.new('whitman')
+line_count = 6
+syllables = {min: 8, max: 8}
+
+rhymes = poefy.corpus.rhymes_by_count(line_count, syllables)
+rhyme = rhymes.sample['rhyme']
+lines = poefy.corpus.lines_by_rhyme(rhyme, syllables)
+lines = lines.map{ |i| i['line'] }.shuffle
+lines.uniq!{ |i| i.to_phrase.last_word.downcase }
+puts lines.sample(line_count)
+
+# As I wended the shores I know,
+# Rhone, and the Guadalquiver flow,
+# Scooting obliquely high and low.
+# O heart-sick days! O nights of woe!
+# Ceaseless she paces to and fro,
+# To be lost if it must be so!
+```
+
+`#rhymes_by_count` and `#lines_by_rhyme` are the only stored procedures that return corpus lines. All the other filtering and line arrangement is done based on the records returned by these two methods.
+
+
 ## Some tips
 
 ### Make a database from a delimited file
