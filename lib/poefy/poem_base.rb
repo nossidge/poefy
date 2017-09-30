@@ -19,7 +19,11 @@ module Poefy
     # Make a database using the given lines.
     def make_database input, description = nil, overwrite = @overwrite
       lines = validate_lines input
-      lines.map(&:strip!)
+      lines.map! do |line|
+        line.force_encoding('utf-8')
+            .gsub("\u00A0", ' ')
+            .strip
+      end
       @corpus.close if @corpus
       if overwrite
         @corpus.make_new! lines, description
@@ -44,8 +48,7 @@ module Poefy
       lines = File.exists?(input.to_s) ? File.read(input) : input
 
       # If lines is not an array, assume string and split on newlines.
-      lines = lines.respond_to?(:each) ? lines : lines.split("\n")
-      lines
+      lines.respond_to?(:each) ? lines : lines.split("\n")
     end
 
     private
