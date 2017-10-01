@@ -60,9 +60,9 @@ Just install the below gem. There is no further setup needed.
 
 ### Set up some example corpora
 
-The repo comes with some text files included. To generate corpora for these files, execute the special `make_dbs` command:
+The repo comes with some initial text files included. To generate corpora for these files, execute the special `poefy_make` binary:
 
-    $ poefy make_dbs
+    $ poefy_make
 
 
 ## Usage

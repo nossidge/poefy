@@ -217,46 +217,6 @@ if first_arg.nil?
   exit 1
 end
 
-# If the first argument is 'make_dbs', then make corpora
-#   from the text files included in the main repo.
-if first_arg == 'make_dbs'
-
-  # Exclude all lines which do not contain lowercase letters.
-  make_db = proc do |database, textfile, description|
-    file  = Poefy.root + '/data/' + textfile
-    input = File.readlines(file).keep_if { |i| i =~ /[a-z]/ }
-    poefy = Poefy::Poem.new database
-    poefy.make_database! input, description
-  end
-  [
-    [
-      'shakespeare',
-      'shakespeare_sonnets.txt',
-      "Shakespeare's sonnets"
-    ],[
-      'therese',
-      'st_therese_of_lisieux.txt',
-      "St. Thérèse of Lisieux"
-    ],[
-      'whitman',
-      'whitman_leaves.txt',
-      "Walt Whitman, Leaves of Grass"
-    ],[
-      'dickinson',
-      'emily_dickinson.txt',
-      "Emily Dickinson"
-    ],[
-      'spoke',
-      'english_as_she_is_spoke.txt',
-      "English As She Is Spoke"
-    ]
-  ].each do |i|
-    make_db.call *i
-  end
-
-  exit 0
-end
-
 # Poetic form name is the second argument, if it exists.
 second_arg = (ARGV.length > 1) ? ARGV[1] : ''
 options[:form] = second_arg if second_arg != ''

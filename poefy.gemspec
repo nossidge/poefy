@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
       $ gem install poefy-pg
       $ gem install poefy-sqlite
     Then run this command to generate the included corpora:
-      $ poefy make_dbs
+      $ poefy_make
     ---}.split("\n").map{ |i| i.sub('    ','') }.join("\n")
 
   s.add_development_dependency('bundler', '~> 1.13')
