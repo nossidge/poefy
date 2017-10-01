@@ -14,6 +14,7 @@ require 'timeout'
 
 require_relative 'poefy/version.rb'
 require_relative 'poefy/self.rb'
+require_relative 'poefy/db_type.rb'
 require_relative 'poefy/poem_base.rb'
 require_relative 'poefy/generation.rb'
 require_relative 'poefy/poetic_forms.rb'
