@@ -391,11 +391,13 @@ To make a poefy database and generate poems from it:
 ```ruby
 require 'poefy'
 poefy = Poefy::Poem.new('shakespeare')
-poefy.make_database('shakespeare_sonnets.txt')
+filename = 'shakespeare_sonnets.txt'
+description = 'The sonnets of Shakespeare'
+poefy.make_database(filename, description)
 poefy.close
 ```
 
-`make_database` will accept a filename string, an array of lines, or a long string delimited by newlines.
+`filename` will accept a string path to a file, an array of lines, or a long string delimited by newlines. `description` is optional.
 
 You only have to make the database once. And then to generate poems:
 
@@ -416,6 +418,8 @@ puts poefy.poem ({ form_from_text: 'how_do_i_love_thee.txt' })
 puts poefy.poem ({ form_from_text: 'how_do_i_love_thee.txt', syllable: 0 })
 poefy.close
 ```
+
+The #poem method requires at least one option of `:rhyme`, `:form`, or `:form_from_text`
 
 All options can be specified at object initialisation, and subsequent poems will use those options as default:
 
