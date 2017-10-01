@@ -8,6 +8,14 @@
 
 module Poefy
 
+  # Are we running this through the console? (Or as a Ruby library?)
+  def self.console= bool
+    @@console = !!bool
+  end
+  def self.console
+    @@console ||= false
+  end
+
   # Attempt to load exactly one of the below files.
   # Array is ordered by priority, so use PostgreSQL before SQLite.
   # ToDo: Replace with 'poefy/pg' and 'poefy/sqlite3'

@@ -8,6 +8,7 @@
 require_relative '../lib/poefy.rb'
 
 Poefy.require_db
+Poefy.console = true
 
 ################################################################################
 

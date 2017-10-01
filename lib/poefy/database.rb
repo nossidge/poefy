@@ -18,11 +18,10 @@ module Poefy
     include Poefy::StringManipulation
     include Poefy::HandleError
 
-    attr_reader :name, :local, :console
+    attr_reader :name, :local
 
-    def initialize name, local = false, console = false
+    def initialize name, local = false
       @local = local
-      @console = console
       @name = name.to_s
       @sproc = {}
       type

@@ -13,7 +13,7 @@ module Poefy
     private
 
       def handle_error msg, return_value = nil
-        if @console
+        if Poefy.console
           STDERR.puts msg
           exit 1
         end
@@ -21,7 +21,7 @@ module Poefy
       end
 
       def raise_error msg
-        if @console
+        if Poefy.console
           STDERR.puts msg
           exit 1
         end

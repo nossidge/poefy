@@ -9,11 +9,11 @@ module Poefy
 
   module PoemBase
 
-    attr_reader :console, :corpus, :local, :overwrite
+    attr_reader :corpus, :local, :overwrite
 
     def initialize db_name, options = {}
       handle_options options
-      @corpus = Poefy::Database.new db_name, @local, @console
+      @corpus = Poefy::Database.new db_name, @local
     end
 
     # Make a database using the given lines.
@@ -55,7 +55,6 @@ module Poefy
 
       # Handle the optional initialize options hash.
       def handle_options options
-        @console     = options[:console]   || false
         @overwrite   = options[:overwrite] || false
         @local       = options[:local]     || false
         @poetic_form = {}
@@ -104,15 +103,6 @@ module Poefy
         # Tiny amendment to solve later errors.
         output[:rhyme] = ' ' if output[:rhyme] == ''
         output
-      end
-
-      # Handle error message. Quit the program if called from console.
-      def handle_error msg
-        if @console
-          STDERR.puts msg
-          exit 1
-        end
-        nil
       end
 
   end

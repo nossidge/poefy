@@ -10,6 +10,7 @@ require 'optparse'
 require_relative '../lib/poefy.rb'
 
 Poefy.require_db
+Poefy.console = true
 
 ################################################################################
 
@@ -25,7 +26,7 @@ end
 ################################################################################
 
 def parse_options
-  options = { console: true }
+  options = {}
 
   # Set up variables used later.
   forms = Poefy.poetic_forms
