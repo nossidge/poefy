@@ -9,8 +9,8 @@ require 'optparse'
 
 require_relative '../lib/poefy.rb'
 
-Poefy.require_db
 Poefy.console = true
+Poefy.require_db
 
 ################################################################################
 

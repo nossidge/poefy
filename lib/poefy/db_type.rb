@@ -38,8 +38,11 @@ module Poefy
           "\n       by default; you must install one of the below gems:" +
           "\n         gem install poefy-sqlite3" +
           "\n         gem install poefy-pg"
-      STDERR.puts msg
-      exit 1
+      if Poefy.console
+        STDERR.puts msg
+        exit 1
+      end
+      raise msg
     end
 
   end
