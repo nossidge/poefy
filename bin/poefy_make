@@ -2,12 +2,55 @@
 # Encoding: UTF-8
 
 ################################################################################
+# Determine which database interface to use, based on the gems installed.
 # Generate initial corpora.
 ################################################################################
 
 require_relative '../lib/poefy.rb'
 
 Poefy.console = true
+
+################################################################################
+
+# Determine which database interface to use, based on the gems installed.
+# Attempt to load exactly one of the below files.
+# Array is ordered by priority, so use PostgreSQL before SQLite.
+# ToDo: Replace with 'poefy/pg' and 'poefy/sqlite3'
+def determine_database_interface
+  loaded_file = nil
+  [
+    '../lib/poefy/pg',
+    '../lib/poefy/sqlite3'
+  ].each do |file|
+    begin
+      require_relative file
+      loaded_file = File.basename(file)
+      break
+    rescue LoadError
+    end
+  end
+
+  # Exit and send error to the console if no file loaded.
+  if loaded_file.nil?
+    msg = "ERROR: Please specify the type of database to use." +
+        "\n       The 'poefy' gem does not implement a database interface" +
+        "\n       by default; you must install one of the below gems:" +
+        "\n         gem install poefy-sqlite3" +
+        "\n         gem install poefy-pg"
+    STDERR.puts msg
+    exit 1
+  end
+
+  loaded_file
+end
+
+# If the user already has a database interface setup, then use that.
+# If they don't, then determine based off installed gems.
+if Poefy.database_type(false).nil?
+  Poefy.database_type = determine_database_interface
+end
+
+# Should already be setup, but just run this to confirm no error is thrown.
 Poefy.require_db
 
 ################################################################################

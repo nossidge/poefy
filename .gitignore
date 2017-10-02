@@ -67,6 +67,9 @@ desktop.ini
 work*.rb
 /~/
 
+# Config files
+settings.yml
+
 # Data files
 /data/
 

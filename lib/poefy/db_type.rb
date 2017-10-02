@@ -6,6 +6,10 @@
 # And for including the correct gem, based on that choice.
 ################################################################################
 
+require 'yaml'
+
+################################################################################
+
 module Poefy
 
   # Are we running this through the console? (Or as a Ruby library?)
@@ -16,35 +20,43 @@ module Poefy
     @@console ||= false
   end
 
-  # Attempt to load exactly one of the below files.
-  # Array is ordered by priority, so use PostgreSQL before SQLite.
-  # ToDo: Replace with 'poefy/pg' and 'poefy/sqlite3'
-  def self.require_db type = ['pg', 'sqlite3']
-
-    loaded_file = nil
-    [*type].each do |file|
-      begin
-        require_relative file
-        loaded_file = file
-        break
-      rescue LoadError
-      end
+  # View and amend the database type in the 'settings' file.
+  def self.database_type= db_name
+    settings_file = Poefy.root + '/settings.yml'
+    File.open(settings_file, 'w') do |file|
+      hsh = {'database' => db_name}
+      file.write hsh.to_yaml
     end
+  end
+  def self.database_type create_file = true
+    settings_file = Poefy.root + '/settings.yml'
+    if not File.exists?(settings_file)
+      return nil if !create_file
+      Poefy.database_type = 'pg'
+    end
+    YAML::load_file(settings_file)['database']
+  end
+
+  # Requires the chosen database interface gem.
+  def self.require_db
+    begin
+      require_relative Poefy.database_type
 
     # Exit and send error to the console if no file loaded.
-    if loaded_file.nil?
-      msg = "ERROR: Please specify the type of database to use." +
-          "\n       The 'poefy' gem does not implement a database interface" +
-          "\n       by default; you must install one of the below gems:" +
-          "\n         gem install poefy-sqlite3" +
-          "\n         gem install poefy-pg"
-      if Poefy.console
-        STDERR.puts msg
-        exit 1
+    rescue LoadError
+      if loaded_file.nil?
+        msg = "ERROR: Please specify the type of database to use." +
+            "\n       The 'poefy' gem does not implement a database interface" +
+            "\n       by default; you must install one of the below gems:" +
+            "\n         gem install poefy-sqlite3" +
+            "\n         gem install poefy-pg"
+        if Poefy.console
+          STDERR.puts msg
+          exit 1
+        end
+        raise msg
       end
-      raise msg
     end
-
   end
 
 end

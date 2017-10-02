@@ -11,6 +11,7 @@ require 'ruby_rhymes'
 require 'wordfilter'
 require 'humanize'
 require 'timeout'
+require 'yaml'
 
 require_relative 'poefy/version.rb'
 require_relative 'poefy/self.rb'

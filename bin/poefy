@@ -148,6 +148,18 @@ def parse_options
       end
       exit 0
     end
+    opts.on('-D', '--database [pg|sqlite3]',
+            "Display the database implementation setting\n" + ' ' * 39 +
+            "Append 'pg' or 'sqlite3' to change programs") do |s|
+      s ||= ' '
+      if s[0].casecmp('p').zero?
+        Poefy.database_type = 'pg'
+      elsif s[0].casecmp('s').zero?
+        Poefy.database_type = 'sqlite3'
+      end
+      puts Poefy.database_type
+      exit 0
+    end
 
     # Help output.
     opts.separator nil
