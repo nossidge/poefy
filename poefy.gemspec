@@ -35,9 +35,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency('bundler', '~> 1.13')
   s.add_development_dependency('rake',    '~> 10.0')
   s.add_development_dependency('rspec',   '~> 3.0')
+  s.add_development_dependency('poefy-sqlite3', '~> 0.1')
+  s.add_development_dependency('poefy-pg',      '~> 0.1')
 
   s.add_runtime_dependency('conditional_sample', '~> 1.0', '>= 1.0.0')
-  s.add_runtime_dependency('sqlite3',            '~> 1.3', '>= 1.3.13')
   s.add_runtime_dependency('ruby_rhymes',        '~> 0.1', '>= 0.1.2')
   s.add_runtime_dependency('wordfilter',         '~> 0.2', '>= 0.2.6')
   s.add_runtime_dependency('humanize',           '~> 1.4', '>= 1.4.0')

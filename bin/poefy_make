@@ -15,12 +15,11 @@ Poefy.console = true
 # Determine which database interface to use, based on the gems installed.
 # Attempt to load exactly one of the below files.
 # Array is ordered by priority, so use PostgreSQL before SQLite.
-# ToDo: Replace with 'poefy/pg' and 'poefy/sqlite3'
 def determine_database_interface
   loaded_file = nil
   [
-    '../lib/poefy/pg',
-    '../lib/poefy/sqlite3'
+    'poefy/pg',
+    'poefy/sqlite3'
   ].each do |file|
     begin
       require_relative file
