@@ -38,9 +38,9 @@ module Poefy
   end
 
   # Requires the chosen database interface gem.
-  def self.require_db
+  def self.require_db db_interface_gem = nil
     begin
-      require_relative Poefy.database_type
+      require_relative (db_interface_gem || Poefy.database_type)
 
     # Exit and send error to the console if no file loaded.
     rescue LoadError

@@ -64,6 +64,13 @@ The repo comes with some initial text files included. To generate corpora for th
 
     $ poefy_make
 
+This command will also setup a `settings.yml` file in the gem root. By default it will be set to 'pg' or 'sqlite3', depending on which gem you installed. If you need to change that setting you can run either of the below:
+
+    $ poefy -D pg
+    $ poefy -D sqlite3
+
+You can use the `-D` option by itself without the argument to see the current database setting.
+
 
 ## Usage
 
@@ -74,7 +81,7 @@ To make a poefy corpus from a text file, run either of the below:
     $ poefy shakespeare -m < shakespeare_sonnets.txt
     $ poefy shakespeare --make < shakespeare_sonnets.txt
 
-This will create a corpus decribing each line of Shakespeare's sonnets. The type of corpus depends on whether you are using PosgreSQL (saved as a table in the 'poefy' database) or SQLite (saved to a database file as ROOT/data/CORPUS.db).
+This will create a corpus describing each line of Shakespeare's sonnets. The type of corpus depends on whether you are using PosgreSQL (saved as a table in the 'poefy' database) or SQLite (saved to a database file as ROOT/data/CORPUS.db).
 
 Now, whenever you want to make poems using Shakespeare's lines, you can just use `poefy shakespeare` and it will read from the already created corpora:
 
@@ -390,10 +397,25 @@ To make a poefy database and generate poems from it:
 
 ```ruby
 require 'poefy'
+
+# Choose one of the below require lines.
+require 'poefy/pg'
+require 'poefy/sqlite3'
+
+# Or you could just run this. It will require the
+# database gem that is specified in 'settings.yml'
+Poefy.require_db
+
+# Set up a Poem object using the name of the corpus.
 poefy = Poefy::Poem.new('shakespeare')
-filename = 'shakespeare_sonnets.txt'
+
+# Filename is the text file containing the lines.
+# Description is an explanation of the data.
+filename    = 'shakespeare_sonnets.txt'
 description = 'The sonnets of Shakespeare'
 poefy.make_database(filename, description)
+
+# Close the database link.
 poefy.close
 ```
 
@@ -497,12 +519,10 @@ To view or change the description of the corpus.
 ```ruby
 poefy = Poefy::Poem.new('shakespeare')
 puts 'Initial description:  ' + poefy.corpus.desc
+# Initial description:  Shakespeare's sonnets
 
 poefy.corpus.desc = 'a brand new string'
 puts 'Updated description:  ' + poefy.corpus.desc
-
-# Output:
-# Initial description:  Shakespeare's sonnets
 # Updated description:  a brand new string
 ```
 
