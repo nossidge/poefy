@@ -18,7 +18,7 @@ module Poefy
   end
 
   def self.version_date
-    '2017-09-08'
+    '2017-10-02'
   end
 
 end
