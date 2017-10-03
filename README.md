@@ -1,11 +1,3 @@
-__Warning: This project is undergoing serious revision at the moment, and parts of this readme are invalid.__
-
-__For the correct documentation for the most recent gem version (0.6.1), please see the revision here:
-[README.md](https://github.com/nossidge/poefy/blob/fb4e39a88296074075a8ad1708e60747f3323baf/README.md)__
-
-__Version 1.0.0 is coming soon, with Postgres support as the major feature.__
-
-
 # Poefy
 
 by [Paul Thompson](https://tilde.town/~nossidge) - nossidge@gmail.com
