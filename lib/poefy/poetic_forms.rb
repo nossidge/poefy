@@ -180,13 +180,18 @@ module Poefy
 
       # If the token is specified in the hash, return it,
       #   else get the token for the named form.
+      def get_poetic_form_rhyme_longest poetic_form = @poetic_form
+        get_poetic_form_token :rhyme, poetic_form, true
+      end
       def get_poetic_form_rhyme poetic_form = @poetic_form
         get_poetic_form_token :rhyme, poetic_form
       end
       def get_poetic_form_indent poetic_form = @poetic_form
         get_poetic_form_token :indent, poetic_form
       end
-      def get_poetic_form_token token, poetic_form = @poetic_form
+      def get_poetic_form_token token,
+                                poetic_form = @poetic_form,
+                                longest = false
         if poetic_form.empty?
           ' '
         elsif poetic_form[token]
@@ -197,7 +202,10 @@ module Poefy
           ' '
         else
           token = POETIC_FORMS[poetic_form[:form].to_sym][token]
-          token = token.is_a?(Array) ? token.sample : token
+          if token.is_a?(Array)
+            token = longest ? token.max_by(&:length) : token.sample
+          end
+          token
         end
       end
 
@@ -223,7 +231,7 @@ module Poefy
         # ["a1"] ["1"] ["1122"] [" 1"] [" 11"] [":1"]
         boolean_array = tokens.map do |i|
           keep = i.gsub(/[^A-Z,0-9]/,'')
-          (keep == '' or !is_int?(keep) or !is_int?(keep))
+          (keep == '' or !is_int?(keep))
         end
         valid = boolean_array.reduce{ |sum, i| sum && i }
         if !valid

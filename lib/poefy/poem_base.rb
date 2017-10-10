@@ -88,7 +88,7 @@ module Poefy
         if output[:rhyme]
           output[:rhyme] = tokenise_rhyme output[:rhyme]
         end
-        rhyme = get_poetic_form_rhyme(output)
+        rhyme = get_poetic_form_rhyme_longest(output)
         if output[:syllable] and rhyme != ' '
           output[:syllable] = transform_string_syllable output[:syllable], rhyme
         end
