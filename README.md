@@ -9,6 +9,45 @@ Poems are created using a template to select lines from the database, according 
 I wrote this because I was banging my head against a wall trying to use [Tracery](https://github.com/galaxykate/tracery) to generate villanelles. Then I remembered that I know how to program computers. Lucky!
 
 
+## Table of Contents
+* [Poefy](#poefy)
+  * [Installation](#installation)
+    * [Install the base gem](#install-the-base-gem)
+    * [Install a database gem](#install-a-database-gem)
+      * [PostgreSQL](#postgresql)
+      * [SQLite](#sqlite)
+    * [Set up some example corpora](#set-up-some-example-corpora)
+  * [Usage](#usage)
+    * [From the Command Line](#from-the-command-line)
+      * [Option `-f` or `--form`](#option-`-f`-or-`--form`)
+      * [Option `-r` or `--rhyme`](#option-`-r`-or-`--rhyme`)
+      * [Option `-i` or `--indent`](#option-`-i`-or-`--indent`)
+      * [Option `-s` or `--syllable`](#option-`-s`-or-`--syllable`)
+      * [Option `-x` or `--regex`](#option-`-x`-or-`--regex`)
+      * [Option `-a` or `--acrostic`](#option-`-a`-or-`--acrostic`)
+      * [Option `-A` or `--acrostic_x`](#option-`-a`-or-`--acrostic_x`)
+      * [Option `-p` or `--proper`](#option-`-p`-or-`--proper`)
+      * [Special case: `rhyme` command](#special-case:-`rhyme`-command)
+      * [Special case: poetic form from text file](#special-case:-poetic-form-from-text-file)
+    * [As a Ruby Gem](#as-a-ruby-gem)
+      * [Option `transform:`](#option-`transform:`)
+      * [Corpus internals](#corpus-internals)
+  * [Some tips](#some-tips)
+    * [Make a database from a delimited file](#make-a-database-from-a-delimited-file)
+    * [Make a database, ignoring short lines](#make-a-database,-ignoring-short-lines)
+    * [Make a database, ignoring uppercase lines](#make-a-database,-ignoring-uppercase-lines)
+    * [Problem: it won't output lines that I know are valid](#problem:-it-won't-output-lines-that-i-know-are-valid)
+    * [Problem: no seriously, it just won't work.](#problem:-no-seriously,-it-just-won't-work.)
+  * [Sample output](#sample-output)
+    * [William Shakespeare, villanelle](#william-shakespeare,-villanelle)
+    * [Emily Dickinson, ballads](#emily-dickinson,-ballads)
+    * [Walt Whitman, Petrarchan sonnet](#walt-whitman,-petrarchan-sonnet)
+    * [English As She Is Spoke, haikus](#english-as-she-is-spoke,-haikus)
+    * [St. Therese of Lisieux, villanelle](#st.-therese-of-lisieux,-villanelle)
+    * [Walt Whitman, lipogram sonnet on 'e'](#walt-whitman,-lipogram-sonnet-on-'e')
+    * [William Shakespeare, acrostic sonnet](#william-shakespeare,-acrostic-sonnet)
+
+
 ## Installation
 
 ### Install the base gem
@@ -99,7 +138,7 @@ You then need to use the `-l` option when generating poems:
     $ cd path/to
     $ poefy -l eliot.db ballata
 
-Note that using this option, you *do* need to specify the '.db' file extension of the chosen corpus.
+Note that using this option you must use the whole file name, i.e. "coleridge.db" and not just "coleridge".
 
 
 #### Option `-f` or `--form`
