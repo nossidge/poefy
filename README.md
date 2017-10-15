@@ -10,18 +10,17 @@ I wrote this because I was banging my head against a wall trying to use [Tracery
 
 
 ## Table of Contents
-* [Poefy](#poefy)
-  * [Installation](#installation)
-    * [Install the base gem](#install-the-base-gem)
-    * [Install a database gem](#install-a-database-gem)
-      * [PostgreSQL](#postgresql)
-      * [SQLite](#sqlite)
-    * [Set up some example corpora](#set-up-some-example-corpora)
-  * [Usage](#usage)
-    * [From the Command Line](#from-the-command-line)
-    * [As a Ruby Gem](#as-a-ruby-gem)
-  * [Some tips](#some-tips)
-  * [Sample output](#sample-output)
+* [Installation](#installation)
+  * [Install the base gem](#install-the-base-gem)
+  * [Install a database gem](#install-a-database-gem)
+    * [PostgreSQL](#postgresql)
+    * [SQLite](#sqlite)
+  * [Set up some example corpora](#set-up-some-example-corpora)
+* [Usage](#usage)
+  * [From the Command Line](#from-the-command-line)
+  * [As a Ruby Gem](#as-a-ruby-gem)
+* [Some tips](#some-tips)
+* [Sample output](#sample-output)
 
 
 ## Installation
