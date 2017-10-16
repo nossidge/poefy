@@ -288,7 +288,8 @@ module Poefy
 
         # To reduce the number of permutations, reject lines
         #   that do not match any of the lines regex.
-        lines.reject! { |i| !(i['line'].match(regex_all)) } if regex_all
+        # ToDo: Why does this line not work?
+        # lines.reject! { |i| !(i['line'].match(regex_all)) } if regex_all
 
         begin
           Timeout::timeout(2) do
