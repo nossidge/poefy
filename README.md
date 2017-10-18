@@ -155,7 +155,7 @@ To view and amend these definitions, the code is in `lib/poefy/poetic_forms.rb`.
     rhyme:    'abcd efgd',
     indent:   '',
     syllable: '[6,6,6,4,0,6,6,6,4]',
-    regex:    '{7=>/^\S+$/}'
+    regex:    { 7 => /^\S+$/ }
   }
 }
 ```
@@ -236,14 +236,14 @@ Specify a regular expression for lines to follow.
 
 If the string is just one regex, all lines will be forced to match that regex.
 
-    $ poefy whitman sonnet -x'^[A-Z].*$'
-    $ poefy whitman sonnet -x'^[^e]*$' -s0
+    $ poefy whitman sonnet -x'^[A-Z]'
+    $ poefy whitman sonnet -x'^[^e]*$'
 
-If the string is a hash, the key will be used to match the line number. Unlike in the `syllable` string, you must use ruby's `=>` key identifier, and not `:` as in JSON. Also, you must put the regex inside `/slashes/`.
+If the string is a hash, the key will be used to match the line number. Unlike in the `syllable` string, you must use ruby's `=>` key identifier, and not `:` as in JSON. Also, you must put the regex inside `'single quotes'`.
 
 Example, to ensure the first line always starts with capitalisation:
 
-    $ poefy whitman sonnet -x'{1=>/^[A-Z].*$/}'
+    $ poefy whitman sonnet -x'{1=>"^[A-Z]"}'
 
 Use a space `-x' '` to specify no regex matching.
 
@@ -437,8 +437,8 @@ puts poefy.poem ({ rhyme: 'abab cdcd efef gg', indent: '0101 0101 0011 01' })
 puts poefy.poem ({ form: 'sonnet' })
 puts poefy.poem ({ form: :sonnet, syllable: 0 })
 puts poefy.poem ({ form: :sonnet, syllable: 10 })
-puts poefy.poem ({ form: :sonnet, regex: /^[A-Z].*$/ })
-puts poefy.poem ({ form: :sonnet, regex: '^[A-Z].*$' })
+puts poefy.poem ({ form: :sonnet, regex: /^[A-Z]/ })
+puts poefy.poem ({ form: :sonnet, regex: '^[A-Z]' })
 puts poefy.poem ({ form: :sonnet, acrostic: 'pauldpthompson' })
 puts poefy.poem ({ form: 'sonnet', indent: '01010101001101' })
 puts poefy.poem ({ form: 'sonnet', proper: false })

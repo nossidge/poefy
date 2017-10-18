@@ -45,6 +45,10 @@
 #
 ################################################################################
 
+require 'yaml'
+
+################################################################################
+
 module Poefy
 
   module PoeticForms
@@ -111,7 +115,7 @@ module Poefy
         rhyme:    'abcd efgd',
         indent:   '',
         syllable: '[6,6,6,4,0,6,6,6,4]',
-        regex:    '{7=>/^\S+$/}'
+        regex:    { 7 => /^\S+$/ }
       }
     }
 
@@ -267,16 +271,6 @@ module Poefy
         end
       end
 
-      # Runs a block of code without warnings.
-      # Used for 'eval' calls.
-      def silence_warnings &block
-        warn_level = $VERBOSE
-        $VERBOSE = nil
-        result = block.call
-        $VERBOSE = warn_level
-        result
-      end
-
       # Sort by keys, to make it more human-readable.
       def sort_hash input
         output = {}
@@ -295,7 +289,6 @@ module Poefy
       # '{0:[8,9],3:[4,5,6],4:[4,5,6]}'
       # '{1:8,5:8}'
       # '{1:8,2:8,3:5,-2:5,-1:8}'
-      # Uses #eval, so pretty likely to mess up big time on error.
       # Use the rhyme string as base for the number of lines in total.
       def transform_string_syllable input, rhyme
         return input if input.is_a? Hash
@@ -321,14 +314,15 @@ module Poefy
         datatype = 'array' if !string.is_a?(Regexp) and string[0] == '['
         datatype = 'hash'  if !string.is_a?(Regexp) and string[0] == '{'
 
-        # Convert string to array, and eval the others.
+        # If it's a basic string format, comvert it to array.
+        # If it's wrapped in [] or {}, then evaluate it using YAML.
         if datatype == 'string'
 
           # Regex cannot be an array, but syllable can.
           if type == :syllable
             arr = each_to_int(string.split(','))
           elsif type == :regex
-            arr = [Regexp.new(string)]
+            arr = (string == []) ? [] : [Regexp.new(string)]
           end
 
           # Set this to be the default '0' hash value.
@@ -336,7 +330,25 @@ module Poefy
           output = { 0 => arr }
           datatype = 'hash'
         else
-          output = silence_warnings { eval string }
+          begin
+            output = YAML.load(string.gsub(':', ': ').gsub(/=>/, ': '))
+          rescue
+            msg = "ERROR: #{type.capitalize} is not valid"
+            return handle_error msg, []
+          end
+
+          # If it's a regex, convert all values to regexp.
+          if type == :regex
+            if output.is_a?(Hash)
+              output.each do |k,v|
+                output[k] = Regexp.new(v)
+              end
+            elsif output.is_a?(Array)
+              output.map! do |i|
+                i = Regexp.new(i)
+              end
+            end
+          end
         end
 
         # Convert array to positioned hash.
