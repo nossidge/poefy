@@ -331,7 +331,14 @@ module Poefy
           datatype = 'hash'
         else
           begin
-            output = YAML.load(string.gsub(':', ': ').gsub(/=>/, ': '))
+            # If it's a regex, mandate the ': ' key seperator.
+            # (This is so the string substitutions don't mess up the regex.)
+            # If it's a syllable, we can be more flexible.
+            as_yaml = string
+            if type == :syllable
+              as_yaml = string.gsub(':', ': ').gsub(/=>/, ': ')
+            end
+            output = YAML.load(as_yaml)
           rescue
             msg = "ERROR: #{type.capitalize} is not valid"
             return handle_error msg, []

@@ -210,7 +210,7 @@ Both of the below will generate limericks, with the second more permissive than 
     $ poefy whitman -r'aabba' -s'[8,8,5,5,8]'
     $ poefy whitman -r'aabba' -s'[[8,9],[8,9],[4,5,6],[4,5,6],[8,9]]'
 
-If the string is a hash, the key will be used to match the line number.
+If the string is a hash, the key will be used to match the line number. The underlying code that reads this uses YAML, but because the values will only be numbers we can be kinder with regards to key identifiers. So you can use `=>` or `:`, and they will be replaced with YAML's default `: `.
 
     $ poefy whitman -r'aabba' -s'{1:8,2:8,3:5,4:5,5:8}'
     $ poefy whitman -r'aabba' -s'{1:[8,9],2:[8,9],3:[4,5,6],4:[4,5,6],5:[8,9]}'
@@ -239,11 +239,11 @@ If the string is just one regex, all lines will be forced to match that regex.
     $ poefy whitman sonnet -x'^[A-Z]'
     $ poefy whitman sonnet -x'^[^e]*$'
 
-If the string is a hash, the key will be used to match the line number. Unlike in the `syllable` string, you must use ruby's `=>` key identifier, and not `:` as in JSON. Also, you must put the regex inside `'single quotes'`.
+If the string is a hash, the key will be used to match the line number. As with the `syllable` string, this will be parsed as YAML, but here we are more concerned about string substition messing up the regex. So you have to use `: ` as the key identifier. Also, you must put the regex inside `'single'` or `"double"` quotes.
 
 Example, to ensure the first line always starts with capitalisation:
 
-    $ poefy whitman sonnet -x'{1=>"^[A-Z]"}'
+    $ poefy whitman sonnet -x'{1: "^[A-Z]"}'
 
 Use a space `-x' '` to specify no regex matching.
 
