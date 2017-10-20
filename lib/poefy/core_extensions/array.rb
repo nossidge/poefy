@@ -13,6 +13,8 @@ module Poefy
     module Array
       module SortByDistance
       end
+      module EvenAndOdd
+      end
     end
   end
 end
@@ -94,10 +96,53 @@ module Poefy::CoreExtensions::Array::SortByDistance
 end
 
 #--
+# Define module methods.
+#++
+module Poefy::CoreExtensions::Array::EvenAndOdd
+
+  ##
+  # Return all elements at odd indices.
+  # First element uses index 0.
+  #
+  def odd_values(start_at_1 = false)
+    self.values_at(* self.each_index.select do |i|
+      start_at_1 ? (i+1).odd? : i.odd?
+    end)
+  end
+
+  ##
+  # Return all elements at odd indices.
+  # First element uses index 1.
+  #
+  def odd_values_from_1
+    self.odd_values(true)
+  end
+
+  ##
+  # Return all elements at even indices.
+  # First element uses index 0.
+  #
+  def even_values(start_at_1 = false)
+    self.values_at(* self.each_index.select do |i|
+      start_at_1 ? (i+1).even? : i.even?
+    end)
+  end
+
+  ##
+  # Return all elements at even indices.
+  # First element uses index 1.
+  #
+  def even_values_from_1
+    self.even_values(true)
+  end
+end
+
+#--
 # Extend Array class.
 #++
 class Array
   include Poefy::CoreExtensions::Array::SortByDistance
+  include Poefy::CoreExtensions::Array::EvenAndOdd
 end
 
 ################################################################################

@@ -307,7 +307,8 @@ module Poefy
         return {} if string == ' '
 
         output = {}
-        line_count = tokenise_rhyme(rhyme).length
+        tokens = tokenise_rhyme(rhyme)
+        line_count = tokens.length
 
         # Figure out datatype.
         datatype = 'string'
@@ -333,10 +334,10 @@ module Poefy
           begin
             # If it's a regex, mandate the ': ' key seperator.
             # (This is so the string substitutions don't mess up the regex.)
-            # If it's a syllable, we can be more flexible.
+            # If it's a syllable, we can be more flexible with gsubs.
             as_yaml = string
             if type == :syllable
-              as_yaml = string.gsub(':', ': ').gsub(/=>/, ': ')
+              as_yaml = string.gsub(':', ': ').gsub('=>', ': ')
             end
             output = YAML.load(as_yaml)
           rescue
@@ -348,7 +349,12 @@ module Poefy
           if type == :regex
             if output.is_a?(Hash)
               output.each do |k,v|
-                output[k] = Regexp.new(v)
+                begin
+                  output[k] = Regexp.new(v)
+                rescue
+                  msg = "ERROR: Regex #{v} at line #{k} is not valid"
+                  return handle_error msg, []
+                end
               end
             elsif output.is_a?(Array)
               output.map! do |i|
@@ -365,6 +371,38 @@ module Poefy
           end.to_h
         end
 
+        # Handle negative keys.
+        output.keys.each do |k|
+          if k.is_a?(Numeric) and k < 0
+            line = line_count + 1 + k
+            output[line] = output[k]
+          end
+        end
+
+        # Find all lines that are not empty.
+        content_lines = tokens.map.with_index do |v, i|
+          i + 1 if (v[:token].strip != '')
+        end.compact
+
+        # Handle 'e' even and 'o' odd lines.
+        even_odd = {}
+        output.keys.each do |k|
+          if %w[e o].include?(k)
+            mth = (k == 'e') ? :even_values_from_1 : :odd_values_from_1
+            content_lines.send(mth).each do |i|
+              even_odd[i] = output[k]
+            end
+          end
+        end
+
+        # Take {even_odd} as the base and overwrite it with specified keys.
+        if even_odd
+          output.keys.each do |k|
+            even_odd[k] = output[k]
+          end
+          output = even_odd
+        end
+
         # Go through each line and make sure there is a value for each.
         # Use default if there is no specific value.
         default_value = output[0] ? output[0] : default
@@ -372,16 +410,8 @@ module Poefy
           output[i] = default_value if output[i].nil?
         end
 
-        # Handle negative keys.
-        output.keys.each do |k|
-          if k < 0
-            line = line_count + 1 + k
-            output[line] = output[k]
-          end
-        end
-
-        # Remove keys less than or equal to zero.
-        output.reject!{ |k| k <= 0 }
+        # Remove keys that are not numeric, or are less than or equal to zero.
+        output.reject!{ |k| !k.is_a?(Numeric) or k <= 0 }
 
         # Return sorted hash.
         sort_hash output
