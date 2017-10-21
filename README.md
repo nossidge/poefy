@@ -210,22 +210,30 @@ Both of the below will generate limericks, with the second more permissive than 
     $ poefy whitman -r'aabba' -s'[8,8,5,5,8]'
     $ poefy whitman -r'aabba' -s'[[8,9],[8,9],[4,5,6],[4,5,6],[8,9]]'
 
-If the string is a hash, the key will be used to match the line number. The underlying code that reads this uses YAML, but because the values will only be numbers we can be kinder with regards to key identifiers. So you can use `=>` or `:`, and they will be replaced with YAML's default `: `.
+If the string is a hash, the key will be used to match the line number. The underlying code that reads this uses YAML, but because the values will only be numbers we can be kinder with regards to key identifiers. So you can use `=>` or `:`, and they will be replaced with YAML's default `: ` (colon + space).
 
     $ poefy whitman -r'aabba' -s'{1:8,2:8,3:5,4:5,5:8}'
     $ poefy whitman -r'aabba' -s'{1:[8,9],2:[8,9],3:[4,5,6],4:[4,5,6],5:[8,9]}'
     $ poefy whitman -r'aabba' -s'{0: [8,9],3: [4,5,6],4: [4,5,6]}'
     $ poefy whitman -r'aabba' -s'{0=>[8,9],3=>[4,5,6],4=>[4,5,6]}'
 
-In the hash form, any lines not explicitly specified will use the value of the '0' key. If there is no '0' key, the lines will be ignored.
-
-The below example will have 8 syllables for the first and fifth lines, but any number for the rest.
+The below example will have 8 syllables for the 1st and 5th lines, but any number for the rest.
 
     $ poefy whitman -r'aabba' -s'{1:8,5:8}'
+
+Any lines not explicitly specified will use the value of the '0' key (zero). If there is no '0' key, the lines will follow no constraints.
+
+The below example will have 8 syllables for the 1st and 5th lines, and 6 syllables for the rest.
+
+    $ poefy whitman -r'aabba' -s'{0:6,1:8,5:8}'
 
 The key of the hash can take the form of negative numbers. In that case, they will refer to lines from the end of the poem. Any duplicated keys will be overwritten by the latest one.
 
     $ poefy whitman -r'aabba' -s'{1:8,2:8,3:5,-2:5,-1:8}'
+
+You can use the special keys 'o' and 'e' to specify odd or even lines. This will ignore empty lines between stanzas (spaces in the rhyme string). The below example will have 8 syllables for the 1st and 3rd lines, 6 syllables for the 2nd and 4th, 6 syllables for the 5th, and 4 syllables for the 6th.
+
+    $ poefy whitman -r'ad bd cd' -s'{o:8,e:6,-2:6,-1:4}'
 
 Use zero `-s0` to specify no syllable matching.
 
@@ -239,7 +247,7 @@ If the string is just one regex, all lines will be forced to match that regex.
     $ poefy whitman sonnet -x'^[A-Z]'
     $ poefy whitman sonnet -x'^[^e]*$'
 
-If the string is a hash, the key will be used to match the line number. As with the `syllable` string, this will be parsed as YAML, but here we are more concerned about string substition messing up the regex. So you have to use `: ` as the key identifier. Also, you must put the regex inside `'single'` or `"double"` quotes.
+If the string is a hash, you can use the same key types as with `syllable` string. Again, it will be parsed as YAML, but here we are more concerned about string substitution messing up the regex. So you have to use `: ` as the key identifier. Also, you must put the regex inside `'single'` or `"double"` quotes.
 
 Example, to ensure the first line always starts with capitalisation:
 

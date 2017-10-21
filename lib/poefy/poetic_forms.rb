@@ -104,12 +104,12 @@ module Poefy
       common: {
         rhyme:    'abcb',
         indent:   '0101',
-        syllable: '[8,6,8,6]'
+        syllable: '{o:8,e:6}'
       },
       ballad: {
         rhyme:    'abab',
         indent:   '0101',
-        syllable: '[8,6,8,6]'
+        syllable: '{o:8,e:6}'
       },
       double_dactyl: {
         rhyme:    'abcd efgd',
