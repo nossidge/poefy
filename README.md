@@ -203,19 +203,25 @@ If the string is comma delimited, all lines will be any of those numbers of syll
 
     $ poefy whitman sonnet -s'9,10,11'
 
+The above can also be written to use a range format:
+
+    $ poefy whitman sonnet -s'9-11'
+
 If the string is an array, each element corresponds to a line in the output. This will skip blank lines.
 
-Both of the below will generate limericks, with the second more permissive than the first.
+All of the below will generate limericks, with the latter ones more permissive than the first.
 
     $ poefy whitman -r'aabba' -s'[8,8,5,5,8]'
     $ poefy whitman -r'aabba' -s'[[8,9],[8,9],[4,5,6],[4,5,6],[8,9]]'
+    $ poefy whitman -r'aabba' -s'[8-9,8-9,4-6,4-6,8-9]'
 
 If the string is a hash, the key will be used to match the line number. The underlying code that reads this uses YAML, but because the values will only be numbers we can be kinder with regards to key identifiers. So you can use `=>` or `:`, and they will be replaced with YAML's default `: ` (colon + space).
 
     $ poefy whitman -r'aabba' -s'{1:8,2:8,3:5,4:5,5:8}'
     $ poefy whitman -r'aabba' -s'{1:[8,9],2:[8,9],3:[4,5,6],4:[4,5,6],5:[8,9]}'
-    $ poefy whitman -r'aabba' -s'{0: [8,9],3: [4,5,6],4: [4,5,6]}'
-    $ poefy whitman -r'aabba' -s'{0=>[8,9],3=>[4,5,6],4=>[4,5,6]}'
+    $ poefy whitman -r'aabba' -s'{1:[8,9],2:[8,9],3:4-6,4:4-6,5:[8,9]}'
+    $ poefy whitman -r'aabba' -s'{0: [8,9],3: [4,5,6],4: 4-6}'
+    $ poefy whitman -r'aabba' -s'{0=>[8,9],3=>[4,5,6],4=>4-6}'
 
 The below example will have 8 syllables for the 1st and 5th lines, but any number for the rest.
 

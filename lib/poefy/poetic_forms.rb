@@ -280,6 +280,23 @@ module Poefy
         output
       end
 
+      # Convert a range in the string form "1-6" to an array.
+      # Assumes elements are integers.
+      def range_to_array input
+        return input if !input.include?('-')
+        vals = input.split('-').map(&:to_i).sort
+        (vals.first..vals.last).to_a
+      end
+
+      # Convert an array in the string form "4,6,8-10,12" to an array.
+      # Assumes elements are integers.
+      def string_to_array input
+        return input if input.is_a?(Numeric) or input.is_a?(Array)
+        input.split(',').map do |i|
+          range_to_array(i)
+        end.flatten.map(&:to_i).sort.uniq
+      end
+
       # '10'
       # '9,10,11'
       # '[8,8,5,5,8]'
@@ -315,13 +332,13 @@ module Poefy
         datatype = 'array' if !string.is_a?(Regexp) and string[0] == '['
         datatype = 'hash'  if !string.is_a?(Regexp) and string[0] == '{'
 
-        # If it's a basic string format, comvert it to array.
+        # If it's a basic string format, convert it to array.
         # If it's wrapped in [] or {}, then evaluate it using YAML.
         if datatype == 'string'
 
           # Regex cannot be an array, but syllable can.
           if type == :syllable
-            arr = each_to_int(string.split(','))
+            arr = string_to_array string
           elsif type == :regex
             arr = (string == []) ? [] : [Regexp.new(string)]
           end
@@ -332,7 +349,7 @@ module Poefy
           datatype = 'hash'
         else
           begin
-            # If it's a regex, mandate the ': ' key seperator.
+            # If it's a regex, mandate the ': ' key separator.
             # (This is so the string substitutions don't mess up the regex.)
             # If it's a syllable, we can be more flexible with gsubs.
             as_yaml = string
@@ -345,8 +362,25 @@ module Poefy
             return handle_error msg, []
           end
 
+          # If it's a syllable, convert all values to int arrays.
+          if type == :syllable
+            if output.is_a?(Hash)
+              output.each do |k,v|
+                begin
+                  output[k] = string_to_array(v)
+                rescue
+                  msg = "ERROR: Syllable #{v} at line #{k} is not valid"
+                  return handle_error msg, []
+                end
+              end
+            elsif output.is_a?(Array)
+              output.map! do |i|
+                i = string_to_array(i)
+              end
+            end
+
           # If it's a regex, convert all values to regexp.
-          if type == :regex
+          elsif type == :regex
             if output.is_a?(Hash)
               output.each do |k,v|
                 begin
