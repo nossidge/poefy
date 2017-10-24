@@ -328,13 +328,12 @@ module Poefy
         line_count = tokens.length
 
         # Figure out datatype.
-        datatype = 'string'
-        datatype = 'array' if !string.is_a?(Regexp) and string[0] == '['
-        datatype = 'hash'  if !string.is_a?(Regexp) and string[0] == '{'
+        datatype = :string
+        datatype = :array if !string.is_a?(Regexp) and string[0] == '['
+        datatype = :hash  if !string.is_a?(Regexp) and string[0] == '{'
 
         # If it's a basic string format, convert it to array.
-        # If it's wrapped in [] or {}, then evaluate it using YAML.
-        if datatype == 'string'
+        if datatype == :string
 
           # Regex cannot be an array, but syllable can.
           if type == :syllable
@@ -346,7 +345,9 @@ module Poefy
           # Set this to be the default '0' hash value.
           arr = arr.first if arr.count == 1
           output = { 0 => arr }
-          datatype = 'hash'
+          datatype = :hash
+
+        # If it's wrapped in [] or {}, then evaluate it using YAML.
         else
           begin
             # If it's a regex, mandate the ': ' key separator.
@@ -362,44 +363,34 @@ module Poefy
             return handle_error msg, []
           end
 
+          # Run different methods on the value depending on the type.
           # If it's a syllable, convert all values to int arrays.
-          if type == :syllable
-            if output.is_a?(Hash)
-              output.each do |k,v|
-                begin
-                  output[k] = string_to_array(v)
-                rescue
-                  msg = "ERROR: Syllable #{v} at line #{k} is not valid"
-                  return handle_error msg, []
-                end
-              end
-            elsif output.is_a?(Array)
-              output.map! do |i|
-                i = string_to_array(i)
+          # If it's a regex, convert all values to regexp.
+          format_value = if type == :syllable
+            Proc.new { |x| string_to_array(x) }
+          elsif type == :regex
+            Proc.new { |x| Regexp.new(x) }
+          end
+
+          # Validate values.
+          if output.is_a?(Hash)
+            output.each do |k, v|
+              begin
+                output[k] = format_value.call(v)
+              rescue
+                msg = "ERROR: #{type.capitalize} #{v} at line #{k} is not valid"
+                return handle_error msg, []
               end
             end
-
-          # If it's a regex, convert all values to regexp.
-          elsif type == :regex
-            if output.is_a?(Hash)
-              output.each do |k,v|
-                begin
-                  output[k] = Regexp.new(v)
-                rescue
-                  msg = "ERROR: Regex #{v} at line #{k} is not valid"
-                  return handle_error msg, []
-                end
-              end
-            elsif output.is_a?(Array)
-              output.map! do |i|
-                i = Regexp.new(i)
-              end
+          elsif output.is_a?(Array)
+            output.map! do |i|
+              i = format_value.call(i)
             end
           end
         end
 
         # Convert array to positioned hash.
-        if datatype == 'array'
+        if datatype == :array
           output = output.map.with_index do |e, i|
             [i+1, e]
           end.to_h
