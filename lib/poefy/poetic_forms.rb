@@ -114,8 +114,8 @@ module Poefy
       double_dactyl: {
         rhyme:    'abcd efgd',
         indent:   '',
-        syllable: '[6,6,6,4,0,6,6,6,4]',
-        regex:    { 7 => /^\S+$/ }
+        syllable: '{0:6, 4m0:4}',
+        regex:    '{7: ^\S+$}'
       }
     }
 
@@ -409,23 +409,33 @@ module Poefy
           i + 1 if (v[:token].strip != '')
         end.compact
 
+        # Handle modulo lines.
         # Handle 'e' even and 'o' odd lines.
-        even_odd = {}
+        modulo_lines = {}
         output.keys.each do |k|
-          if %w[e o].include?(k)
-            mth = (k == 'e') ? :even_values_from_1 : :odd_values_from_1
-            content_lines.send(mth).each do |i|
-              even_odd[i] = output[k]
+          is_modulo = k.respond_to?(:include?) && k.include?('m')
+          is_even_odd = %w[e o].include?(k)
+          if is_modulo or is_even_odd
+            if is_modulo
+              vals = k.split('m').map(&:to_i)
+              divider = vals.first
+              remainder = vals.last
+            elsif is_even_odd
+              divider = 2
+              remainder = (k == 'e') ? 0 : 1
+            end
+            content_lines.modulo_index(divider, remainder, 1).each do |i|
+              modulo_lines[i] = output[k]
             end
           end
         end
 
-        # Take {even_odd} as the base and overwrite it with specified keys.
-        if even_odd
+        # Take {modulo_lines} as the base and overwrite it with specified keys.
+        if modulo_lines
           output.keys.each do |k|
-            even_odd[k] = output[k]
+            modulo_lines[k] = output[k]
           end
-          output = even_odd
+          output = modulo_lines
         end
 
         # Go through each line and make sure there is a value for each.

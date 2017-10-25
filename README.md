@@ -154,8 +154,8 @@ To view and amend these definitions, the code is in `lib/poefy/poetic_forms.rb`.
   double_dactyl: {
     rhyme:    'abcd efgd',
     indent:   '',
-    syllable: '[6,6,6,4,0,6,6,6,4]',
-    regex:    { 7 => /^\S+$/ }
+    syllable: '{0:6, 4m0:4}',
+    regex:    '{7: ^\S+$}'
   }
 }
 ```
@@ -240,6 +240,26 @@ The key of the hash can take the form of negative numbers. In that case, they wi
 You can use the special keys 'o' and 'e' to specify odd or even lines. This will ignore empty lines between stanzas (spaces in the rhyme string). The below example will have 8 syllables for the 1st and 3rd lines, 6 syllables for the 2nd and 4th, 6 syllables for the 5th, and 4 syllables for the 6th.
 
     $ poefy whitman -r'ad bd cd' -s'{o:8,e:6,-2:6,-1:4}'
+
+A more advanced version of the above, you can use the letter 'm' to perform a [modulo operation][0] on the line number. This key takes the format `[divider]m[remainder]`. There's a few examples here, but it's not as complicated as it might first seem.
+
+[0]: https://en.wikipedia.org/wiki/Modulo_operation
+
+If you have stanzas of 6 lines, to match the last line in each you can use the key `6m0`. This is because the line has a number of 6, 12, or 18, and those divide by 6 cleanly, leaving 0 as the remainder:
+
+    $ poefy whitman -r'abcdef abcdef abcdef' -s'{6m0:4}'
+
+To match the first two lines, use `6m1` and `6m2`:
+
+    $ poefy whitman -r'abcdef abcdef abcdef' -s'{6m1:4, 6m2:8}'
+
+This will give you stanzas of three lines, and longer syllable counts for the first line of each stanza:
+
+    $ poefy whitman -r'abb abb cdd cdd' -s'{0:4, 3m1:8}'
+
+This will create a [double dactyl](https://en.wikipedia.org/wiki/Double_dactyl):
+
+    $ poefy whitman -r'abcd efgd' -s'{0:6, 4m0:4}' -x'{7: ^\S+$}'
 
 Use zero `-s0` to specify no syllable matching.
 
