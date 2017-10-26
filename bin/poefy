@@ -60,6 +60,7 @@ def parse_options
       poefy therese -r 'abab cdcd efef gg' -i '0101 0101 0011 01'
       poefy whitman -r 'A1bA2 abA1 abA2 abA1 abA2 abA1A2'
       poefy -Lc
+      poefy -f
     ].gsub('      ','       ')
 
     list = 'Corpora: ' + corpora.join("\n         ")
@@ -67,11 +68,15 @@ def parse_options
     opts.banner = program_info + "\n" + usage + "\n" + list + "\n\n"
 
     # These will be further validated within the class.
-    opts.on('-f', '--form STRING',
+    opts.on('-f', '--form [STRING]',
             "A named poetic form for the output\n" +
             ' ' * 37 + "Specifies rhyme, indent and syllable\n" +
             ' ' * 37 + "One of:\n" +
             ' ' * 39 + forms_by_4.join("\n" + ' ' * 39)) do |s|
+      if s.nil?
+        puts forms
+        exit 0
+      end
       options[:form] = s
     end
     opts.on('-r', '--rhyme STRING', "(See 'Description of rhyme string' below)") do |s|
