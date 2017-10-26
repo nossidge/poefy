@@ -39,11 +39,12 @@ You have two options when it comes to databases.
 
 Install [PostgreSQL 9.0+](https://www.postgresql.org/download/)
 
-Install the below gem.
+Install the gem, and let poefy know that you will be using 'pg'.
 
     $ gem install poefy-pg
+    $ poefy -D pg
 
-Create a new user:
+In your Postgres instance, create a new user:
 
     username: 'poefy'
     password: 'poefy'
@@ -59,9 +60,12 @@ Everything is called 'poefy'. Nice and easy.
 
 Install [SQLite 3.0+](https://sqlite.org/download.html)
 
-Just install the below gem. There is no further setup needed.
+Install the gem, and let poefy know that you will be using 'sqlite3'.
 
     $ gem install poefy-sqlite3
+    $ poefy -D sqlite3
+
+There is no further setup needed.
 
 
 ### Set up some example corpora
@@ -69,13 +73,6 @@ Just install the below gem. There is no further setup needed.
 The repo comes with some initial text files included. To generate corpora for these files, execute the special `poefy_make` binary:
 
     $ poefy_make
-
-This command will also setup a `settings.yml` file in the gem root. By default it will be set to 'pg' or 'sqlite3', depending on which gem you installed. If you need to change that setting you can run either of the below:
-
-    $ poefy -D pg
-    $ poefy -D sqlite3
-
-You can use the `-D` option by itself without the argument to see the current database setting.
 
 
 ## Usage
@@ -241,7 +238,7 @@ You can use the special keys 'o' and 'e' to specify odd or even lines. This will
 
     $ poefy whitman -r'ad bd cd' -s'{o:8,e:6,-2:6,-1:4}'
 
-A more advanced version of the above, you can use the letter 'm' to perform a [modulo operation][0] on the line number. This key takes the format `[divider]m[remainder]`. There's a few examples here, but it's not as complicated as it might first seem.
+A more advanced version of the above, you can use the letter 'm' to perform a [modulo operation][0] on the line number. This key takes the format `[divider]m[remainder]`. There's a few examples here, but it's not as complicated as it might at first seem.
 
 [0]: https://en.wikipedia.org/wiki/Modulo_operation
 

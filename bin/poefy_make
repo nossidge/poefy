@@ -15,6 +15,8 @@ Poefy.console = true
 # Determine which database interface to use, based on the gems installed.
 # Attempt to load exactly one of the below files.
 # Array is ordered by priority, so use PostgreSQL before SQLite.
+# (This code shouldn't really be necessary, unless the user has explicitly
+#   deleted their settings file.)
 def determine_database_interface
   loaded_file = nil
   [
