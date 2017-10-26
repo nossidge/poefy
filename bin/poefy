@@ -112,8 +112,12 @@ def parse_options
             ' ' * 39 + "Defaults to ON -- Use this option to DISABLE") do
       options[:proper] = false
     end
+    opts.on('-c', '--capital',
+            "Capitalise the first letter of each line") do
+      options[:transform] = proc { |line| line.capitalize }
+    end
 
-    # Repeat options.
+    # Poem output options.
     opts.separator nil
     opts.on('-n', '--number INTEGER',
             "Number of poems to generate") do |n|
