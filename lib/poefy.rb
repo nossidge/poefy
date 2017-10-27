@@ -38,7 +38,6 @@ module Poefy
     include Poefy::PoeticFormFromText
     include Poefy::StringManipulation
     include Poefy::ConditionalSample
-    include Poefy::HandleError
 
   end
 

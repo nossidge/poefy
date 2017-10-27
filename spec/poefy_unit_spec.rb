@@ -13,7 +13,6 @@ describe Poefy::Poem, "-- Unit tests" do
       class Sing
         include Poefy::PoeticForms
         include Poefy::StringManipulation
-        include Poefy::HandleError
         public *private_instance_methods
       end.new
     end

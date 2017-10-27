@@ -16,7 +16,6 @@ module Poefy
   class Database
 
     include Poefy::StringManipulation
-    include Poefy::HandleError
 
     attr_reader :name, :local
 
