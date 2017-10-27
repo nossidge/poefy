@@ -42,20 +42,9 @@ module Poefy
     begin
       require 'poefy/' + (db_interface_gem || Poefy.database_type)
 
-    # Exit and send error to the console if no file loaded.
+    # Replace with custom exception.
     rescue LoadError
-      if loaded_file.nil?
-        msg = "ERROR: Please specify the type of database to use." +
-            "\n       The 'poefy' gem does not implement a database interface" +
-            "\n       by default; you must install one of the below gems:" +
-            "\n         gem install poefy-sqlite3" +
-            "\n         gem install poefy-pg"
-        if Poefy.console
-          STDERR.puts msg
-          exit 1
-        end
-        raise msg
-      end
+      raise Poefy::MissingDBInterface
     end
   end
 
