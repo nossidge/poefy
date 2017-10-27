@@ -93,6 +93,11 @@ module Poefy
         # Add line number as ':line' in each element's hash.
         by_line = conditions_by_line(tokenised_rhyme, poetic_form)
 
+        # Remove any regexes that are empty arrays [].
+        by_line.each do |i|
+          i.delete(:regex) if i[:regex] == []
+        end
+
         # If the poetic_form[:proper] option is true, we're going to
         #   need to add additional regex conditions to the first and
         #   last lines.
@@ -288,8 +293,7 @@ module Poefy
 
         # To reduce the number of permutations, reject lines
         #   that do not match any of the lines regex.
-        # ToDo: Why does this line not work?
-        # lines.reject! { |i| !(i['line'].match(regex_all)) } if regex_all
+        lines.reject! { |i| !(i['line'].match(regex_all)) } if regex_all
 
         begin
           Timeout::timeout(2) do
