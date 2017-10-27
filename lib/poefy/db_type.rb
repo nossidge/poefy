@@ -27,19 +27,23 @@ module Poefy
       hsh = {'database' => db_name}
       file.write hsh.to_yaml
     end
+    @@database_type = nil
   end
   def self.database_type create_file = true
+    @@database_type ||= nil
+    return @@database_type if @@database_type
     settings_file = Poefy.root + '/settings.yml'
     if not File.exists?(settings_file)
       return nil if !create_file
       Poefy.database_type = 'pg'
     end
-    YAML::load_file(settings_file)['database']
+    @@database_type = YAML::load_file(settings_file)['database']
   end
 
   # Requires the chosen database interface gem.
   def self.require_db db_interface_gem = nil
     begin
+      @@database_type = db_interface_gem if db_interface_gem
       require 'poefy/' + (db_interface_gem || Poefy.database_type)
 
     # Replace with custom exception.
