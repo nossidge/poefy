@@ -23,6 +23,14 @@ def corpora
   end
 end
 
+# Create a new Poefy::Poem object, and catch any exceptions thrown.
+def poefy_new corpus, options = nil
+  Poefy::Poem.new corpus, options
+rescue Poefy::DatabaseError => e
+  STDERR.puts e.console_msg
+  exit 1
+end
+
 ################################################################################
 
 def parse_options
@@ -221,7 +229,14 @@ options[:form] = second_arg if second_arg != ''
 # If we need to make a corpus.
 # Exit the program after corpus is generated.
 if options[:make_corpus]
-  poefy = Poefy::Poem.new first_arg
+
+  # It's okay if there's an error with an existing database, because
+  # we're creating a new one. So we can swallow any errors here.
+  begin
+    poefy = Poefy::Poem.new first_arg
+  rescue Poefy::DatabaseError
+  end
+
   if data
     poefy.make_database data, options[:corpus_desc], true
     poefy.close
@@ -236,7 +251,7 @@ end
 # If we need to update a corpus description.
 # Exit the program after corpus is generated.
 if options[:corpus_desc]
-  poefy = Poefy::Poem.new first_arg
+  poefy = poefy_new first_arg
   begin
     poefy.corpus.desc = options[:corpus_desc]
     poefy.close
@@ -250,7 +265,7 @@ end
 # If the second argument is 'rhyme', then output all
 #   lines that rhyme with the word.
 if second_arg == 'rhyme'
-  poefy = Poefy::Poem.new first_arg
+  poefy = poefy_new first_arg
   third_arg  = (ARGV.length > 2) ? ARGV[2] : nil
   fourth_arg = (ARGV.length > 3) ? ARGV[3] : nil
   puts poefy.corpus.rhymes(third_arg, fourth_arg)
@@ -264,12 +279,25 @@ if data or File.exists?(second_arg)
 end
 
 # Create poefy object using the options.
-poefy = Poefy::Poem.new first_arg, options
+begin
+  poefy = poefy_new first_arg, options
+rescue Poefy::DatabaseError => e
+  STDERR.puts e.console_msg
+  exit 1
+end
 
 # Make the correct number of poems, and output them.
 number = options[:number] || 1
 number.times do |i|
-  poem = poefy.poem
+
+  # Exit the program if a Poefy error is raised.
+  begin
+    poem = poefy.poem
+  rescue Poefy::Error => e
+    STDERR.puts e.console_msg
+    exit 1
+  end
+
   if poem
     puts poem
     puts nil if i < number - 1

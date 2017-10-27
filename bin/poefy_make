@@ -24,15 +24,19 @@ def determine_database_interface
     'poefy/sqlite3'
   ].each do |file|
     begin
-      require_relative file
+      require file
       loaded_file = File.basename(file)
       break
     rescue LoadError
     end
   end
 
-  # Raise en exception if no file loaded.
-  raise Poefy::MissingDBInterface if loaded_file.nil?
+  # Exit the program if no file loaded.
+  if loaded_file.nil?
+    e = Poefy::MissingDBInterface.new
+    STDERR.puts e.console_msg
+    exit 1
+  end
 
   loaded_file
 end
