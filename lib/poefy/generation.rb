@@ -16,9 +16,8 @@ module Poefy
     # Generate specific poem types.
     def poem poetic_form = @poetic_form
 
-      if !@corpus.exists?
-        return handle_error 'ERROR: Database does not yet exist', nil
-      end
+      # Can't do much if the database doesn't exist.
+      raise Poefy::MissingDatabase unless @corpus.exists?
 
       # Validate the poetic form hash.
       raise ArgumentError, 'Argument must be a hash' unless
@@ -28,10 +27,7 @@ module Poefy
 
       # Make sure the hash contains ':form' or ':rhyme' keys.
       if !(poetic_form[:form] or poetic_form[:rhyme])
-        return handle_error \
-          "ERROR: No valid rhyme or form option specified.\n" +
-          "       Try again using the -f or -r option.\n" +
-          "       Use -h or --help to view valid forms."
+        raise Poefy::MissingFormOrRhyme
       end
 
       # Loop until we find a valid poem.
@@ -69,7 +65,7 @@ module Poefy
         # Tokenise the rhyme string, and return [] if invalid.
         tokenised_rhyme = tokenise_rhyme poetic_form[:rhyme]
         if tokenised_rhyme == []
-          return handle_error 'ERROR: Rhyme string is not valid', []
+          raise Poefy::RhymeError
         end
 
         # Expand poetic_form[:transform], if there's just one element.
@@ -221,7 +217,7 @@ module Poefy
             if poetic_form[:proper]
               msg += "\n       Perhaps try again using the -p option."
             end
-            return handle_error msg
+            raise Poefy::NotEnoughData.new(msg)
           end
           rhymes_already_used << out.first['rhyme']
 

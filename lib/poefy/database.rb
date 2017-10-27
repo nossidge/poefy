@@ -49,7 +49,7 @@ module Poefy
           create_sprocs
         rescue
           @db = nil
-          return handle_error 'ERROR: Database contains invalid structure'
+          raise Poefy::StructureInvalid
         end
       end
       @db

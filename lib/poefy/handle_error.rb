@@ -40,8 +40,9 @@ module Poefy
   #   messages for end users who will be using the bin through the console.
   # If accessing through a console, all these errors are cause to exit.
   class Error < StandardError
-    def initialize short_message, console_message
+    def initialize short_message, console_message = nil
       if Poefy.console
+        console_message ||= "ERROR: " + short_message
         STDERR.puts console_message
         exit 1
       end
@@ -53,22 +54,26 @@ module Poefy
   end
 
   class MissingFormOrRhyme < InputError
-    def initialize msg = "No valid rhyme or form option specified"
-      super
+    @@msg = "No valid rhyme or form option specified"
+    @@con = "ERROR: No valid rhyme or form option specified." +
+          "\n       Try again using the -f or -r option." +
+          "\n       Use -h or --help to view valid forms."
+    def initialize
+      super @@msg, @@con
     end
   end
 
   class RhymeError < InputError
-    def initialize msg = "Rhyme string is not valid"
-      super
+    @@msg = "Rhyme string is not valid"
+    def initialize
+      super @@msg
     end
   end
 
   class HashError < InputError
-    # "ERROR: #{type.capitalize} is not valid"
-    # "ERROR: #{type.capitalize} #{v} at line #{k} is not valid"
-    def initialize msg = "Hash is not valid"
-      super
+    @@msg = "Hash is not valid"
+    def initialize msg = @@msg
+      super @@msg
     end
   end
 
@@ -76,31 +81,34 @@ module Poefy
   end
 
   class NotEnoughData < GenerationError
-    def initialize msg = "Not enough rhyming lines in the input"
-      super
+    @@msg = "Not enough rhyming lines in the input"
+    def initialize con = nil
+      super @@msg, con
     end
   end
 
   class DatabaseError < Error
   end
 
-  class FileError < DatabaseError
-    def initialize msg = "Database does not yet exist"
-      super
+  class MissingDatabase < DatabaseError
+    @@msg = "Database does not yet exist"
+    def initialize
+      super @@msg
     end
   end
 
   class StructureInvalid < DatabaseError
-    def initialize msg = "Database contains invalid structure"
-      super
+    @@msg = "Database contains invalid structure"
+    def initialize con = nil
+      super @@msg, con
     end
   end
 
   class MissingDBInterface < DatabaseError
     @@msg = "Database interface not specified"
     @@con = "ERROR: Please specify the type of database to use." +
-          "\n       'poefy' does not implement a database interface" +
-          "\n       by default; you must install one of the below gems:" +
+          "\n       poefy does not implement a database interface by" +
+          "\n       default; you must install one of the below gems:" +
           "\n         gem install poefy-sqlite3" +
           "\n         gem install poefy-pg"
     def initialize

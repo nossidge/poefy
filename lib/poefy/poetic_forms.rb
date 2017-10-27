@@ -238,9 +238,7 @@ module Poefy
           (keep == '' or !is_int?(keep))
         end
         valid = boolean_array.reduce{ |sum, i| sum && i }
-        if !valid
-          return handle_error 'ERROR: Rhyme string is not valid', []
-        end
+        raise Poefy::RhymeError unless valid
         tokens = [' '] if tokens == ['']
 
         # Output as a hash.
@@ -359,8 +357,8 @@ module Poefy
             end
             output = YAML.load(as_yaml)
           rescue
-            msg = "ERROR: #{type.capitalize} is not valid"
-            return handle_error msg, []
+            msg = "#{type.capitalize} is not valid"
+            raise Poefy::HashError.new(msg)
           end
 
           # Run different methods on the value depending on the type.
@@ -378,8 +376,8 @@ module Poefy
               begin
                 output[k] = format_value.call(v)
               rescue
-                msg = "ERROR: #{type.capitalize} #{v} at line #{k} is not valid"
-                return handle_error msg, []
+                msg = "#{type.capitalize} value '#{v}' at key '#{k}'"
+                raise Poefy::HashError.new(msg)
               end
             end
           elsif output.is_a?(Array)
