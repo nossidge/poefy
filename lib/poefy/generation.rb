@@ -199,7 +199,11 @@ module Poefy
 
           # If all the lines include a 'syllable' condition,
           #   then we can specify to only query for matching lines.
-          min_max = syllable_min_max line_conds
+          begin
+            min_max = syllable_min_max line_conds
+          rescue
+            raise Poefy::SyllableError
+          end
           rhymes = @corpus.rhymes_by_count(line_conds.count, min_max)
 
           # Get just the rhyme part of the hash.

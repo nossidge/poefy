@@ -47,6 +47,15 @@ module Poefy
     end
   end
 
+  class SyllableError < InputError
+    def msg
+      "Syllable string is not valid"
+    end
+    def initialize
+      super msg
+    end
+  end
+
   class HashError < InputError
     def msg
       "Hash is not valid"
@@ -77,7 +86,7 @@ module Poefy
 
   class MissingDatabase < DatabaseError
     def msg
-      "Database does not yet exist"
+      "Database does not exist"
     end
     def initialize
       super msg
