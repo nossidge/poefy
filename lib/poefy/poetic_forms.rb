@@ -289,11 +289,15 @@ module Poefy
       # Convert an array in the string form "4,6,8-10,12" to an array.
       # Assumes elements are integers.
       def string_to_array input
-        return input if input.is_a?(Numeric)
+        return input.to_i.abs if input.is_a?(Numeric)
         arr = input.is_a?(Array) ? input : input.split(',')
         arr.map do |i|
           range_to_array(i)
-        end.flatten.map(&:to_i).sort.uniq
+        end.flatten.map do |i|
+          i.to_i.abs
+        end.sort.uniq.select do |i|
+          i != 0
+        end
       end
 
       # '10'
@@ -318,9 +322,11 @@ module Poefy
       end
 
       # This should work for both syllable and regex strings.
-      def transform_string_to_hash type, string, rhyme, default
+      def transform_string_to_hash type, input_string, rhyme, default
+        string = input_string.dup
         return string if string.is_a? Hash
-        return {} if string == ' '
+        string.strip!
+        return {} if string == ''
 
         output = {}
         tokens = tokenise_rhyme(rhyme)
@@ -328,8 +334,13 @@ module Poefy
 
         # Figure out datatype.
         datatype = :string
-        datatype = :array if !string.is_a?(Regexp) and string[0] == '['
-        datatype = :hash  if !string.is_a?(Regexp) and string[0] == '{'
+        if !string.is_a?(Regexp)
+          if string[0] == '[' or string[-1] == ']'
+            datatype = :array
+          elsif string[0] == '{' or string[-1] == '}'
+            datatype = :hash
+          end
+        end
 
         # If it's a basic string format, convert it to array.
         if datatype == :string
@@ -358,7 +369,7 @@ module Poefy
             end
             output = YAML.load(as_yaml)
           rescue
-            msg = "#{type.capitalize} is not valid"
+            msg = "#{type.capitalize} hash is not valid"
             raise Poefy::HashError.new(msg)
           end
 
@@ -377,7 +388,7 @@ module Poefy
               begin
                 output[k] = format_value.call(v)
               rescue
-                msg = "#{type.capitalize} value '#{v}' at key '#{k}'"
+                msg = "#{type.capitalize} hash invalid, key='#{k}' value='#{v}'"
                 raise Poefy::HashError.new(msg)
               end
             end
@@ -417,8 +428,13 @@ module Poefy
           if is_modulo or is_even_odd
             if is_modulo
               vals = k.split('m').map(&:to_i)
-              divider = vals.first
-              remainder = vals.last
+              divider = vals.first.to_i
+              remainder = vals.last.to_i
+              if divider == 0
+                msg = "#{type.capitalize} hash invalid,"
+                msg += " key='#{k}', modulo='#{divider}m#{remainder}'"
+                raise Poefy::HashError.new(msg)
+              end
             elsif is_even_odd
               divider = 2
               remainder = (k == 'e') ? 0 : 1
