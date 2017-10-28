@@ -281,7 +281,7 @@ module Poefy
       # Convert a range in the string form "1-6" to an array.
       # Assumes elements are integers.
       def range_to_array input
-        return input if !input.include?('-')
+        return input if input.is_a?(Numeric) || !input.include?('-')
         vals = input.split('-').map(&:to_i).sort
         (vals.first..vals.last).to_a
       end
@@ -289,8 +289,9 @@ module Poefy
       # Convert an array in the string form "4,6,8-10,12" to an array.
       # Assumes elements are integers.
       def string_to_array input
-        return input if input.is_a?(Numeric) or input.is_a?(Array)
-        input.split(',').map do |i|
+        return input if input.is_a?(Numeric)
+        arr = input.is_a?(Array) ? input : input.split(',')
+        arr.map do |i|
           range_to_array(i)
         end.flatten.map(&:to_i).sort.uniq
       end
