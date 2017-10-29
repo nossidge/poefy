@@ -119,11 +119,21 @@ describe Poefy::Poem, "-- Unit tests" do
       end.new
     end
     describe "using rhyme string 'aabba'" do
-      input_and_output = [
+      normal_input = [
+        [0,
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['0',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
         ['10',
           {1=>10,2=>10,3=>10,4=>10,5=>10}],
-        ['9,10,11',
-          {1=>[9,10,11],2=>[9,10,11],3=>[9,10,11],4=>[9,10,11],5=>[9,10,11]}],
+        ['99',
+          {1=>99,2=>99,3=>99,4=>99,5=>99}],
+        ['8,9,10',
+          {1=>[8,9,10],2=>[8,9,10],3=>[8,9,10],4=>[8,9,10],5=>[8,9,10]}],
+        ['6,7,8,9',
+          {1=>[6,7,8,9],2=>[6,7,8,9],3=>[6,7,8,9],4=>[6,7,8,9],5=>[6,7,8,9]}],
+        ['[10]',
+          {1=>10,2=>0,3=>0,4=>0,5=>0}],
         ['[8,8,5,5,8]',
           {1=>8,2=>8,3=>5,4=>5,5=>8}],
         ['[[8,9],[8,9],[4,5,6],[4,5,6],[8,9]]',
@@ -156,6 +166,10 @@ describe Poefy::Poem, "-- Unit tests" do
           {1=>8,2=>6,3=>8,4=>6,5=>4}],
         ['{o:8,e:6,-2:6,-1:4,0:9}',
           {1=>8,2=>6,3=>8,4=>6,5=>4}],
+        ['8-10',
+          {1=>[8,9,10],2=>[8,9,10],3=>[8,9,10],4=>[8,9,10],5=>[8,9,10]}],
+        ['6-9',
+          {1=>[6,7,8,9],2=>[6,7,8,9],3=>[6,7,8,9],4=>[6,7,8,9],5=>[6,7,8,9]}],
         ['4-9',
           { 1=>[4,5,6,7,8,9],
             2=>[4,5,6,7,8,9],
@@ -199,16 +213,110 @@ describe Poefy::Poem, "-- Unit tests" do
             4=>31,
             5=>11}]
       ]
-      input_and_output.each do |pair|
-        it "syllable: #{pair.first}" do
-          rhyme = obj.tokenise_rhyme('aabba')
-          out   = obj.transform_string_syllable(pair.first, 'aabba')
-          again = obj.transform_string_syllable(out, 'aabba')
-          expect(out).to eq pair.last
-          expect(again).to eq out
-          expect(again).to eq pair.last
+      weird_input = [
+        ['40xxxx',
+          {1=>40,2=>40,3=>40,4=>40,5=>40}],
+        ['{3: 4 5}',
+          {1=>0,2=>0,3=>4,4=>0,5=>0}],
+        ['{}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{xxxxx: 8}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{xxxxx: 8000}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{2m12: 9}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{1m0: 9}',
+          {1=>9,2=>9,3=>9,4=>9,5=>9}],
+        ['{1m1: 9}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{-1m0: 9}',
+          {1=>9,2=>9,3=>9,4=>9,5=>9}],
+        ['{-1m1: 9}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{-1m1: -9}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['{10: 2}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0,10=>2}],
+        ['{0:1, 0:2, 0:3, 0:4, 0:5, 0:6, 0:7, 0:8, 0:9}',
+          {1=>9,2=>9,3=>9,4=>9,5=>9}],
+        ['{1: -12}',
+          {1=>12,2=>0,3=>0,4=>0,5=>0}],
+        ['{-12: -12}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['1: 12}',
+          {1=>12,2=>0,3=>0,4=>0,5=>0}],
+        ['1: 12',
+          {1=>1,2=>1,3=>1,4=>1,5=>1}],
+        ['40    ',
+          {1=>40,2=>40,3=>40,4=>40,5=>40}],
+        ['    40',
+          {1=>40,2=>40,3=>40,4=>40,5=>40}],
+        ['{1m1: 9}    ',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['    {1m1: 9}',
+          {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        ['[1,2,3,4,[1,2,3,4,[1,2,3,4,[1,2,3,4,[1,2,3,4,5]]]]]',
+          {1=>1,2=>2,3=>3,4=>4,5=>[1,2,3,4,5]}],
+        ['[1,2,3,4,[1,2,3,4,[1,2,3,4,[1,2,3,4,999,[1,2,3,4,5]]]]]',
+          {1=>1,2=>2,3=>3,4=>4,5=>[1,2,3,4,5,999]}],
+        [[1,2,3,4,[1,2,3,4,[1,2,3,4,[1,2,3,4,999,[1,2,3,4,5]]]]],
+          {1=>1,2=>2,3=>3,4=>4,5=>[1,2,3,4,5,999]}]
+      ]
+      error_input = [
+        'x',
+        'xxxx',
+        'xxxx40',
+        'xx40xx',
+        '<40xxxx></40xxxx>',
+        '{1: 12',
+        '{xxxxx}',
+        '{{xxxxx}}',
+        '{xxxxx: xxxxx}',
+        '{2: f}',
+        '{3: }',
+        '{3: 4: 5}',
+        '{xxxxx: 8000, 0: xxxxx: 8000}',
+        '{40}',
+        '{[40]}',
+        '{{40}}',
+        '{{}}'
+      ]
+      describe "normal input" do
+        normal_input.each do |pair|
+          it "syllable: #{pair.first}" do
+            rhyme = obj.tokenise_rhyme('aabba')
+            out   = obj.transform_string_syllable(pair.first, 'aabba')
+            again = obj.transform_string_syllable(out, 'aabba')
+            expect(out).to eq pair.last
+            expect(again).to eq out
+            expect(again).to eq pair.last
+          end
         end
       end
+      describe "weird (but technically fine) input" do
+        weird_input.each do |pair|
+          it "syllable: #{pair.first}" do
+            rhyme = obj.tokenise_rhyme('aabba')
+            out   = obj.transform_string_syllable(pair.first, 'aabba')
+            again = obj.transform_string_syllable(out, 'aabba')
+            expect(out).to eq pair.last
+            expect(again).to eq out
+            expect(again).to eq pair.last
+          end
+        end
+      end
+      describe "error input" do
+        error_input.each do |i|
+          it "syllable: #{i}" do
+            rhyme = obj.tokenise_rhyme('aabba')
+            expect {
+              obj.transform_string_syllable(i, 'aabba')
+            }.to raise_error(Poefy::SyllableError)
+          end
+        end
+      end
+
     end
   end
 
