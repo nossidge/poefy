@@ -318,32 +318,32 @@ module Poefy
       # '{1:8,2:8,3:5,-2:5,-1:8}'
       # Use the rhyme string as base for the number of lines in total.
       def transform_string_syllable input, rhyme
-        return input if input.is_a? Hash
-        input = input.to_s
-        transform_string_to_hash :syllable, input.gsub(':','=>'), rhyme, 0
+        tokens = tokenise_rhyme rhyme
+        hash = transform_string_to_hash :syllable, input
+        hash = expand_hash_keys :syllable, hash, tokens, 0
+        hash
       end
 
       # Do the same for regular expression strings.
       def transform_string_regex input, rhyme
-        transform_string_to_hash :regex, input, rhyme, nil
+        tokens = tokenise_rhyme rhyme
+        hash = transform_string_to_hash :regex, input
+        hash = expand_hash_keys :regex, hash, tokens, nil
       end
 
       # This should work for both syllable and regex strings.
       # It should also be fine for Integer and Regexp 'input' values.
-      def transform_string_to_hash type, input, rhyme, default
-        string = input.dup
+      def transform_string_to_hash type, string
         return string if string.is_a? Hash
         string.strip! if string.is_a? String
         return {} if string == ''
 
         output = {}
-        tokens = tokenise_rhyme(rhyme)
-        line_count = tokens.length
 
         # Figure out datatype.
         datatype = :string
         if !string.is_a?(Regexp)
-          if string[0] == '[' or string[-1] == ']'
+          if string.is_a?(Array) or string[0] == '[' or string[-1] == ']'
             datatype = :array
           elsif string[0] == '{' or string[-1] == '}'
             datatype = :hash
@@ -369,19 +369,25 @@ module Poefy
 
         # If it's wrapped in [] or {}, then evaluate it using YAML.
         else
-          begin
-            # If it's a regex, mandate the ': ' key separator.
-            # (This is so the string substitutions don't mess up the regex.)
-            # If it's a syllable, we can be more flexible with gsubs.
-            as_yaml = string
-            if type == :syllable
-              as_yaml = string.gsub(':', ': ').gsub('=>', ': ')
+
+          # Don't need to evaluate if it's already an Array.
+          if string.is_a?(Array)
+            output = string
+          else
+            begin
+              # If it's a regex, mandate the ': ' key separator.
+              # (This is so the string substitutions don't mess up the regex.)
+              # If it's a syllable, we can be more flexible with gsubs.
+              as_yaml = string
+              if type == :syllable
+                as_yaml = string.gsub(':', ': ').gsub('=>', ': ')
+              end
+              output = YAML.load(as_yaml)
+            rescue
+              msg = "#{type.capitalize} hash is not valid YAML"
+              e = Object.const_get("Poefy::#{type.capitalize}Error")
+              raise e.new(msg)
             end
-            output = YAML.load(as_yaml)
-          rescue
-            msg = "#{type.capitalize} hash is not valid YAML"
-            e = Object.const_get("Poefy::#{type.capitalize}Error")
-            raise e.new(msg)
           end
 
           # Run different methods on the value depending on the type.
@@ -420,6 +426,14 @@ module Poefy
             [i+1, e]
           end.to_h
         end
+
+        output
+      end
+
+      # Convert non-positive-integer keys into the correct position.
+      def expand_hash_keys type, input, tokens, default
+        output = input.dup
+        line_count = tokens.length
 
         # Handle negative keys.
         output.keys.each do |k|
