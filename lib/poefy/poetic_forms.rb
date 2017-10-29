@@ -289,7 +289,7 @@ module Poefy
       # Convert an array in the string form "4,6,8-10,12" to an array.
       # Assumes elements are positive integers.
       def string_to_array input
-        return input.to_i.abs if input.is_a?(Numeric)
+        return [input.to_i.abs] if input.is_a?(Numeric)
         arr = input.is_a?(Array) ? input : input.split(',')
 
         # Convert to positive integers, and remove duplicates.
@@ -329,10 +329,11 @@ module Poefy
       end
 
       # This should work for both syllable and regex strings.
-      def transform_string_to_hash type, input_string, rhyme, default
-        string = input_string.dup
+      # It should also be fine for Integer and Regexp 'input' values.
+      def transform_string_to_hash type, input, rhyme, default
+        string = input.dup
         return string if string.is_a? Hash
-        string.strip!
+        string.strip! if string.is_a? String
         return {} if string == ''
 
         output = {}
@@ -352,11 +353,13 @@ module Poefy
         # If it's a basic string format, convert it to array.
         if datatype == :string
 
-          # Regex cannot be an array, but syllable can.
-          if type == :syllable
-            arr = string_to_array string
-          elsif type == :regex
+          # Regex cannot be an array or range, but syllable can.
+          if type == :regex
             arr = (string == []) ? [] : [Regexp.new(string)]
+
+          # Special case for if a user explicitly states only '0'.
+          elsif type == :syllable
+            arr = string == '0' ? [0] : string_to_array(string)
           end
 
           # Set this to be the default '0' hash value.
@@ -385,7 +388,10 @@ module Poefy
           # If it's a syllable, convert all values to int arrays.
           # If it's a regex, convert all values to regexp.
           format_value = if type == :syllable
-            Proc.new { |x| string_to_array(x) }
+            Proc.new do |x|
+              arr = string_to_array(x)
+              arr.count == 1 ? arr.first : arr
+            end
           elsif type == :regex
             Proc.new { |x| Regexp.new(x) }
           end
