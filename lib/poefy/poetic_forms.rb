@@ -287,17 +287,24 @@ module Poefy
       end
 
       # Convert an array in the string form "4,6,8-10,12" to an array.
-      # Assumes elements are integers.
+      # Assumes elements are positive integers.
       def string_to_array input
         return input.to_i.abs if input.is_a?(Numeric)
         arr = input.is_a?(Array) ? input : input.split(',')
-        arr.map do |i|
+
+        # Convert to positive integers, and remove duplicates.
+        output = arr.map do |i|
           range_to_array(i)
         end.flatten.map do |i|
           i.to_i.abs
         end.sort.uniq.select do |i|
           i != 0
         end
+
+        # This cannot be an empty array []. It will fail anyway when we
+        #   come to do the poem generation, but it's better to fail now.
+        raise Poefy::SyllableError.new if output.empty?
+        output
       end
 
       # '10'
@@ -369,8 +376,9 @@ module Poefy
             end
             output = YAML.load(as_yaml)
           rescue
-            msg = "#{type.capitalize} hash is not valid"
-            raise Poefy::HashError.new(msg)
+            msg = "#{type.capitalize} hash is not valid YAML"
+            e = Object.const_get("Poefy::#{type.capitalize}Error")
+            raise e.new(msg)
           end
 
           # Run different methods on the value depending on the type.
@@ -389,7 +397,8 @@ module Poefy
                 output[k] = format_value.call(v)
               rescue
                 msg = "#{type.capitalize} hash invalid, key='#{k}' value='#{v}'"
-                raise Poefy::HashError.new(msg)
+                e = Object.const_get("Poefy::#{type.capitalize}Error")
+                raise e.new(msg)
               end
             end
           elsif output.is_a?(Array)
@@ -433,7 +442,8 @@ module Poefy
               if divider == 0
                 msg = "#{type.capitalize} hash invalid,"
                 msg += " key='#{k}', modulo='#{divider}m#{remainder}'"
-                raise Poefy::HashError.new(msg)
+                e = Object.const_get("Poefy::#{type.capitalize}Error")
+                raise e.new(msg)
               end
             elsif is_even_odd
               divider = 2

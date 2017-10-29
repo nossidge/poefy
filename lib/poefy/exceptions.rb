@@ -26,7 +26,7 @@ module Poefy
 
   class MissingFormOrRhyme < InputError
     def msg
-      "No valid rhyme or form option specified"
+      "No valid rhyme or form input specified"
     end
     def console_msg
         "ERROR: No valid rhyme or form option specified." +
@@ -40,7 +40,7 @@ module Poefy
 
   class RhymeError < InputError
     def msg
-      "Rhyme string is not valid"
+      "Rhyme input is not valid"
     end
     def initialize
       super msg
@@ -49,16 +49,16 @@ module Poefy
 
   class SyllableError < InputError
     def msg
-      "Syllable string is not valid"
+      "Syllable input is not valid"
     end
-    def initialize
-      super msg
+    def initialize short_message = msg
+      super short_message
     end
   end
 
-  class HashError < InputError
+  class RegexError < InputError
     def msg
-      "Hash is not valid"
+      "Regular expression input is not valid"
     end
     def initialize short_message = msg
       super short_message
