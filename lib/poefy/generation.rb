@@ -26,7 +26,11 @@ module Poefy
       poetic_form = @poetic_form.merge poetic_form
 
       # Make sure the hash contains ':form' or ':rhyme' keys.
-      if !(poetic_form[:form] or poetic_form[:rhyme])
+      # Make sure the rhyme token is not empty.
+      rhyme = poetic_form[:rhyme]
+      if !(rhyme || poetic_form[:form])
+        raise Poefy::MissingFormOrRhyme
+      elsif (rhyme && rhyme.count == 1 && rhyme.first[:token] == ' ')
         raise Poefy::MissingFormOrRhyme
       end
 
@@ -53,6 +57,15 @@ module Poefy
       end
 
       output
+    end
+
+    # Same as the above method, but swallow any errors.
+    def poem! poetic_form = @poetic_form
+      begin
+        poem poetic_form
+      rescue Poefy::Error
+        nil
+      end
     end
 
     private
