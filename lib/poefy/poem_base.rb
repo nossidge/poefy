@@ -90,10 +90,10 @@ module Poefy
         end
         rhyme = get_poetic_form_rhyme_longest(output)
         if output[:syllable] and rhyme != ' '
-          output[:syllable] = transform_string_syllable output[:syllable], rhyme
+          output[:syllable] = transform_input_syllable output[:syllable], rhyme
         end
         if output[:regex]
-          output[:regex] = transform_string_regex output[:regex], rhyme
+          output[:regex] = transform_input_regex output[:regex], rhyme
         end
 
         # Get from instance by default.

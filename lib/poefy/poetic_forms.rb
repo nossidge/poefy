@@ -317,35 +317,35 @@ module Poefy
       # '{1:8,5:8}'
       # '{1:8,2:8,3:5,-2:5,-1:8}'
       # Use the rhyme string as base for the number of lines in total.
-      def transform_string_syllable input, rhyme
+      def transform_input_syllable input, rhyme
         tokens = tokenise_rhyme rhyme
-        hash = transform_string_to_hash :syllable, input
+        hash = transform_input_to_hash :syllable, input
         hash = expand_hash_keys :syllable, hash, tokens, 0
         hash
       end
 
       # Do the same for regular expression strings.
-      def transform_string_regex input, rhyme
+      def transform_input_regex input, rhyme
         tokens = tokenise_rhyme rhyme
-        hash = transform_string_to_hash :regex, input
+        hash = transform_input_to_hash :regex, input
         hash = expand_hash_keys :regex, hash, tokens, nil
       end
 
       # This should work for both syllable and regex strings.
       # It should also be fine for Integer and Regexp 'input' values.
-      def transform_string_to_hash type, string
-        return string if string.is_a? Hash
-        string.strip! if string.is_a? String
-        return {} if string == ''
+      def transform_input_to_hash type, input
+        return input if input.is_a? Hash
+        input.strip! if input.is_a? String
+        return {} if input == ''
 
         output = {}
 
         # Figure out datatype.
         datatype = :string
-        if !string.is_a?(Regexp)
-          if string.is_a?(Array) or string[0] == '[' or string[-1] == ']'
+        if !input.is_a?(Regexp)
+          if input.is_a?(Array) or input[0] == '[' or input[-1] == ']'
             datatype = :array
-          elsif string[0] == '{' or string[-1] == '}'
+          elsif input[0] == '{' or input[-1] == '}'
             datatype = :hash
           end
         end
@@ -355,11 +355,11 @@ module Poefy
 
           # Regex cannot be an array or range, but syllable can.
           if type == :regex
-            arr = (string == []) ? [] : [Regexp.new(string)]
+            arr = (input == []) ? [] : [Regexp.new(input)]
 
           # Special case for if a user explicitly states only '0'.
           elsif type == :syllable
-            arr = string == '0' ? [0] : string_to_array(string)
+            arr = input == '0' ? [0] : string_to_array(input)
           end
 
           # Set this to be the default '0' hash value.
@@ -371,19 +371,20 @@ module Poefy
         else
 
           # Don't need to evaluate if it's already an Array.
-          if string.is_a?(Array)
-            output = string
+          if input.is_a?(Array)
+            output = input
           else
             begin
               # If it's a regex, mandate the ': ' key separator.
               # (This is so the string substitutions don't mess up the regex.)
               # If it's a syllable, we can be more flexible with gsubs.
-              as_yaml = string
+              as_yaml = input
               if type == :syllable
-                as_yaml = string.gsub(':', ': ').gsub('=>', ': ')
+                as_yaml = input.gsub(':', ': ').gsub('=>', ': ')
               end
               output = YAML.load(as_yaml)
             rescue
+              # Raise a SyllableError or RegexError.
               msg = "#{type.capitalize} hash is not valid YAML"
               e = Object.const_get("Poefy::#{type.capitalize}Error")
               raise e.new(msg)
@@ -408,6 +409,7 @@ module Poefy
               begin
                 output[k] = format_value.call(v)
               rescue
+                # Raise a SyllableError or RegexError.
                 msg = "#{type.capitalize} hash invalid, key='#{k}' value='#{v}'"
                 e = Object.const_get("Poefy::#{type.capitalize}Error")
                 raise e.new(msg)
@@ -457,9 +459,10 @@ module Poefy
           if is_modulo or is_even_odd
             if is_modulo
               vals = k.split('m').map(&:to_i)
-              divider = vals.first.to_i
-              remainder = vals.last.to_i
+              divider = vals.first.to_i.abs
+              remainder = vals.last.to_i.abs
               if divider == 0
+                # Raise a SyllableError or RegexError.
                 msg = "#{type.capitalize} hash invalid,"
                 msg += " key='#{k}', modulo='#{divider}m#{remainder}'"
                 e = Object.const_get("Poefy::#{type.capitalize}Error")

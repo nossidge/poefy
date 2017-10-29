@@ -5,7 +5,7 @@
 
 describe Poefy::Poem, "-- Unit tests" do
 
-  describe "#transform_string_regex" do
+  describe "#transform_input_regex" do
 
     # Singleton which includes the method.
     # Make the private methods public.
@@ -107,7 +107,7 @@ describe Poefy::Poem, "-- Unit tests" do
 
   ##############################################################################
 
-  describe "#transform_string_syllable" do
+  describe "#transform_input_syllable" do
 
     # Singleton which includes the method.
     # Make the private methods public.
@@ -122,6 +122,8 @@ describe Poefy::Poem, "-- Unit tests" do
       normal_input = [
         [0,
           {1=>0,2=>0,3=>0,4=>0,5=>0}],
+        [10,
+          {1=>10,2=>10,3=>10,4=>10,5=>10}],
         ['0',
           {1=>0,2=>0,3=>0,4=>0,5=>0}],
         ['10',
@@ -201,17 +203,11 @@ describe Poefy::Poem, "-- Unit tests" do
         ['[8-9,8-9,4-6,4-6,8-9]',
           {1=>[8,9],2=>[8,9],3=>[4,5,6],4=>[4,5,6],5=>[8,9]}],
         ['{0:11,3m0:30}',
-          { 1=>11,
-            2=>11,
-            3=>30,
-            4=>11,
-            5=>11}],
+          {1=>11,2=>11,3=>30,4=>11,5=>11}],
         ['{0:11,3m0:30,3m1:31}',
-          { 1=>31,
-            2=>11,
-            3=>30,
-            4=>31,
-            5=>11}]
+          {1=>31,2=>11,3=>30,4=>31,5=>11}],
+        [{0=>11,'3m0'=>30,'3m1'=>31},
+          {1=>31,2=>11,3=>30,4=>31,5=>11}]
       ]
       weird_input = [
         ['40xxxx',
@@ -260,6 +256,10 @@ describe Poefy::Poem, "-- Unit tests" do
           {1=>1,2=>2,3=>3,4=>4,5=>[1,2,3,4,5]}],
         ['[1,2,3,4,[1,2,3,4,[1,2,3,4,[1,2,3,4,999,[1,2,3,4,5]]]]]',
           {1=>1,2=>2,3=>3,4=>4,5=>[1,2,3,4,5,999]}],
+        [[10],
+          {1=>10,2=>0,3=>0,4=>0,5=>0}],
+        [[8,8,5,5,8],
+          {1=>8,2=>8,3=>5,4=>5,5=>8}],
         [[1,2,3,4,[1,2,3,4,[1,2,3,4,[1,2,3,4,999,[1,2,3,4,5]]]]],
           {1=>1,2=>2,3=>3,4=>4,5=>[1,2,3,4,5,999]}]
       ]
@@ -286,8 +286,8 @@ describe Poefy::Poem, "-- Unit tests" do
         normal_input.each do |pair|
           it "syllable: #{pair.first}" do
             rhyme = obj.tokenise_rhyme('aabba')
-            out   = obj.transform_string_syllable(pair.first, 'aabba')
-            again = obj.transform_string_syllable(out, 'aabba')
+            out   = obj.transform_input_syllable(pair.first, 'aabba')
+            again = obj.transform_input_syllable(out, 'aabba')
             expect(out).to eq pair.last
             expect(again).to eq out
             expect(again).to eq pair.last
@@ -298,8 +298,8 @@ describe Poefy::Poem, "-- Unit tests" do
         weird_input.each do |pair|
           it "syllable: #{pair.first}" do
             rhyme = obj.tokenise_rhyme('aabba')
-            out   = obj.transform_string_syllable(pair.first, 'aabba')
-            again = obj.transform_string_syllable(out, 'aabba')
+            out   = obj.transform_input_syllable(pair.first, 'aabba')
+            again = obj.transform_input_syllable(out, 'aabba')
             expect(out).to eq pair.last
             expect(again).to eq out
             expect(again).to eq pair.last
@@ -311,7 +311,7 @@ describe Poefy::Poem, "-- Unit tests" do
           it "syllable: #{i}" do
             rhyme = obj.tokenise_rhyme('aabba')
             expect {
-              obj.transform_string_syllable(i, 'aabba')
+              obj.transform_input_syllable(i, 'aabba')
             }.to raise_error(Poefy::SyllableError)
           end
         end
