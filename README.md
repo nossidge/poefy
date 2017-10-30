@@ -276,6 +276,8 @@ Example, to ensure the first line always starts with capitalisation:
 
     $ poefy whitman sonnet -x'{1: "^[A-Z]"}'
 
+Unlike with the syllable option, you cannot use an array. You must use a single value or a hash. This is because the use of `[]` symbols in regular expressions confuses the parser, and I didn't want to forbid these common regex symbols. You can use hashes, but because of this you cannot use `{}` repetition matching in Poefy command line expressions. It's a pretty niche regex use though. You'll be fine without it.
+
 Use a space `-x' '` to specify no regex matching.
 
 

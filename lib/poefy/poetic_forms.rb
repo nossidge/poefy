@@ -335,18 +335,17 @@ module Poefy
       # This should work for both syllable and regex strings.
       # It should also be fine for Integer and Regexp 'input' values.
       def transform_input_to_hash type, input
+        return input if input.is_a? Hash
 
         # Don't go any further if we've got an invalid type.
         valid_non_string =
           input.is_a?(Array) ||
-          input.is_a?(Hash) ||
           (type == :syllable and input.is_a?(Numeric)) ||
           (type == :regex and input.is_a?(Regexp))
         valid_string_like = !valid_non_string && input.respond_to?(:to_s)
         raise TypeError unless valid_non_string || valid_string_like
 
         # Perform different tasks depending on type.
-        return input if input.is_a? Hash
         input.strip! if input.is_a? String
         input = input.to_i if input.is_a? Numeric
         input = input.to_s if valid_string_like
@@ -356,16 +355,19 @@ module Poefy
         output = {}
 
         # Figure out datatype.
+        # Regex string input cannot be an array, but syllable can.
         datatype = :string
         if !input.is_a?(Regexp)
-          if input.is_a?(Array) or input[0] == '[' or input[-1] == ']'
+          if input.is_a?(Array)
             datatype = :array
-          elsif input[0] == '{' or input[-1] == '}'
+          elsif type == :syllable and input[0] == '[' and input[-1] == ']'
+            datatype = :array
+          elsif input[0] == '{' and input[-1] == '}'
             datatype = :hash
           end
         end
 
-        # If it's a basic string format, convert it to array.
+        # If it's a basic string format, convert it to hash.
         if datatype == :string
 
           # Regex cannot be an array or range, but syllable can.
