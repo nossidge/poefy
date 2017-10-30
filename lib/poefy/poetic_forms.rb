@@ -321,7 +321,6 @@ module Poefy
         tokens = tokenise_rhyme rhyme
         hash = transform_input_to_hash :syllable, input
         hash = expand_hash_keys :syllable, hash, tokens, 0
-        hash
       end
 
       # Do the same for regular expression strings.
@@ -334,10 +333,24 @@ module Poefy
       # This should work for both syllable and regex strings.
       # It should also be fine for Integer and Regexp 'input' values.
       def transform_input_to_hash type, input
+
+        # Don't go any further if we've got an invalid type.
+        valid_non_string =
+          input.is_a?(Array) ||
+          input.is_a?(Hash) ||
+          (type == :syllable and input.is_a?(Numeric)) ||
+          (type == :regex and input.is_a?(Regexp))
+        valid_string_like = !valid_non_string && input.respond_to?(:to_s)
+        raise TypeError unless valid_non_string || valid_string_like
+
+        # Perform different tasks depending on type.
         return input if input.is_a? Hash
         input.strip! if input.is_a? String
+        input = input.to_i if input.is_a? Numeric
+        input = input.to_s if valid_string_like
         return {} if input == ''
 
+        # This will be built up over the course of the method.
         output = {}
 
         # Figure out datatype.
