@@ -320,6 +320,7 @@ module Poefy
       def transform_input_syllable input, rhyme
         tokens = tokenise_rhyme rhyme
         hash = transform_input_to_hash :syllable, input
+        hash = validate_hash_values :syllable, hash
         hash = expand_hash_keys :syllable, hash, tokens, 0
       end
 
@@ -327,7 +328,8 @@ module Poefy
       def transform_input_regex input, rhyme
         tokens = tokenise_rhyme rhyme
         hash = transform_input_to_hash :regex, input
-        hash = expand_hash_keys :regex, hash, tokens, nil
+        hash = validate_hash_values :regex, hash
+        hash = expand_hash_keys :regex, hash, tokens, //
       end
 
       # This should work for both syllable and regex strings.
@@ -403,36 +405,6 @@ module Poefy
               raise e.new(msg)
             end
           end
-
-          # Run different methods on the value depending on the type.
-          # If it's a syllable, convert all values to int arrays.
-          # If it's a regex, convert all values to regexp.
-          format_value = if type == :syllable
-            Proc.new do |x|
-              arr = string_to_array(x)
-              arr.count == 1 ? arr.first : arr
-            end
-          elsif type == :regex
-            Proc.new { |x| Regexp.new(x) }
-          end
-
-          # Validate values.
-          if output.is_a?(Hash)
-            output.each do |k, v|
-              begin
-                output[k] = format_value.call(v)
-              rescue
-                # Raise a SyllableError or RegexError.
-                msg = "#{type.capitalize} hash invalid, key='#{k}' value='#{v}'"
-                e = Object.const_get("Poefy::#{type.capitalize}Error")
-                raise e.new(msg)
-              end
-            end
-          elsif output.is_a?(Array)
-            output.map! do |i|
-              i = format_value.call(i)
-            end
-          end
         end
 
         # Convert array to positioned hash.
@@ -443,6 +415,41 @@ module Poefy
         end
 
         output
+      end
+
+      # Run different methods on each value depending on the type.
+      # If it's a syllable, convert all values to int arrays.
+      # If it's a regex, convert all values to regexp.
+      def validate_hash_values type, input
+        format_value = if type == :syllable
+          Proc.new do |x|
+            arr = string_to_array(x)
+            arr.count == 1 ? arr.first : arr
+          end
+        elsif type == :regex
+          Proc.new do |x|
+            x.is_a?(Regexp) ? x : Regexp.new(x.to_s)
+          end
+        end
+
+        # Validate values.
+        if input.is_a?(Hash)
+          input.each do |k, v|
+            begin
+              input[k] = format_value.call(v)
+            rescue
+              # Raise a SyllableError or RegexError.
+              msg = "#{type.capitalize} hash invalid, key='#{k}' value='#{v}'"
+              e = Object.const_get("Poefy::#{type.capitalize}Error")
+              raise e.new(msg)
+            end
+          end
+        elsif input.is_a?(Array)
+          input.map! do |i|
+            i = format_value.call(i)
+          end
+        end
+        input
       end
 
       # Convert non-positive-integer keys into the correct position.
