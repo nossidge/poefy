@@ -9,7 +9,7 @@ module Poefy
 
   def self.version_number
     major = 1
-    minor = 0
+    minor = 1
     tiny  = 0
     pre   = nil
 
@@ -18,7 +18,7 @@ module Poefy
   end
 
   def self.version_date
-    '2017-10-02'
+    '2017-10-31'
   end
 
 end
