@@ -302,16 +302,18 @@ module Poefy
 
         # To reduce the number of permutations, reject lines
         #   that do not match any of the lines regex.
-        new_lines = []
         regex_conds = line_conds.map { |i| i[:regex] }
-        regex_conds.each do |regex_group|
-          possible_lines = lines.dup
-          regex_group.each do |regex|
-            possible_lines.reject! { |i| !(i['line'].match(regex)) }
+        if !regex_conds.include?(nil) and !regex_conds.include?(//)
+          new_lines = []
+          [*regex_conds].each do |regex_group|
+            possible_lines = lines.dup
+            [*regex_group].each do |regex|
+              possible_lines.reject! { |i| !(i['line'].match(regex)) }
+            end
+            new_lines += possible_lines
           end
-          new_lines += possible_lines
+          lines = new_lines
         end
-        lines = new_lines
 
         # Get a sample from the lines that works for all the conditions.
         begin
