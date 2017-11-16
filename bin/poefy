@@ -122,7 +122,11 @@ def parse_options
     end
     opts.on('-c', '--capital',
             "Capitalise the first letter of each line") do
-      options[:transform] = proc { |line| line.capitalize }
+      options[:transform] = proc do |line|
+        regex = /[a-zA-Z]/
+        line[regex] = line[regex].upcase if line[regex]
+        line
+      end
     end
 
     # Poem output options.
