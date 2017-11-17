@@ -11,7 +11,8 @@ module Poefy
 
     attr_reader :corpus, :local, :overwrite
 
-    def initialize db_name, options = {}
+    def initialize db_name, options = nil
+      options ||= {}
       handle_options options
       @corpus = Poefy::Database.new db_name, @local
     end
