@@ -56,10 +56,11 @@ module Poefy
 
       # Handle the optional initialize options hash.
       def handle_options options
-        @overwrite   = options[:overwrite] || false
-        @local       = options[:local]     || false
+        @overwrite   = !!options[:overwrite]
+        @local       = !!options[:local]
         @poetic_form = {}
-        @poetic_form[:proper] = options[:proper] || true
+        @poetic_form[:proper] = true
+        @poetic_form[:proper] = !!options[:proper] if options[:proper]
         @poetic_form = validate_poetic_form options
       end
 
