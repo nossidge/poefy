@@ -270,9 +270,42 @@ end
 #   lines that rhyme with the word.
 if second_arg == 'rhyme'
   poefy = poefy_new first_arg
-  third_arg  = (ARGV.length > 2) ? ARGV[2] : nil
-  fourth_arg = (ARGV.length > 3) ? ARGV[3] : nil
-  puts poefy.corpus.rhymes(third_arg, fourth_arg)
+  rhyme_word = (ARGV.length > 2) ? ARGV[2] : nil
+  rhyme_key  = (ARGV.length > 3) ? ARGV[3] : nil
+
+  # If the value for 'rhyme_key' is instead 'json', then set that bool.
+  is_output_json = (rhyme_key.to_s.downcase == 'json')
+  rhyme_key = nil if is_output_json
+
+  # This will return an array of elements.
+  # If the 'rhyme_key' is nil, it will be an array of hashes.
+  # If the 'rhyme_key' is not, it will be an array of strings.
+  lines = poefy.corpus.rhymes(rhyme_word, rhyme_key)
+
+  if is_output_json or !rhyme_key.nil?
+    puts lines
+  else
+    # Convert the array of hashes to an array of arrays.
+    lines.map! { |i| i.values }
+
+    # Find the max length of each column.
+    max_len = []
+    lines.each do |row|
+      row.each.with_index do |col, index|
+        max_len[index] ||= 0
+        if col.length > max_len[index]
+          max_len[index] = col.length
+        end
+      end
+    end
+
+    # Output to console as whitespace delimited.
+    lines.each do |i|
+      pform  = "%-#{max_len[0]+3}s %-#{max_len[1]+3}s "
+      pform += "%-#{max_len[2]+3}s %-#{max_len[3]}s\n"
+      printf pform, *i
+    end
+  end
   exit 0
 end
 
