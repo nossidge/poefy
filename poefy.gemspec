@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.version       = Poefy.version_number
   s.date          = Poefy.version_date
-  s.license       = 'GPL-3.0'
+  s.license       = 'GPL-3.0-or-later'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -32,11 +32,13 @@ Gem::Specification.new do |s|
       $ poefy_make
     ---}.split("\n").map{ |i| i.sub('    ','') }.join("\n")
 
+  s.required_ruby_version = '>= 3.2.0'
+
   s.add_development_dependency('bundler', '~> 1.13')
   s.add_development_dependency('rake',    '~> 10.0')
   s.add_development_dependency('rspec',   '~> 3.0')
-  s.add_development_dependency('poefy-sqlite3', '~> 0.1')
-  s.add_development_dependency('poefy-pg',      '~> 0.1')
+  s.add_development_dependency('poefy-sqlite3', '~> 2.0.0')
+  s.add_development_dependency('poefy-pg',      '~> 2.0.0')
 
   s.add_runtime_dependency('conditional_sample', '~> 1.0', '>= 1.0.0')
   s.add_runtime_dependency('ruby_rhymes',        '~> 0.1', '>= 0.1.2')
