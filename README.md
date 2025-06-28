@@ -543,14 +543,14 @@ poefy = Poefy::Poem.new('shakespeare')
 puts poefy.corpus.type      # "sqlite3" or "pg"
 puts poefy.corpus.name      # "shakespeare"
 puts poefy.corpus.count     # 2137
-puts poefy.corpus.exists?   # true
+puts poefy.corpus.exist?    # true
 
 # If the corpus has not been generated yet:
 poefy = Poefy::Poem.new('plath')
 puts poefy.corpus.type      # "sqlite3" or "pg"
 puts poefy.corpus.name      # "plath"
 puts poefy.corpus.count     # 0
-puts poefy.corpus.exists?   # false
+puts poefy.corpus.exist?    # false
 ```
 
 To view or change the description of the corpus.

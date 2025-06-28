@@ -41,7 +41,7 @@ module Poefy
 
     # Open instance database session, if not already existing.
     def db
-      if not @db and exists?
+      if not @db and exist?
         begin
           open_connection
           create_sprocs
@@ -66,7 +66,7 @@ module Poefy
     #   Create database using SQL import file.
     #   Delete both files.
     def make_new lines, description = nil
-      make_new!(lines, description) if !exists?
+      make_new!(lines, description) unless exist?
     end
 
     # Force new database, overwriting existing.

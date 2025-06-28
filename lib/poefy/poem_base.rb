@@ -46,7 +46,7 @@ module Poefy
     def validate_lines input
 
       # If the input is a file, then read it.
-      lines = File.exists?(input.to_s) ? File.read(input) : input
+      lines = File.exist?(input.to_s) ? File.read(input) : input
 
       # If lines is not an array, assume string and split on newlines.
       lines.respond_to?(:each) ? lines : lines.split("\n")

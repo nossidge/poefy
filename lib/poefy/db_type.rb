@@ -33,7 +33,7 @@ module Poefy
     @@database_type ||= nil
     return @@database_type if @@database_type
     settings_file = Poefy.root + '/settings.yml'
-    if not File.exists?(settings_file)
+    unless File.exist?(settings_file)
       return nil if !create_file
       Poefy.database_type = 'pg'
     end

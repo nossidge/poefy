@@ -17,7 +17,7 @@ module Poefy
     def poem poetic_form = @poetic_form
 
       # Can't do much if the database doesn't exist.
-      raise Poefy::MissingDatabase unless @corpus.exists?
+      raise Poefy::MissingDatabase unless @corpus.exist?
 
       # Validate the poetic form hash.
       raise ArgumentError, 'Argument must be a hash' unless

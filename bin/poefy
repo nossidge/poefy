@@ -311,7 +311,7 @@ end
 
 # If there is piped data, or the second argument is a file,
 #   then use that as the poetic_form.
-if data or File.exists?(second_arg)
+if data or File.exist?(second_arg)
   options[:form_from_text] = (data || second_arg)
 end
 
