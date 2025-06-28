@@ -17,6 +17,8 @@ Poefy.require_db
 # List the corpora & descriptions in a nice table format.
 def corpora
   output = Poefy.corpora_with_desc
+  return ['(no corpora yet)'] if output.empty?
+
   width = output.keys.max_by(&:length).length
   output.map do |key, value|
     sprintf "%-#{width}s  %s", key, value
